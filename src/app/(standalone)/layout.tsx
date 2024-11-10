@@ -1,5 +1,4 @@
 import { UserButton } from "@/features/auth/components/user-button";
-import Image from "next/image";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
 
@@ -9,7 +8,6 @@ const StandaloneLayout = ({ children }: PropsWithChildren) => {
       <div className="mx-auto max-w-screen-2xl p-4">
         <nav className="flex justify-between items-center h-[73px]">
           <Link href="/">
-            {/* <Image src="/logo.png" width={152} height={56} alt="logo" /> */}
             <h1 className="text-4xl font-medium">RepoX</h1>
           </Link>
           <UserButton />
