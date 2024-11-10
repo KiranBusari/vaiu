@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
-import ConvexClientProvider from "./ConvexClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,7 +37,7 @@ export default function RootLayout({
           <NuqsAdapter>
             <QueryProvider>
               <Toaster richColors theme="light" />
-              <ConvexClientProvider>{children}</ConvexClientProvider>
+              {children}
             </QueryProvider>
           </NuqsAdapter>
         </ThemeProvider>
