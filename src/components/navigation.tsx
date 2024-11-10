@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { Settings, UsersIcon } from "lucide-react";
 import {
@@ -10,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
+
 const router = [
   {
     label: "Home",

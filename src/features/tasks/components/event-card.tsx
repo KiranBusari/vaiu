@@ -22,7 +22,7 @@ const statusColorMap: Record<TaskStatus, string> = {
   [TaskStatus.TODO]: "border-l-red-500",
   [TaskStatus.DONE]: "border-l-emerald-500",
   [TaskStatus.IN_PROGRESS]: "border-l-yellow-500",
-  [TaskStatus.IN_REVIEW]: "border-l-blue-500",
+  [TaskStatus.IN_REVIEW]: "border-l-neutral-500",
 };
 
 export const EventCard = ({

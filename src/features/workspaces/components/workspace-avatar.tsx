@@ -24,7 +24,7 @@ export const WorkspaceAvatar = ({
   }
   return (
     <Avatar className={cn("size-10 rounded-md", className)}>
-      <AvatarFallback className="text-white bg-blue-600  font-semibold text-lg uppercase rounded-md">
+      <AvatarFallback className="text-white bg-neutral-600  font-semibold text-lg uppercase rounded-md">
         {name[0]}
       </AvatarFallback>
     </Avatar>

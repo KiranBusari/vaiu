@@ -1,9 +1,8 @@
 "use client";
 import { useCallback } from "react";
 import { useQueryState } from "nuqs";
-import { Loader, Plus, PlusIcon } from "lucide-react";
+import { Loader, PlusIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -21,6 +20,7 @@ import { columns } from "./columns";
 import { TaskStatus } from "../types";
 import { useBulkUpdateTasks } from "../api/use-bulk-update-tasks";
 import { DataCalander } from "./data-calander";
+import { Button } from "@/components/ui/button";
 
 interface TaskViewSwitcherProps {
   hideProjectFilter?: boolean;

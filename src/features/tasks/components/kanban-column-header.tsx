@@ -28,7 +28,7 @@ const statusIconMap: Record<TaskStatus, React.ReactNode> = {
     <CircleDotDashedIcon className="size=[18px] text-yellow-400" />
   ),
   [TaskStatus.IN_REVIEW]: (
-    <CircleDotIcon className="size=[18px] text-blue-400" />
+    <CircleDotIcon className="size=[18px] text-neutral-400" />
   ),
 };
 export const KanbanColumnHeader = ({

@@ -1,5 +1,5 @@
 "use client";
-import { Pencil } from "lucide-react";
+import { Pencil, PresentationIcon } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -27,7 +27,7 @@ export const ProjectIdClient = () => {
   if (!project) return <PageError message="Project not found" />;
 
   const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
-
+  const canvasHref = `/workspaces/${project.workspaceId}/projects/${project.$id}/canvas/${project.canvasId}`;
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between">
@@ -39,12 +39,20 @@ export const ProjectIdClient = () => {
           />
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
-        <Button variant="secondary" size="sm" asChild>
-          <Link href={href}>
-            <Pencil className="size-4 mr-2" />
-            Edit Project
-          </Link>
-        </Button>
+        <div className="space-x-4 flex items-center">
+          <Button variant={"default"} size={"sm"}>
+            <Link href={canvasHref} className="flex items-center">
+              <PresentationIcon className="size-1 mr-1" />
+              Canvas
+            </Link>
+          </Button>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href={href}>
+              <Pencil className="size-4 mr-2" />
+              Edit Project
+            </Link>
+          </Button>
+        </div>
       </div>
       {analytics ? <Analytics data={analytics} /> : null}
       <TaskViewSwitcher hideProjectFilter />
