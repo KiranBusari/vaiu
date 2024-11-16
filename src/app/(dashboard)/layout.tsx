@@ -5,12 +5,14 @@ import { CreateWorkspaceModal } from "@/features/workspaces/components/create-wo
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { EditTaskModal } from "@/features/tasks/components/edit-task-modal";
+import { CreateRooomModal } from "@/features/channels/components/create-channel-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="min-h-screen">
       <CreateWorkspaceModal />
       <CreateProjectModal />
+      <CreateRooomModal />
       <CreateTaskModal />
       <EditTaskModal />
       <div className="flex h-full w-full">

@@ -43,7 +43,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
       projectUrl: "",
     },
   });
-  const onSumit = (values: CreateProjectSchema) => {
+  const onSubmit = (values: CreateProjectSchema) => {
     const finalValues = {
       ...values,
       image: values.image instanceof File ? values.image : "",
@@ -76,7 +76,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
       </div>
       <CardContent className="p-7">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSumit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-y-4">
               <FormField
                 control={form.control}

@@ -39,7 +39,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
       name: "",
     },
   });
-  const onSumit = (values: CreateWorkspaceSchema) => {
+  const onSubmit = (values: CreateWorkspaceSchema) => {
     const finalValues = {
       ...values,
       image: values.image instanceof File ? values.image : "",
@@ -73,7 +73,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
       </div>
       <CardContent className="p-7">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSumit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-y-4">
               <FormField
                 control={form.control}
