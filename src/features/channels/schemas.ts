@@ -6,6 +6,6 @@ export const RoomSchema = z.object({
         .string()
         .min(1, "Channel Name is required")
         .max(32, "Channel Name is too long"),
-    type: z.nativeEnum(RoomType),
+    roomType: z.nativeEnum(RoomType),
     workspaceId: z.string(),
 });

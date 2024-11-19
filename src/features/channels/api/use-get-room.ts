@@ -6,7 +6,7 @@ interface useGetRoomProps {
 }
 export const useGetRoom = ({ roomId }: useGetRoomProps) => {
   const query = useQuery({
-    queryKey: ["room", roomId],
+    queryKey: ["rooms", roomId],
     queryFn: async () => {
       const response = await client.api.rooms[":roomId"].$get({
         param: { roomId },

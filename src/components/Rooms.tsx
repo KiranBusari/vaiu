@@ -7,17 +7,21 @@ import { useGetRooms } from "@/features/channels/api/use-get-rooms";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useCreateRoomModal } from "@/features/channels/hooks/use-create-room-modal";
 import { RiAddCircleFill } from "react-icons/ri";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 const Rooms = () => {
   const pathname = usePathname();
   const workspaceId = useWorkspaceId();
+  const projectId = useProjectId();
 
   const { open } = useCreateRoomModal();
   const { data } = useGetRooms({ workspaceId });
+  console.log(data);
 
-  const textRooms = data?.documents.filter((room) => room.type === "TEXT");
-  const audioRooms = data?.documents.filter((room) => room.type === "AUDIO");
-  const videoRooms = data?.documents.filter((room) => room.type === "VIDEO");
+
+  const textRooms = data?.documents.filter((room) => room.roomType === "TEXT");
+  const audioRooms = data?.documents.filter((room) => room.roomType === "AUDIO");
+  const videoRooms = data?.documents.filter((room) => room.roomType === "VIDEO");
 
   return (
     <div className="flex flex-col gap-y-2">
@@ -35,10 +39,10 @@ const Rooms = () => {
           <div className="mb-2">
             <p className="text-sm font-semibold">Text Rooms</p>
             <div className="space-y-[2px]">
-              {textRooms.map((room) => (
+              {textRooms?.map((room) => (
                 <Link
                   key={room.$id}
-                  href={`/workspaces/${workspaceId}/rooms/${room.$id}`}
+                  href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
                     className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname === `/workspaces/${workspaceId}/rooms/${room.$id}`
@@ -61,7 +65,7 @@ const Rooms = () => {
               {audioRooms.map((room) => (
                 <Link
                   key={room.$id}
-                  href={`/workspaces/${workspaceId}/rooms/${room.$id}`}
+                  href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
                     className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname === `/workspaces/${workspaceId}/rooms/${room.$id}`
@@ -84,7 +88,7 @@ const Rooms = () => {
               {videoRooms.map((room) => (
                 <Link
                   key={room.$id}
-                  href={`/workspaces/${workspaceId}/rooms/${room.$id}`}
+                  href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
                     className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname === `/workspaces/${workspaceId}/rooms/${room.$id}`

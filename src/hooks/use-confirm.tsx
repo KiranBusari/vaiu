@@ -12,7 +12,7 @@ import { useState } from "react";
 export const useConfirm = (
   title: string,
   message: string,
-  variant: ButtonProps["variant"] = "primary"
+  variant: ButtonProps["variant"] = "secondary"
 ): [() => JSX.Element, () => Promise<unknown>] => {
   const [promise, setPromise] = useState<{
     resolve: (value: boolean) => void;

@@ -10,11 +10,11 @@ type ResponseType = InferResponseType<
 >;
 type RequestType = InferRequestType<(typeof client.api.rooms)["$post"]>;
 
-export const useCreateRoom = ()  => {
+export const useCreateRoom = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ form }) => {
-      const response = await client.api.rooms.$post({ form });
+    mutationFn: async ({ json }) => {
+      const response = await client.api.rooms.$post({ json });
       if (!response.ok) throw new Error("Failed to create room");
       return await response.json();
     },
