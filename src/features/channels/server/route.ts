@@ -10,6 +10,7 @@ import {
 import { RoomSchema } from "../schemas";
 import { z } from "zod";
 import { getMember } from "@/features/members/utilts";
+import { Room } from "../types";
 
 const app = new Hono()
   .post(
@@ -70,4 +71,56 @@ const app = new Hono()
 
     return c.json({ data: rooms });
   })
+  .get("/:roomId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
+    const { roomId } = c.req.param();
+
+    const room = await databases.getDocument<Room>(
+      DATABASE_ID,
+      ROOMS_ID,
+      roomId
+    );
+
+    const member = await getMember({
+      databases,
+      workspaceId: room.workspaceId,
+      userId: user.$id,
+    });
+
+    if (!member) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    return c.json({ data: room });
+  })
+  .delete("/:roomId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
+    const { roomId } = c.req.param();
+
+    const existingRoom = await databases.getDocument<Room>(
+      DATABASE_ID,
+      ROOMS_ID,
+      roomId
+    );
+
+    const member = await getMember({
+      databases,
+      workspaceId: existingRoom.workspaceId,
+      userId: user.$id,
+    });
+
+    if (!member) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    // TODO: delete  tasks
+    await databases.deleteDocument(
+      DATABASE_ID,
+      ROOMS_ID,
+      roomId);
+
+    return c.json({ data: { $id: existingRoom.$id } });
+  });
+
 export default app;
