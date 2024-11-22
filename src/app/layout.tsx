@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
+import { SocketProvider } from "@/components/socket-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,14 +35,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NuqsAdapter>
-            <QueryProvider>
-              <Toaster richColors theme="light" />
-              {children}
-            </QueryProvider>
-          </NuqsAdapter>
+          <SocketProvider>
+            <NuqsAdapter>
+              <QueryProvider>
+                <Toaster richColors theme="light" />
+                {children}
+              </QueryProvider>
+            </NuqsAdapter>
+          </SocketProvider>
         </ThemeProvider>
       </body>
-    </html>
+    </html >
   );
 }
