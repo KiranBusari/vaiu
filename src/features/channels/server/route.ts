@@ -23,7 +23,6 @@ const app = new Hono()
 
 
       const { name, roomType, workspaceId } = c.req.valid("json");
-      console.log(name, roomType, workspaceId);
 
       const member = await getMember({
         databases,
