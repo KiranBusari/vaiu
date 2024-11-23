@@ -60,8 +60,6 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
     }, [RoomType]);
 
     const onSubmit = async (values: z.infer<typeof RoomSchema>) => {
-        console.log("Clicked");
-        console.log(values);
 
         try {
             mutate({ json: { ...values, workspaceId } }, {
