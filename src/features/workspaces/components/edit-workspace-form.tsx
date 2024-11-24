@@ -189,7 +189,7 @@ export const EditWorkspaceForm = ({
                           />
                           {field.value ? (
                             <Button
-                              size="xs"
+                              size="sm"
                               type="button"
                               variant="destructive"
                               className="w-fit mt-2"

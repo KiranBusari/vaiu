@@ -9,7 +9,7 @@ import { CreateRooomModal } from "@/features/channels/components/create-channel-
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-950 bg-gray-100">
       <CreateWorkspaceModal />
       <CreateProjectModal />
       <CreateRooomModal />

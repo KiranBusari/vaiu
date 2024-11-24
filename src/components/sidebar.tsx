@@ -1,16 +1,22 @@
-import Link from "next/link";
+"use client";
 
 import { Projects } from "./projects";
 import { Navigation } from "./navigation";
 import { DottedSeparator } from "./dotted-separator";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import Rooms from "./Rooms";
+import { Logo } from "./Logo";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import Link from "next/link";
 
 export const Sidebar = () => {
+  const workspaceId = useWorkspaceId();
   return (
-    <aside className="h-full bg-neutral-100 p-4 w-full">
+    <aside className="h-full bg-gray-100 dark:bg-gray-950 p-4 w-full border">
       <div className="flex items-center justify-center">
-        <h1 className="text-4xl font-medium">RepoX</h1>
+        <Link href={`/workspaces/${workspaceId}`}>
+          <Logo />
+        </Link>
       </div>
       <DottedSeparator className="my-4" />
       <WorkspaceSwitcher />

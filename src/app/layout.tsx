@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={cn(inter.className, "antialiased min-h-screen")}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
@@ -43,6 +43,12 @@ export default function RootLayout({
               </QueryProvider>
             </NuqsAdapter>
           </SocketProvider>
+          <NuqsAdapter>
+            <QueryProvider>
+              <Toaster richColors theme="dark" />
+              {children}
+            </QueryProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html >

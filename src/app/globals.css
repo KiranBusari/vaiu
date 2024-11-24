@@ -114,3 +114,7 @@ body {
     @apply size-1 rounded-full bg-neutral-300;
   }
 }
+
+.fantasy {
+  font-family: fantasy;
+}
