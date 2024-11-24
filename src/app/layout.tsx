@@ -35,14 +35,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SocketProvider>
-            <NuqsAdapter>
-              <QueryProvider>
-                <Toaster richColors theme="light" />
-                {children}
-              </QueryProvider>
-            </NuqsAdapter>
-          </SocketProvider>
+          <NuqsAdapter>
+            <QueryProvider>
+              <Toaster richColors theme="light" />
+              {children}
+            </QueryProvider>
+          </NuqsAdapter>
           <NuqsAdapter>
             <QueryProvider>
               <Toaster richColors theme="dark" />
@@ -51,6 +49,6 @@ export default function RootLayout({
           </NuqsAdapter>
         </ThemeProvider>
       </body>
-    </html >
+    </html>
   );
 }
