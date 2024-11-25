@@ -35,6 +35,10 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
 
         const data = await response.json();
         setToken(data.token);
+        console.log(data);
+        console.log(data.token);
+        
+        
       } catch (error) {
         console.log(error);
       }
