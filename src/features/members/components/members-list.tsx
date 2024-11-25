@@ -79,6 +79,9 @@ export const MembersList = () => {
               <div className="flex flex-col">
                 <p className="text-sm font-medium">{member.name}</p>
                 <p className="text-xs font-medium">{member.email}</p>
+                <p className="text-xs font-semibold text-destructive">
+                  {member.role}
+                </p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -88,7 +91,9 @@ export const MembersList = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" align="end">
                   <DropdownMenuItem
-                    className="font-medium"
+                    className={`font-medium ${
+                      member.role === MemberRole.ADMIN && "hidden"
+                    }`}
                     onClick={() =>
                       handleUpdateMember(member.$id, MemberRole.ADMIN)
                     }

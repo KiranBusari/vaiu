@@ -28,7 +28,7 @@ export const RoomId = () => {
   // return redirect(`/workspaces/${workspaceId}/projects/${projectId}`);
 
   return (
-    <div className="bg-white dark:bg-[#14171A] flex flex-col h-full">
+    <div className="bg-white dark:bg-[#14171A] flex flex-col h-[80vh]">
       {/* <ChatHeader
         name={room.name}
         serverId={room.roomId}

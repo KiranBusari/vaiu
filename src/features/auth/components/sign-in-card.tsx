@@ -76,7 +76,12 @@ export const SignInCard = () => {
                 </FormItem>
               )}
             />
-            <Button className="w-full" size="lg" disabled={isPending}>
+            <Button
+              className="w-full"
+              type="submit"
+              size="lg"
+              disabled={isPending}
+            >
               Login
             </Button>
           </form>
@@ -104,7 +109,9 @@ export const SignInCard = () => {
         <p>
           Don&apos;t have an account?
           <Link href="/sign-up">
-            <span className="text-neutral-700">&nbsp;Sign Up</span>
+            <span className="text-gray-700 dark:text-gray-400">
+              &nbsp;Sign Up
+            </span>
           </Link>
         </p>
       </CardContent>

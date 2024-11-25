@@ -46,7 +46,7 @@ export const ProjectIdClient = () => {
               Canvas
             </Link>
           </Button>
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
             <Link href={href}>
               <Pencil className="size-4 mr-2" />
               Edit Project

@@ -118,15 +118,6 @@ export const SignUpCard = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7 flex flex-col gap-y-2">
-        {/*<Button*/}
-        {/*	disabled={isPending}*/}
-        {/*	variant="secondary"*/}
-        {/*	size="lg"*/}
-        {/*	className="w-full"*/}
-        {/*>*/}
-        {/*	<FcGoogle className="size-5 mr-2" />*/}
-        {/*	Login with Google*/}
-        {/*</Button>*/}
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
@@ -145,7 +136,9 @@ export const SignUpCard = () => {
         <p>
           already have an account?
           <Link href="/sign-in">
-            <span className="text-neutral-700">&nbsp;Sign In</span>
+            <span className="text-gray-700 dark:text-gray-400">
+              &nbsp;Sign In
+            </span>
           </Link>
         </p>
       </CardContent>

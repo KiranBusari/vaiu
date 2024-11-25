@@ -6,12 +6,15 @@ import { getCurrent } from "@/features/auth/queries";
 
 const SignIn = async () => {
   const user = await getCurrent();
-  const workspaces = await getWorkspaces();
   if (!user) return <SignInCard />;
-  if (workspaces.total === 0 && user) {
-    redirect("/workspaces/create");
-  } else {
-    redirect(`/workspaces/${workspaces.documents[0].$id}`);
+  else {
+    const workspaces = await getWorkspaces();
+    if (workspaces.total === 0 && user) {
+      redirect("/workspaces/create");
+    } else {
+      redirect(`/workspaces/${workspaces.documents[0].$id}`);
+    }
   }
 };
+
 export default SignIn;

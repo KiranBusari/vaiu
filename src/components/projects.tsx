@@ -19,10 +19,12 @@ export const Projects = () => {
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase text-neutral-500">Projects</p>
+        <p className="text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold">
+          Projects
+        </p>
         <RiAddCircleFill
           onClick={open}
-          className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
+          className="size-5 text-gray-500 dark:text-gray-400 cursor-pointer hover:opacity-75 transition"
         />
       </div>
       {data?.documents.map((project) => {
@@ -32,8 +34,9 @@ export const Projects = () => {
           <Link href={href} key={project.$id}>
             <div
               className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-md hover:opacity-75 transition cursor-pointer text-neutral-500",
-                isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
+                "flex items-center gap-2.5 p-2.5 rounded-md hover:opacity-75 transition cursor-pointer text-gray-500 dark:text-gray-400 font-medium",
+                isActive &&
+                  "bg-white dark:bg-gray-800 text-gray-100 shadow-sm hover:opacity-100 text-primary"
               )}
             >
               <ProjectAvatar image={project.imageUrl} name={project.name} />
