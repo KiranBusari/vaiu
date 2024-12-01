@@ -1,25 +1,25 @@
 import { Hash } from "lucide-react";
 
 interface ChatWelcomeProps {
-  type: "conversation" | "channel";
+  type: "conversation" | "room";
   name: string;
 }
 
 export const ChatWelcome: React.FC<ChatWelcomeProps> = ({ type, name }) => {
   return (
     <div className="space-y-2 px-4 mb-4">
-      {type === "channel" && (
+      {type === "room" && (
         <div className="h-[75px] w-[75px] rounded-full bg-zinc-500 dark:bg-zinc-700 flex items-center justify-center">
           <Hash className="h-12 w-12 text-white" />
         </div>
       )}
 
       <p className="text-xl md:text-3xl font-bold">
-        {type === "channel" ? `Welcome to #${name}` : `Welcome to ${name}`}
+        {type === "room" ? `Welcome to #${name}` : `Welcome to ${name}`}
       </p>
 
       <p className="text-zinc-600 dark:text-zinc-400 text-sm">
-        {type === "channel"
+        {type === "room"
           ? `This is the beginning of the #${name} classroom.`
           : `This is the beginning of your conversation with ${name}.`}
       </p>

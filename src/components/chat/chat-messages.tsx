@@ -1,6 +1,6 @@
 "use client";
 
-import { Member, Message, Profile } from "@prisma/client";
+// import { Member, Message, Profile } from "@prisma/client";
 import { ChatWelcome } from "./chat-welcome";
 import { Loader2, ServerCrash } from "lucide-react";
 import { useChatQuery } from "@/hooks/use-chat-query";
@@ -10,29 +10,29 @@ import { format } from "date-fns";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
 
-type MessageWithMemberWithProfile = Message & {
-  member: Member & {
-    profile: Profile;
-  };
-};
+// type MessageWithMemberWithProfile = Message & {
+//   member: Member & {
+//     profile: Profile;
+//   };
+// };
 
 const DATE_FORMAT = "dd/MM/yyyy, HH:mm";
 
 interface ChatMessagesProps {
   name: string;
-  member: Member;
+  memberId: string;
   chatId: string;
   apiUrl: string;
   socketUrl: string;
   socketQuery: Record<string, string>;
-  paramKey: "conversationId" | "channelId";
+  paramKey: "conversationId" | "roomId";
   paramValue: string;
-  type: "conversation" | "channel";
+  type: "conversation" | "room";
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   name,
-  member,
+  memberId,
   chatId,
   apiUrl,
   socketUrl,
@@ -70,7 +70,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     count: data?.pages[0]?.items?.length ?? 0,
   });
 
-  if (status === "loading") {
+  if (status === "pending") {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
         <Loader2 className="w-7 h-7 text-zinc-500 animate-spin my-4" />
@@ -114,12 +114,12 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       <div className="flex flex-col-reverse mt-auto">
         {data?.pages.map((page, i) => (
           <Fragment key={i}>
-            {page.items.map((message: MessageWithMemberWithProfile) => (
+            {page.items.map((message: any) => (
               <ChatItem
                 key={message.id}
                 id={message.id}
-                currentMember={member}
-                member={message.member}
+                currentMemberId={memberId}
+                memberId={message.member}
                 content={message.content}
                 fileUrl={message.fileUrl}
                 deleted={message.deleted}
