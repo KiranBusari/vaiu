@@ -1,7 +1,11 @@
-import { currentProfilePages } from "@/lib/current-profile-pages";
-import { db } from "@/lib/db";
-import { NextApiResponseServerIo } from "@/types";
+import { getCurrent } from "@/features/auth/queries";
 import { NextApiRequest } from "next";
+import { DATABASE_ID, MESSAGE_ID, ROOMS_ID } from "@/config";
+import { ID } from "node-appwrite";
+import { Room } from "@/features/channels/types";
+import { getMember } from "@/features/members/utilts";
+import { NextApiResponseServerIo } from "@/pages/api/socket/types";
+import { createSessionClient } from "@/lib/appwrite";
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,71 +15,54 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
 
   try {
-    const profile = await currentProfilePages(req);
-    const { content, fileUrl } = req.body;
+    const user = await getCurrent();
 
-    const { serverId, channelId } = req.query;
+    const { content, roomId } = req.body;
+    console.log(content, roomId);
+    console.log(user);  
+    
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    if (!profile) return res.status(401).json({ message: "Unauthorized" });
-    if (!serverId)
-      return res.status(400).json({ message: "Server id is required" });
-    if (!channelId)
-      return res.status(400).json({ message: "Channel id is required" });
-    if (!content)
-      return res.status(400).json({ message: "Content is required" });
+    if (!roomId) return res.status(400).json({ message: "Room id is required" });
 
-    const server = await db.server.findFirst({
-      where: {
-        id: serverId as string,
-        members: {
-          some: {
-            profileId: profile.id,
-          },
-        },
-      },
-      include: {
-        members: true,
-      },
-    });
+    if (!content) return res.status(400).json({ message: "Content is required" });
 
-    if (!server) return res.status(404).json({ message: "Server not found" });
+    const {databases} = await createSessionClient()
 
-    const channel = await db.channel.findFirst({
-      where: {
-        id: channelId as string,
-        serverId: server.id,
-      },
-    });
+    const room = await databases.getDocument<Room>(
+      DATABASE_ID,
+      ROOMS_ID,
+      roomId
+    )
 
-    if (!channel) return res.status(404).json({ message: "Channel not found" });
+    if (!room) return res.status(404).json({ message: "Room not found" });
 
-    const member = server.members.find(
-      (member) => member.profileId === profile.id
-    );
+    const member = await getMember({
+      databases,
+      workspaceId: room.workspaceId,
+      userId: user.$id
+    })
 
     if (!member) return res.status(401).json({ message: "Unauthorized" });
 
-    const message = await db.message.create({
-      data: {
+    const message = await databases.createDocument(
+      DATABASE_ID,
+      MESSAGE_ID,
+      ID.unique(),
+      {
         content,
-        fileUrl,
-        memberId: member.id,
-        channelId: channel.id as string,
-      },
-      include: {
-        member: {
-          include: {
-            profile: true,
-          },
-        },
-      },
+        userId: user.$id,
+        roomId
+      }
+    )
+
+    const roomKey = `chat:${roomId}:messages`;
+
+    res?.socket?.server?.io.emit(roomKey, message);
+
+    return res.status(200).json({
+      message
     });
-
-    const channelKey = `chat:${channelId}:messages`;
-
-    res?.socket?.server?.io.emit(channelKey, message);
-
-    return res.status(200).json({ message });
   } catch (error) {
     console.log("[MESSAGES_POST_ERROR]", error);
     return res.status(500).json({ message: "Internal server error" });
