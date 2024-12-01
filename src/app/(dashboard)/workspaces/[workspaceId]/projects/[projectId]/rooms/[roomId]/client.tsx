@@ -1,6 +1,5 @@
 "use client"
 
-import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { MediaRoom } from "@/components/media-room";
@@ -9,7 +8,7 @@ import { useGetRoom } from "@/features/channels/api/use-get-room";
 import { useRoomId } from "@/features/channels/hooks/use-roomId";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 export const RoomId = () => {
 
@@ -18,28 +17,23 @@ export const RoomId = () => {
   const roomId = useRoomId()
   const { data: current } = useCurrent()
 
+  const router = useRouter()
+
   if (!current) {
     return redirect("/sign-in");
   }
 
   const { data: room } = useGetRoom({ roomId });
 
-  if (!room) return
-  // return redirect(`/workspaces/${workspaceId}/projects/${projectId}`);
+  if (!room) router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
 
   return (
     <div className="bg-white dark:bg-[#14171A] flex flex-col h-[80vh]">
-      {/* <ChatHeader
-        name={room.name}
-        serverId={room.roomId}
-        type="room"
-      />
-
-      {room.type === roomType.TEXT && (
+      {room?.roomType === "TEXT" && (
         <>
           <ChatMessages
             name={room.name}
-            member={member}
+            memberId={current.$id}
             chatId={room.id}
             apiUrl="/api/messages"
             socketUrl="/api/socket/messages"
@@ -61,13 +55,13 @@ export const RoomId = () => {
             type="room"
           />
         </>
-      )} */}
+      )}
 
-      {room.roomType === "AUDIO" && (
+      {room?.roomType === "AUDIO" && (
         <MediaRoom audio={true} video={false} chatId={room.$id} />
       )}
 
-      {room.roomType === "VIDEO" && (
+      {room?.roomType === "VIDEO" && (
         <MediaRoom audio={true} video={true} chatId={room.$id} />
       )}
 

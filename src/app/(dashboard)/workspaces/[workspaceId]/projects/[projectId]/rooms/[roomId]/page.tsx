@@ -8,7 +8,11 @@ const RoomIdPage = async () => {
   const current = await getCurrent();
   if (!current) redirect("/sign-in");
 
-  return <RoomId />;
+  return (
+    <div>
+      <RoomId />;
+    </div>
+  )
 };
 
 export default RoomIdPage;
