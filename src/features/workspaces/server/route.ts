@@ -92,7 +92,8 @@ const app = new Hono()
       const storage = c.get("storage");
       const user = c.get("user");
 
-      const { name, image } = c.req.valid("form");
+      const { name, image, accessToken } = c.req.valid("form");
+
       let uploadedImage: string | undefined;
       if (image instanceof File) {
         const file = await storage.createFile(
@@ -117,6 +118,7 @@ const app = new Hono()
           userId: user.$id,
           imageUrl: uploadedImage,
           inviteCode: generateInviteCode(INVITECODE_LENGTH),
+          accessToken,
         }
       );
 
@@ -138,7 +140,7 @@ const app = new Hono()
       const user = c.get("user");
 
       const { workspaceId } = c.req.param();
-      const { name, image } = c.req.valid("form");
+      const { name, image, accessToken } = c.req.valid("form");
       const member = await getMember({
         databases,
         workspaceId,
@@ -173,6 +175,7 @@ const app = new Hono()
         {
           name,
           imageUrl: uploadedImage,
+          accessToken,
         }
       );
 

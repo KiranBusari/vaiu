@@ -8,7 +8,9 @@ export const createWorkspaceSchema = z.object({
       z.string().transform((value) => (value === "" ? undefined : value)),
     ])
     .optional(),
+  accessToken: z.string().trim().min(1, { message: "Required" }),
 });
+
 export const updateWorkspaceSchema = z.object({
   name: z
     .string()
@@ -21,6 +23,7 @@ export const updateWorkspaceSchema = z.object({
       z.string().transform((value) => (value === "" ? undefined : value)),
     ])
     .optional(),
+  accessToken: z.string().trim().min(1, { message: "Required" }).optional(),
 });
 export const inviteCodeSchema = z.object({ code: z.string() });
 

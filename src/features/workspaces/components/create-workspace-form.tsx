@@ -90,6 +90,19 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
               />
               <FormField
                 control={form.control}
+                name="accessToken"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Access token</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter access token" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="image"
                 render={({ field }) => (
                   <div className="flex flex-col gap-y-2">

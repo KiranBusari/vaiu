@@ -19,13 +19,15 @@ const Hero = () => {
         </p>
       </div>
       <div className="mt-10">
-        <Button
-          className="text-blue-400 hover:text-blue-500 font-bold rounded-full"
-          variant={"outline"}
-          size={"lg"}
-        >
-          <Link href={"/sign-in"}>Get Started</Link>
-        </Button>
+        <Link href={"/sign-in"}>
+          <Button
+            className="text-blue-400 hover:text-blue-500 font-bold rounded-full"
+            variant={"outline"}
+            size={"lg"}
+          >
+            Get Started
+          </Button>
+        </Link>
       </div>
     </LampContainer>
   );

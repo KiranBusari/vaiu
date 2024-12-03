@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ChatInput } from "@/components/chat/chat-input";
 import { ChatMessages } from "@/components/chat/chat-messages";
@@ -11,13 +11,12 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { redirect, useRouter } from "next/navigation";
 
 export const RoomId = () => {
+  const workspaceId = useWorkspaceId();
+  const projectId = useProjectId();
+  const roomId = useRoomId();
+  const { data: current } = useCurrent();
 
-  const workspaceId = useWorkspaceId()
-  const projectId = useProjectId()
-  const roomId = useRoomId()
-  const { data: current } = useCurrent()
-
-  const router = useRouter()
+  const router = useRouter();
 
   if (!current) {
     return redirect("/sign-in");
@@ -64,7 +63,6 @@ export const RoomId = () => {
       {room?.roomType === "VIDEO" && (
         <MediaRoom audio={true} video={true} chatId={room.$id} />
       )}
-
     </div>
   );
 };
