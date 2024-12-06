@@ -89,7 +89,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           Something went wrong!
         </p>
       </div>
-    );
+    )
   }
 
   return (

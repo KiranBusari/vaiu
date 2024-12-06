@@ -15,8 +15,9 @@ export const RoomId = () => {
   const workspaceId = useWorkspaceId()
   const projectId = useProjectId()
   const roomId = useRoomId()
+  
   const { data: current } = useCurrent()
-
+  
   const router = useRouter()
 
   if (!current) {
@@ -34,29 +35,29 @@ export const RoomId = () => {
           <ChatMessages
             name={room.name}
             memberId={current.$id}
-            chatId={room.id}
+            chatId={room.$id}
             apiUrl="/api/messages"
             socketUrl="/api/socket/messages"
             socketQuery={{
-              roomId: room.id,
-              serverId: room.serverId,
+              roomId: room.$id,
+              memberId: current.$id,
             }}
             paramKey="roomId"
-            paramValue={room.id}
+            paramValue={room.$id}
             type="room"
           />
           <ChatInput
             apiUrl="/api/socket/messages"
             query={{
-              roomId: room.id,
-              serverId: room.serverId,
+              roomId: room.$id,
+              memberId: current.$id,
             }}
             name={room.name}
             type="room"
           />
         </>
       )}
-
+      
       {room?.roomType === "AUDIO" && (
         <MediaRoom audio={true} video={false} chatId={room.$id} />
       )}
