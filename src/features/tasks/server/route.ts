@@ -6,12 +6,20 @@ import { zValidator } from "@hono/zod-validator";
 import { getMember } from "@/features/members/utilts";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import {
+  DATABASE_ID,
+  MEMBERS_ID,
+  PROJECTS_ID,
+  TASKS_ID,
+  WORKSPACE_ID,
+} from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 
 import { createTaskSchema } from "../schemas";
 import { Task, TaskStatus } from "../types";
 import { Project } from "@/features/projects/types";
+import { Octokit } from "octokit";
+
 const app = new Hono()
   .delete("/:taskId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -151,50 +159,104 @@ const app = new Hono()
     sessionMiddleware,
     zValidator("json", createTaskSchema),
     async (c) => {
-      const databases = c.get("databases");
-      const user = c.get("user");
-      const { name, status, dueDate, projectId, assigneeId, workspaceId } =
-        c.req.valid("json");
+      try {
+        const databases = c.get("databases");
+        const user = c.get("user");
+        const { name, status, dueDate, projectId, assigneeId, workspaceId } =
+          c.req.valid("json");
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
+        const workspaces = await databases.listDocuments(
+          DATABASE_ID,
+          WORKSPACE_ID,
+          [Query.equal("$id", workspaceId)]
+        );
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-      const highestPositionTask = await databases.listDocuments(
-        DATABASE_ID,
-        TASKS_ID,
-        [
-          Query.equal("status", status),
-          Query.equal("workspaceId", workspaceId),
-          Query.orderAsc("position"),
-          Query.limit(1),
-        ]
-      );
-      const newPosition =
-        highestPositionTask.documents.length > 0
-          ? highestPositionTask.documents[0].position + 1000
-          : 1000;
+        const { accessToken } = workspaces.documents.filter(
+          (name) => name.$collectionId
+        )[0];
 
-      const task = await databases.createDocument<Task>(
-        DATABASE_ID,
-        TASKS_ID,
-        ID.unique(),
-        {
-          name,
-          status,
-          dueDate,
-          workspaceId,
-          projectId,
-          assigneeId,
-          position: newPosition,
+        if (!accessToken) {
+          return c.json({ error: "Workspace not found" }, 404);
         }
-      );
-      return c.json({ data: task });
+
+        // if (accessToken.documents.length === 0) {
+        //   return c.json({ error: "Workspace not found" }, 404);
+        // }
+
+        const fetchAssinee = await databases.getDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          assigneeId
+        );
+
+        if (!fetchAssinee) {
+          return c.json({ error: "Assignee not found" }, 404);
+        }
+        console.log("fetchAssinee:", fetchAssinee);
+
+        const octokit = new Octokit({
+          auth: accessToken,
+        });
+
+        const member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+        const highestPositionTask = await databases.listDocuments(
+          DATABASE_ID,
+          TASKS_ID,
+          [
+            Query.equal("status", status),
+            Query.equal("workspaceId", workspaceId),
+            Query.orderAsc("position"),
+            Query.limit(1),
+          ]
+        );
+        const newPosition =
+          highestPositionTask.documents.length > 0
+            ? highestPositionTask.documents[0].position + 1000
+            : 1000;
+
+        const task =
+          (await databases.createDocument<Task>(
+            DATABASE_ID,
+            TASKS_ID,
+            ID.unique(),
+            {
+              name,
+              status,
+              dueDate,
+              workspaceId,
+              projectId,
+              assigneeId,
+              position: newPosition,
+            }
+          ),
+          await octokit.rest.issues.create({
+            owner: "KIRAN-BUSARI",
+            repo: workspaces.documents[0].name,
+            title: name,
+            body: "This is a test task",
+          }),
+          await octokit.request(
+            "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees",
+            {
+              owner: "KIRAN-BUSARI",
+              repo: workspaces.documents[0].name,
+              issue_number: 1,
+              assignees: [fetchAssinee.email],
+            }
+          ));
+
+        return c.json({ data: task });
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
   )
   .patch(

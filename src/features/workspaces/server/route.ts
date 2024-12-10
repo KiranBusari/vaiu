@@ -22,6 +22,7 @@ import { getMember } from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
+import { Octokit } from "octokit";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -88,46 +89,66 @@ const app = new Hono()
     zValidator("form", createWorkspaceSchema),
     sessionMiddleware,
     async (c) => {
-      const databases = c.get("databases");
-      const storage = c.get("storage");
-      const user = c.get("user");
+      try {
+        const databases = c.get("databases");
+        const storage = c.get("storage");
+        const user = c.get("user");
 
-      const { name, image, accessToken } = c.req.valid("form");
+        const { name, image, accessToken } = c.req.valid("form");
 
-      let uploadedImage: string | undefined;
-      if (image instanceof File) {
-        const file = await storage.createFile(
-          IMAGES_BUCKET_ID,
-          ID.unique(),
-          image
-        );
-        const buffer: ArrayBuffer = await storage.getFilePreview(
-          IMAGES_BUCKET_ID,
-          file.$id
-        );
-        uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-          "base64"
-        )}`;
-      }
-      const workspace = await databases.createDocument(
-        DATABASE_ID,
-        WORKSPACE_ID,
-        ID.unique(),
-        {
-          name,
-          userId: user.$id,
-          imageUrl: uploadedImage,
-          inviteCode: generateInviteCode(INVITECODE_LENGTH),
-          accessToken,
+        const octokit = new Octokit({ auth: accessToken });
+
+        let uploadedImage: string | undefined;
+        if (image instanceof File) {
+          const file = await storage.createFile(
+            IMAGES_BUCKET_ID,
+            ID.unique(),
+            image
+          );
+          const buffer: ArrayBuffer = await storage.getFilePreview(
+            IMAGES_BUCKET_ID,
+            file.$id
+          );
+          uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
+            "base64"
+          )}`;
         }
-      );
 
-      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
-        userId: user.$id,
-        workspaceId: workspace.$id,
-        role: MemberRole.ADMIN,
-      });
-      return c.json({ data: workspace });
+        const existingWorkspace = await databases.listDocuments(
+          DATABASE_ID,
+          WORKSPACE_ID,
+          [Query.equal("name", name)]
+        );
+
+        if (existingWorkspace.total > 0) {
+          return c.json({ error: "Workspace already exists" }, 400);
+        } else {
+          const workspace =
+            (await databases.createDocument(
+              DATABASE_ID,
+              WORKSPACE_ID,
+              ID.unique(),
+              {
+                name,
+                userId: user.$id,
+                imageUrl: uploadedImage,
+                inviteCode: generateInviteCode(INVITECODE_LENGTH),
+                accessToken,
+              }
+            ),
+            await octokit.rest.repos.createForAuthenticatedUser({
+              name: name,
+            }));
+          await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+            userId: user.$id,
+            workspaceId: workspace.data.id,
+            role: MemberRole.ADMIN,
+          });
+          return c.json({ data: workspace });
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   )
   .patch(
