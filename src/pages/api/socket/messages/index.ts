@@ -90,7 +90,6 @@
 //   }
 // }
 
-
 import { DATABASE_ID, MESSAGE_ID, ROOMS_ID } from "@/config";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
@@ -101,70 +100,83 @@ import { Room } from "@/features/channels/types";
 import { getMember } from "@/features/members/utilts";
 import { Server as SocketIOServer } from "socket.io";
 
-const app = new Hono<{ Bindings: { io: SocketIOServer } }>();
+export const config = {
+  runtime: "edge",
+};
 
-app
-  .post(
-    "/",
-    sessionMiddleware,
-    zValidator("form", createMessageSchema),
-    async (c) => {
-      const databases = c.get("databases");
-      const user = c.get("user");
+export default function handler(req: any, res: any) {
 
-      const { content, roomId } = c.req.valid("form");
+  const app = new Hono<{ Bindings: { io: SocketIOServer } }>();
 
-      if (!user) return c.json({
-        message: "Unauthorized"
-      }, 401);
+  app
+    .post(
+      "/",
+      sessionMiddleware,
+      zValidator("form", createMessageSchema),
+      async (c) => {
+        const databases = c.get("databases");
+        const user = c.get("user");
 
-      if (!roomId) return c.json({
-        message: "Room id is required"
-      }, 400);
+        const { content, roomId } = c.req.valid("form");
 
-      if (!content) return c.json({
-        message: "Content is required"
-      }, 400);
+        console.log("User", user);
+        console.log("RoomId", roomId);
+        console.log("Content", content);
 
-      const room = await databases.getDocument<Room>(
-        DATABASE_ID,
-        ROOMS_ID,
-        roomId
-      )
+        if (!user) return c.json({
+          message: "Unauthorized"
+        }, 401);
 
-      if (!room) return c.json({
-        message: "Room not found"
-      }, 404);
+        if (!roomId) return c.json({
+          message: "Room id is required"
+        }, 400);
 
-      const member = await getMember({
-        databases,
-        workspaceId: room.workspaceId,
-        userId: user.$id
-      })
+        if (!content) return c.json({
+          message: "Content is required"
+        }, 400);
 
-      if (!member) return c.json({
-        message: "Unauthorized"
-      }, 401);
-
-      const message = await databases.createDocument(
-        DATABASE_ID,
-        MESSAGE_ID,
-        ID.unique(),
-        {
-          content,
-          userId: user.$id,
+        const room = await databases.getDocument<Room>(
+          DATABASE_ID,
+          ROOMS_ID,
           roomId
-        }
-      )
+        )
 
-      const roomKey = `chat:${roomId}:messages`;
+        console.log("Room", room);
 
-      c.env.io.emit(roomKey, message);
 
-      return c.json({
-        message
-      }, 201);
-    }
-  )
+        if (!room) return c.json({
+          message: "Room not found"
+        }, 404);
 
-export default app
+        const member = await getMember({
+          databases,
+          workspaceId: room.workspaceId,
+          userId: user.$id
+        })
+
+        if (!member) return c.json({
+          message: "Unauthorized"
+        }, 401);
+
+        const message = await databases.createDocument(
+          DATABASE_ID,
+          MESSAGE_ID,
+          ID.unique(),
+          {
+            content,
+            userId: user.$id,
+            roomId
+          }
+        )
+
+        const roomKey = `chat:${roomId}:messages`;
+
+        c.env.io.emit(roomKey, message);
+
+        return c.json({
+          message
+        }, 201);
+      }
+    )
+  return app.fetch(req, res);
+}
