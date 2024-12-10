@@ -35,6 +35,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "convex": "^1.17.0",
+    "cookie": "^1.0.2",
     "date-fns": "^2.29.3",
     "framer-motion": "^11.11.17",
     "hono": "4.6.8",

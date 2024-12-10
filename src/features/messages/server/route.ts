@@ -7,8 +7,11 @@ import { createMessageSchema } from "../types";
 import { Room } from "@/features/channels/types";
 import { getMember } from "@/features/members/utilts";
 import { NextApiResponseServerIo } from "@/pages/api/socket/types";
+import { Server as SocketIOServer } from "socket.io";
 
-const app = new Hono()
+const app = new Hono<{ Bindings: { io: SocketIOServer } }>();
+
+app
     .post(
         "/",
         sessionMiddleware,
@@ -64,7 +67,7 @@ const app = new Hono()
 
             const roomKey = `chat:${roomId}:messages`;
 
-            res?.socket?.server?.io.emit(roomKey, message);
+            c.env.io.emit(roomKey, message);
 
             return c.json({
                 message

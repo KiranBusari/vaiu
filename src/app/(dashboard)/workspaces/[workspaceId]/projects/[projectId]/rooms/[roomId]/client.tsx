@@ -55,7 +55,7 @@ export const RoomId = () => {
           />
         </>
       )}
-      
+
       {room?.roomType === "AUDIO" && (
         <MediaRoom audio={true} video={false} chatId={room.$id} />
       )}
