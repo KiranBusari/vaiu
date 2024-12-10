@@ -95,7 +95,6 @@ const app = new Hono()
         const user = c.get("user");
 
         const { name, image, accessToken } = c.req.valid("form");
-        console.log(accessToken);
 
         const octokit = new Octokit({ auth: accessToken });
 
@@ -121,28 +120,27 @@ const app = new Hono()
           [Query.equal("name", name)]
         );
 
-        if (existingWorkspace.total > 0) {
+        if (existingWorkspace.total !== 0) {
           return c.json({ error: "Workspace already exists" }, 400);
         } else {
-          const workspace =
-            (await databases.createDocument(
-              DATABASE_ID,
-              WORKSPACE_ID,
-              ID.unique(),
-              {
-                name,
-                userId: user.$id,
-                imageUrl: uploadedImage,
-                inviteCode: generateInviteCode(INVITECODE_LENGTH),
-                accessToken,
-              }
-            ),
-            await octokit.rest.repos.createForAuthenticatedUser({
-              name: name,
-            }));
+          const workspace = await databases.createDocument(
+            DATABASE_ID,
+            WORKSPACE_ID,
+            ID.unique(),
+            {
+              name,
+              userId: user.$id,
+              imageUrl: uploadedImage,
+              inviteCode: generateInviteCode(INVITECODE_LENGTH),
+              accessToken,
+            }
+          );
+          await octokit.rest.repos.createForAuthenticatedUser({
+            name: name,
+          });
           await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
             userId: user.$id,
-            workspaceId: workspace.data.id,
+            workspaceId: workspace.$id,
             role: MemberRole.ADMIN,
           });
           return c.json({ data: workspace });
