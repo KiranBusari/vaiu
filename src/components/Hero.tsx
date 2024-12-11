@@ -5,7 +5,7 @@ import { LampContainer } from "./ui/lamp";
 
 const Hero = () => {
   return (
-    <LampContainer className="flex h-screen max-w-full place-content-center">
+    <LampContainer className="flex max-h-screen place-content-center">
       <div className="text-center">
         <h1 className="bg-gradient-to-b flex-col flex from-slate-50 to-slate-500 bg-clip-text text-8xl font-bold leading-[150%] text-transparent">
           Contributions

@@ -90,19 +90,6 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
               />
               <FormField
                 control={form.control}
-                name="accessToken"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Access token</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Enter access token" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="image"
                 render={({ field }) => (
                   <div className="flex flex-col gap-y-2">
@@ -142,7 +129,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                         />
                         {field.value ? (
                           <Button
-                            size="xs"
+                            size="sm"
                             type="button"
                             variant="destructive"
                             className="w-fit mt-2"
@@ -156,9 +143,9 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                           </Button>
                         ) : (
                           <Button
-                            size="xs"
+                            size="sm"
                             type="button"
-                            variant="teritary"
+                            variant="secondary"
                             className="w-fit mt-2"
                             disabled={isPending}
                             onClick={() => inputRef.current?.click()}

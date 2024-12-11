@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { SocketProvider } from "@/components/socket-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,12 +35,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SocketProvider>
-            <QueryProvider>
-              <Toaster richColors theme="light" />
-              {children}
-            </QueryProvider>
-          </SocketProvider>
+          <TooltipProvider>
+            <SocketProvider>
+              <QueryProvider>
+                <Toaster richColors theme="light" />
+                {children}
+              </QueryProvider>
+            </SocketProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

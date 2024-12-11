@@ -11,6 +11,7 @@ import { createProjectSchema, updateProjectSchema } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
+import { Octokit } from "octokit";
 
 const app = new Hono()
   .post(
@@ -22,7 +23,10 @@ const app = new Hono()
       const storage = c.get("storage");
       const user = c.get("user");
 
-      const { name, image, workspaceId, projectUrl } = c.req.valid("form");
+      const { name, image, workspaceId, accessToken } = c.req.valid("form");
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
 
       const member = await getMember({
         databases,
@@ -50,18 +54,37 @@ const app = new Hono()
         )}`;
       }
 
-      const project = await databases.createDocument(
+      const existingProject = await databases.listDocuments<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        ID.unique(),
-        {
-          name,
-          imageUrl: uploadedImage,
-          projectUrl,
-          workspaceId,
-        }
+        [
+          Query.equal("workspaceId", workspaceId),
+          Query.orderDesc("$createdAt"),
+          Query.equal("name", name),
+          Query.limit(1),
+        ]
       );
-      return c.json({ data: project });
+
+      if (existingProject.total !== 0) {
+        return c.json({ error: "Project with this name already exists" }, 400);
+      } else {
+        const project =
+          (await databases.createDocument(
+            DATABASE_ID,
+            PROJECTS_ID,
+            ID.unique(),
+            {
+              name,
+              imageUrl: uploadedImage,
+              accessToken,
+              workspaceId,
+            }
+          ),
+          await octokit.rest.repos.createForAuthenticatedUser({
+            name: name,
+          }));
+        return c.json({ data: project });
+      }
     }
   )
   .get(

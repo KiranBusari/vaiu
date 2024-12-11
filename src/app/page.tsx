@@ -1,12 +1,8 @@
-import Landing from "@/components/Landing";
+import Hero from "@/components/Hero";
 import React from "react";
 
 function page() {
-  return (
-    <div>
-      <Landing />
-    </div>
-  );
+  return <Hero />;
 }
 
 export default page;
