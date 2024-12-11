@@ -76,7 +76,7 @@ export const CreateTaskForm = ({
   return (
     <Card className="size-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <CardTitle className="text-xl font-bold">Create new task</CardTitle>
+        <CardTitle className="text-xl font-bold">Create new issue</CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
@@ -90,9 +90,9 @@ export const CreateTaskForm = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Task name</FormLabel>
+                    <FormLabel>Issue name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter task name" />
+                      <Input {...field} placeholder="Enter issue name" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -225,7 +225,7 @@ export const CreateTaskForm = ({
                 Cancel
               </Button>
               <Button disabled={isPending} type="submit" size="lg">
-                Create Task
+                Create Issue
               </Button>
             </div>
           </form>

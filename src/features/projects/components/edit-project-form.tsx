@@ -101,9 +101,9 @@ export const EditProjectForm = ({
               onCancel
                 ? onCancel
                 : () =>
-                    router.push(
-                      `/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`
-                    )
+                  router.push(
+                    `/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`
+                  )
             }
           >
             <ArrowLeft className="size-4 mr-2" />
@@ -228,7 +228,7 @@ export const EditProjectForm = ({
       <Card className="size-full border-none shadow-none">
         <CardContent className="p-7">
           <div className="flex flex-col">
-            <h3 className="font-bold">Danger Zone</h3>
+            <h3 className="font-bold">Delete Project</h3>
             <p className="text-sm text-muted-foreground">
               Deleting a project is irreversible and will remove all associated
               data

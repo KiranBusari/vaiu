@@ -69,7 +69,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
     <div className="flex flex-col gap-y-4 col-span-1">
       <div className="bg-gray-100 dark:bg-gray-800 border rounded-lg p-4">
         <div className="flex items-center justify-between">
-          <p className="text-lg font-semibold">Tasks ({total})</p>
+          <p className="text-lg font-semibold">Issues ({total})</p>
           <Button variant="secondary" size="icon" onClick={createTask}>
             <PlusIcon className="size-4 text-gray-400" />
           </Button>
@@ -98,7 +98,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             </li>
           ))}
           <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
-            No tasks found
+            No issues found
           </li>
         </ul>
         <Button variant="secondary" className="mt-4 w-full" asChild>
