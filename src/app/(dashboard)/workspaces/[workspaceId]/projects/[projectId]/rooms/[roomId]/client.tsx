@@ -9,6 +9,7 @@ import { useRoomId } from "@/features/channels/hooks/use-roomId";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { redirect, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const RoomId = () => {
   const workspaceId = useWorkspaceId();
@@ -20,6 +21,11 @@ export const RoomId = () => {
 
   if (!current) {
     return redirect("/sign-in");
+  }
+
+  if (projectId === "undefined" || projectId === null) {
+    toast.error("Please select your project to join the room");
+    return redirect(`/workspaces/${workspaceId}`);
   }
 
   const { data: room } = useGetRoom({ roomId });

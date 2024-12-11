@@ -8,12 +8,12 @@ import { ModeToggle } from "./ModeToggle";
 
 const pathnameMap = {
   tasks: {
-    title: "My Tasks",
-    description: "View all of your tasks here",
+    title: "Issues",
+    description: "View all of your issues here",
   },
   projects: {
     title: "My Projects",
-    description: "View tasks of your project here",
+    description: "View issues of your project here",
   },
 };
 const defaultMap = {

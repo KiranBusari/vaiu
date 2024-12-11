@@ -40,12 +40,12 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div className="space-x-4 flex items-center">
-          <Button variant={"default"} size={"sm"}>
+          {/* <Button variant={"default"} size={"sm"}>
             <Link href={canvasHref} className="flex items-center">
               <PresentationIcon className="size-1 mr-1" />
               Canvas
             </Link>
-          </Button>
+          </Button> */}
           <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
             <Link href={href}>
               <Pencil className="size-4 mr-2" />

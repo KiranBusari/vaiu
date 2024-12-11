@@ -67,10 +67,10 @@ export const TaskList = ({ data, total }: TaskListProps) => {
 
   return (
     <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-muted dark:bg-gray-800 rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-800 border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Tasks ({total})</p>
-          <Button variant="muted" size="icon" onClick={createTask}>
+          <Button variant="secondary" size="icon" onClick={createTask}>
             <PlusIcon className="size-4 text-gray-400" />
           </Button>
         </div>
@@ -101,7 +101,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             No tasks found
           </li>
         </ul>
-        <Button variant="muted" className="mt-4 w-full" asChild>
+        <Button variant="secondary" className="mt-4 w-full" asChild>
           <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
         </Button>
       </div>
@@ -119,7 +119,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
 
   return (
     <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-800 border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Projects ({total})</p>
           <Button variant="secondary" size="icon" onClick={createProject}>
@@ -131,7 +131,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
           {data.map((project) => (
             <li key={project.$id}>
               <Link href={`/workspaces/${workspaceId}/projects/${project.$id}`}>
-                <Card className="shadow-none rounded-lg hover:opacity-75 transition">
+                <Card className="bg-gray-200 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg hover:opacity-75 transition">
                   <CardContent className="p-4 flex items-center gap-x-2.5">
                     <ProjectAvatar
                       className="size-12"
@@ -165,7 +165,7 @@ export const MembersList = ({ data, total }: MembersListProps) => {
 
   return (
     <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-white dark:bg-gray-800 border rounded-lg p-4">
+      <div className="bg-gray-100 dark:bg-gray-800 border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Members ({total})</p>
           <Button asChild variant="secondary" size="icon">
@@ -178,7 +178,7 @@ export const MembersList = ({ data, total }: MembersListProps) => {
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map((member) => (
             <li key={member.$id}>
-              <Card className="shadow-none rounded-lg overflow-hidden">
+              <Card className="bg-gray-200 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg overflow-hidden">
                 <CardContent className="p-3 flex-col flex items-center gap-x-2">
                   <MemberAvatar className="size-12" name={member.name} />
                   <div className="flex flex-col items-center overflow-hidden">

@@ -65,7 +65,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
         {
           onSuccess: ({ data }) => {
             form.reset();
-            router.push(`/workspaces/${workspaceId}/channels/${data.$id}`);
+            router.push(`/workspaces/${workspaceId}`);
           },
         }
       );

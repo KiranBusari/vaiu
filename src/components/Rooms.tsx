@@ -8,6 +8,7 @@ import { useCreateRoomModal } from "@/features/channels/hooks/use-create-room-mo
 import { RiAddCircleFill } from "react-icons/ri";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { DottedSeparator } from "./dotted-separator";
+import { cn } from "@/lib/utils";
 
 const Rooms = () => {
   const pathname = usePathname();
@@ -37,7 +38,6 @@ const Rooms = () => {
         />
       </div>
       <ScrollArea className="flex-1">
-        <DottedSeparator className="my-4" />
 
         {!!textRooms?.length && (
           <div className="mb-2">
@@ -51,12 +51,11 @@ const Rooms = () => {
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
-                      pathname ===
+                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
                       `/workspaces/${workspaceId}/rooms/${room.$id}`
-                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                        : "text-gray-500"
-                    }`}
+                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                      : "text-gray-500"
+                      }`}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>
@@ -78,12 +77,11 @@ const Rooms = () => {
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
-                      pathname ===
+                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
                       `/workspaces/${workspaceId}/rooms/${room.$id}`
-                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                        : "text-gray-500"
-                    }`}
+                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                      : "text-gray-500"
+                      }`}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>
@@ -95,7 +93,7 @@ const Rooms = () => {
 
         {!!videoRooms?.length && (
           <div className="mb-2">
-            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               Video Rooms
             </p>
             <div className="space-y-[2px]">
@@ -105,12 +103,13 @@ const Rooms = () => {
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
+                    className={cn(
+                      "flex items-center gap-2.5 p-2.5 rounded-md hover:opacity-75 transition cursor-pointer text-gray-500 dark:text-gray-400 font-medium",
                       pathname ===
-                      `/workspaces/${workspaceId}/rooms/${room.$id}`
-                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                        `/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`
+                        ? "bg-white dark:bg-gray-800 text-gray-100 shadow-sm hover:opacity-100 text-primary"
                         : "text-gray-500"
-                    }`}
+                    )}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>
@@ -119,6 +118,7 @@ const Rooms = () => {
             </div>
           </div>
         )}
+        <DottedSeparator className="my-4" />
       </ScrollArea>
     </div>
   );

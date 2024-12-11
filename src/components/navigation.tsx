@@ -20,7 +20,7 @@ const router = [
     aciveIcon: GoHomeFill,
   },
   {
-    label: "My Tasks",
+    label: "Issues",
     href: "/tasks",
     icon: GoCheckCircle,
     aciveIcon: GoCheckCircleFill,

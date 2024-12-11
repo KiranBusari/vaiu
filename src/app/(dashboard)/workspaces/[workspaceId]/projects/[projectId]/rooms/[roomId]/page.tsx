@@ -10,7 +10,7 @@ const RoomIdPage = async () => {
 
   return (
     <div>
-      <RoomId />;
+      <RoomId />
     </div>
   )
 };

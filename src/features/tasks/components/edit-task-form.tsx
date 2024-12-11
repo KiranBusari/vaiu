@@ -94,9 +94,9 @@ export const EditTaskForm = ({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Task name</FormLabel>
+                    <FormLabel>Issue name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter task name" />
+                      <Input {...field} placeholder="Enter issue name" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
