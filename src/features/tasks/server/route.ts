@@ -6,13 +6,7 @@ import { zValidator } from "@hono/zod-validator";
 import { getMember } from "@/features/members/utilts";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import {
-  DATABASE_ID,
-  MEMBERS_ID,
-  PROJECTS_ID,
-  TASKS_ID,
-  WORKSPACE_ID,
-} from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 
 import { createTaskSchema } from "../schemas";
@@ -165,23 +159,23 @@ const app = new Hono()
         const { name, status, dueDate, projectId, assigneeId, workspaceId } =
           c.req.valid("json");
 
-        const workspaces = await databases.listDocuments(
+        const projects = await databases.listDocuments(
           DATABASE_ID,
-          WORKSPACE_ID,
-          [Query.equal("$id", workspaceId)]
+          PROJECTS_ID,
+          [
+            Query.equal("$id", projectId),
+            Query.equal("workspaceId", workspaceId),
+          ]
         );
+        console.log("projects:", projects);
 
-        const { accessToken } = workspaces.documents.filter(
-          (name) => name.$collectionId
+        const { accessToken } = projects.documents.filter(
+          (project) => project.$id === projectId
         )[0];
 
         if (!accessToken) {
           return c.json({ error: "Workspace not found" }, 404);
         }
-
-        // if (accessToken.documents.length === 0) {
-        //   return c.json({ error: "Workspace not found" }, 404);
-        // }
 
         const fetchAssinee = await databases.getDocument(
           DATABASE_ID,
@@ -239,19 +233,10 @@ const app = new Hono()
           ),
           await octokit.rest.issues.create({
             owner: "KIRAN-BUSARI",
-            repo: workspaces.documents[0].name,
+            repo: projects.documents[0].name,
             title: name,
             body: "This is a test task",
-          }),
-          await octokit.request(
-            "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees",
-            {
-              owner: "KIRAN-BUSARI",
-              repo: workspaces.documents[0].name,
-              issue_number: 1,
-              assignees: [fetchAssinee.email],
-            }
-          ));
+          }));
 
         return c.json({ data: task });
       } catch (error) {

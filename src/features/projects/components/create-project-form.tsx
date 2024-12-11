@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import Image from "next/image";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Info } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -40,7 +45,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
     defaultValues: {
       name: "",
       image: "",
-      projectUrl: "",
+      accessToken: "",
     },
   });
   const onSubmit = (values: CreateProjectSchema) => {
@@ -91,22 +96,50 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="projectUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project URL / Github link</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Paste project URL / Github link"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="">
+                <FormField
+                  control={form.control}
+                  name="accessToken"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex justify-between">
+                        <div className="flex items-center">
+                          Access Token{" "}
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <span className="text-muted-foreground">
+                                <Info size={16} className="ml-2" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-slate-900 text-slate-100 max-w-sm flex place-content-center">
+                              <p className="text-sm">
+                                Access token is a unique identifier that allows
+                                you to access your repo data. You can generate
+                                an access token from your github account
+                                settings.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                        <p className="text-sm text-blue-400">
+                          <a
+                            href=""
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            Steps to generate personal access token
+                          </a>
+                        </p>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Enter access token" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="image"

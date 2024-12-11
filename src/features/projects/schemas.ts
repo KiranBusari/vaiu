@@ -10,7 +10,7 @@ export const createProjectSchema = z.object({
     .optional(),
 
   workspaceId: z.string(),
-  projectUrl: z.string().optional(),
+  accessToken: z.string().optional(),
 });
 export const updateProjectSchema = z.object({
   name: z

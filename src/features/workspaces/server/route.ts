@@ -22,7 +22,6 @@ import { getMember } from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
-import { Octokit } from "octokit";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -94,9 +93,7 @@ const app = new Hono()
         const storage = c.get("storage");
         const user = c.get("user");
 
-        const { name, image, accessToken } = c.req.valid("form");
-
-        const octokit = new Octokit({ auth: accessToken });
+        const { name, image } = c.req.valid("form");
 
         let uploadedImage: string | undefined;
         if (image instanceof File) {
@@ -117,7 +114,11 @@ const app = new Hono()
         const existingWorkspace = await databases.listDocuments(
           DATABASE_ID,
           WORKSPACE_ID,
-          [Query.equal("name", name)]
+          [
+            Query.equal("name", name),
+            Query.equal("userId", user.$id),
+            Query.limit(1),
+          ]
         );
 
         if (existingWorkspace.total !== 0) {
@@ -132,12 +133,9 @@ const app = new Hono()
               userId: user.$id,
               imageUrl: uploadedImage,
               inviteCode: generateInviteCode(INVITECODE_LENGTH),
-              accessToken,
             }
           );
-          await octokit.rest.repos.createForAuthenticatedUser({
-            name: name,
-          });
+
           await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
             userId: user.$id,
             workspaceId: workspace.$id,
@@ -160,7 +158,7 @@ const app = new Hono()
       const user = c.get("user");
 
       const { workspaceId } = c.req.param();
-      const { name, image, accessToken } = c.req.valid("form");
+      const { name, image } = c.req.valid("form");
       const member = await getMember({
         databases,
         workspaceId,
@@ -195,7 +193,6 @@ const app = new Hono()
         {
           name,
           imageUrl: uploadedImage,
-          accessToken,
         }
       );
 
