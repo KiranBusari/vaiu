@@ -1,7 +1,5 @@
 "use client";
 
-import { ChatInput } from "@/components/chat/chat-input";
-import { ChatMessages } from "@/components/chat/chat-messages";
 import { MediaRoom } from "@/components/media-room";
 import { useCurrent } from "@/features/auth/api/use-curent";
 import { useGetRoom } from "@/features/channels/api/use-get-room";
@@ -34,33 +32,6 @@ export const RoomId = () => {
 
   return (
     <div className="bg-white dark:bg-[#14171A] flex flex-col h-[80vh]">
-      {room?.roomType === "TEXT" && (
-        <>
-          <ChatMessages
-            name={room.name}
-            memberId={current.$id}
-            chatId={room.$id}
-            apiUrl="/api/messages"
-            socketUrl="/api/socket/messages"
-            socketQuery={{
-              roomId: room.$id,
-              memberId: current.$id,
-            }}
-            paramKey="roomId"
-            paramValue={room.$id}
-            type="room"
-          />
-          <ChatInput
-            apiUrl="/api/socket/messages"
-            query={{
-              roomId: room.$id,
-              memberId: current.$id,
-            }}
-            name={room.name}
-            type="room"
-          />
-        </>
-      )}
 
       {room?.roomType === "AUDIO" && (
         <MediaRoom audio={true} video={false} chatId={room.$id} />

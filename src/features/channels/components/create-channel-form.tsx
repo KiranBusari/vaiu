@@ -49,13 +49,13 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
     resolver: zodResolver(RoomSchema),
     defaultValues: {
       name: "",
-      roomType: RoomType.TEXT,
+      roomType: RoomType.AUDIO,
       workspaceId: workspaceId,
     },
   });
 
   useEffect(() => {
-    form.setValue("roomType", RoomType.TEXT);
+    form.setValue("roomType", RoomType.AUDIO);
   }, [RoomType]);
 
   const onSubmit = async (values: z.infer<typeof RoomSchema>) => {
@@ -63,7 +63,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
       mutate(
         { json: { ...values, workspaceId } },
         {
-          onSuccess: ({ data }) => {
+          onSuccess: () => {
             form.reset();
             router.push(`/workspaces/${workspaceId}`);
           },

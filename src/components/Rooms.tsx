@@ -39,32 +39,6 @@ const Rooms = () => {
       </div>
       <ScrollArea className="flex-1">
 
-        {!!textRooms?.length && (
-          <div className="mb-2">
-            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-              Text Rooms
-            </p>
-            <div className="space-y-[2px]">
-              {textRooms?.map((room) => (
-                <Link
-                  key={room.$id}
-                  href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
-                >
-                  <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
-                      `/workspaces/${workspaceId}/rooms/${room.$id}`
-                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                      : "text-gray-500"
-                      }`}
-                  >
-                    <span className="truncate">{room.name}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
         {!!audioRooms?.length && (
           <div className="mb-2">
             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">

@@ -1,5 +1,5 @@
 "use client";
-import { Pencil, PresentationIcon } from "lucide-react";
+import { Pencil } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -27,7 +27,7 @@ export const ProjectIdClient = () => {
   if (!project) return <PageError message="Project not found" />;
 
   const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
-  const canvasHref = `/workspaces/${project.workspaceId}/projects/${project.$id}/canvas/${project.canvasId}`;
+  // const canvasHref = `/workspaces/${project.workspaceId}/projects/${project.$id}/canvas/${project.canvasId}`;
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between">

@@ -1,7 +1,6 @@
 import { Models } from "node-appwrite";
 
 export enum RoomType {
-    TEXT = "TEXT",
     AUDIO = "AUDIO",
     VIDEO = "VIDEO"
 }

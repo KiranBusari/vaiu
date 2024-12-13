@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { getWorkspaces } from "@/features/workspaces/queries";
 import { UserButton } from "@/features/auth/components/user-button";
 import { Logo } from "@/components/Logo";
 
