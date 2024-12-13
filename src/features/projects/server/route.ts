@@ -68,22 +68,22 @@ const app = new Hono()
       if (existingProject.total !== 0) {
         return c.json({ error: "Project with this name already exists" }, 400);
       } else {
-        const project =
-          (await databases.createDocument(
-            DATABASE_ID,
-            PROJECTS_ID,
-            ID.unique(),
-            {
-              name,
-              imageUrl: uploadedImage,
-              accessToken,
-              workspaceId,
-            }
-          ),
-          await octokit.rest.repos.createForAuthenticatedUser({
-            name: name,
-          }));
-        return c.json({ data: project });
+        const repo = await octokit.rest.repos.createForAuthenticatedUser({
+          name: name,
+        });
+        const project = await databases.createDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          ID.unique(),
+          {
+            name,
+            imageUrl: uploadedImage,
+            accessToken,
+            workspaceId,
+          }
+        );
+
+        return c.json({ data: project, repo: repo.data });
       }
     }
   )
