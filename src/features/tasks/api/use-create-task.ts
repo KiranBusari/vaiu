@@ -10,10 +10,10 @@ type RequestType = InferRequestType<(typeof client.api.tasks)["$post"]>;
 export const useCreateTask = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
+    mutationFn: async ({ json }): Promise<ResponseType> => {
       const response = await client.api.tasks.$post({ json });
       if (!response.ok) throw new Error("Failed to create task");
-      return await response.json();
+      return (await response.json()) as ResponseType;
     },
     onSuccess: () => {
       toast.success("Task created successfully");
