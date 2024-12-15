@@ -216,29 +216,29 @@ const app = new Hono()
             ? highestPositionTask.documents[0].position + 1000
             : 1000;
 
-        const task =
-          (await databases.createDocument<Task>(
-            DATABASE_ID,
-            TASKS_ID,
-            ID.unique(),
-            {
-              name,
-              status,
-              dueDate,
-              workspaceId,
-              projectId,
-              assigneeId,
-              position: newPosition,
-            }
-          ),
-          await octokit.rest.issues.create({
-            owner: "KIRAN-BUSARI",
-            repo: projects.documents[0].name,
-            title: name,
-            body: "This is a test task",
-          }));
+        const issueInGit = await octokit.rest.issues.create({
+          owner: projects.documents[0].owner,
+          repo: projects.documents[0].name,
+          title: name,
+          body: "This is a test task",
+        });
 
-        return c.json({ data: task });
+        const task = await databases.createDocument<Task>(
+          DATABASE_ID,
+          TASKS_ID,
+          ID.unique(),
+          {
+            name,
+            status,
+            dueDate,
+            workspaceId,
+            projectId,
+            assigneeId,
+            position: newPosition,
+          }
+        );
+
+        return c.json({ data: task, issueId: issueInGit.data.id }, 201);
       } catch (error) {
         console.error("Error:", error);
       }
