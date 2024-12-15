@@ -56,7 +56,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
 
   useEffect(() => {
     form.setValue("roomType", RoomType.AUDIO);
-  }, [RoomType]);
+  }, [form]);
 
   const onSubmit = async (values: z.infer<typeof RoomSchema>) => {
     try {

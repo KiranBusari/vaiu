@@ -18,7 +18,6 @@ const Rooms = () => {
   const { open } = useCreateRoomModal();
   const { data } = useGetRooms({ workspaceId });
 
-  const textRooms = data?.documents.filter((room) => room.roomType === "TEXT");
   const audioRooms = data?.documents.filter(
     (room) => room.roomType === "AUDIO"
   );
