@@ -238,7 +238,7 @@ const app = new Hono()
           }
         );
 
-        return c.json({ data: task, issueId: issueInGit.data.id }, 201);
+        return c.json({ data: task, issue: issueInGit });
       } catch (error) {
         console.error("Error:", error);
       }
