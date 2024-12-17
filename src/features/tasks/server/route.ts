@@ -217,7 +217,7 @@ const app = new Hono()
             : 1000;
 
         const issueInGit = await octokit.rest.issues.create({
-          owner: projects.documents[0].owner,
+          owner: 'prathyarthi',
           repo: projects.documents[0].name,
           title: name,
           body: "This is a test task",

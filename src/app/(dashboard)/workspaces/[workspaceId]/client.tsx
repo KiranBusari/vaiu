@@ -79,7 +79,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
           {data.map((task) => (
             <li key={task.$id}>
               <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                <Card className="shadow-none rounded-lg hover:opacity-75 transition">
+                <Card className="bg-gray-200 dark:bg-gray-900 shadow-none rounded-lg hover:opacity-75 transition">
                   <CardContent className="p-4">
                     <p className="text-lg font-medium truncate">{task.name}</p>
                     <div className="flex items-center gap-x-2">
