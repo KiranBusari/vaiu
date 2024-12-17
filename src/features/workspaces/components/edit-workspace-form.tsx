@@ -204,9 +204,9 @@ export const EditWorkspaceForm = ({
                             </Button>
                           ) : (
                             <Button
-                              size="xs"
+                              size="sm"
                               type="button"
-                              variant="teritary"
+                              variant="secondary"
                               className="w-fit mt-2"
                               disabled={isPending}
                               onClick={() => inputRef.current?.click()}
