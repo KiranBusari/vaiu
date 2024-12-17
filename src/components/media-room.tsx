@@ -60,6 +60,6 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
       video={video}
     >
       <VideoConference />
-    </LiveKitRoom>
+    </Room>
   );
 };
