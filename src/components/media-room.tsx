@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LiveKitRoom, VideoConference } from "@livekit/components-react";
+import { Room, VideoConference } from "@livekit/components-react";
 
 import "@livekit/components-styles";
 import { Loader2 } from "lucide-react";
@@ -51,7 +51,7 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
   }
 
   return (
-    <LiveKitRoom
+    <Room
       data-lk-theme="default"
       serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
       token={token}
