@@ -1,7 +1,15 @@
-import React from "react";
+import { redirect } from "next/navigation";
+import { getCurrent } from "@/features/auth/queries";
+import { getWorkspaces } from "@/features/workspaces/queries";
 
-const page = () => {
-  return <div>page</div>;
-};
+export default async function Home() {
+  const current = await getCurrent();
+  if (!current) redirect("/sign-in");
 
-export default page;
+  const workspaces = await getWorkspaces();
+  if (workspaces.total === 0) {
+    redirect("/workspaces/create");
+  } else {
+    redirect(`/workspaces/${workspaces.documents[0].$id}`);
+  }
+}
