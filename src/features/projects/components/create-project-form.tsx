@@ -30,7 +30,13 @@ import { cn } from "@/lib/utils";
 
 import { useCreateProject } from "../api/use-create-project";
 import { type CreateProjectSchema, createProjectSchema } from "../schemas";
-import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface CreateProjectFormProps {
   onCancel?: () => void;
@@ -131,7 +137,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                             </DialogTrigger>
                             <DialogContent className="size-[600px] overflow-y-auto">
                               <DialogTitle>
-                                Steps to generate personal access token from Github
+                                Steps to generate personal access token from
+                                Github
                               </DialogTitle>
                               <DialogDescription>
                                 <p className="text-lg">
@@ -145,7 +152,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 />
                                 <br />
                                 <p className="text-lg">
-                                  Step 2. Scroll to the bottom and Click on "Developer settings".
+                                  Step 2. Scroll to the bottom and Click on
+                                  &quot;Developer settings&quot;.
                                 </p>
                                 <Image
                                   src="/step2.png"
@@ -155,7 +163,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 />
                                 <br />
                                 <p className="text-lg">
-                                  Step 3. Click on "Personal access tokens". Choose Tokens(Classic)
+                                  Step 3. Click on &quot;Personal access
+                                  tokens&quot;. Choose Tokens(Classic)
                                 </p>
                                 <Image
                                   src="/step3.png"
@@ -165,7 +174,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 />
                                 <br />
                                 <p className="text-lg">
-                                  Step 4. Click on "Generate new token". Enter the required information.
+                                  Step 4. Click on &quot;Generate new
+                                  token&quot;. Enter the required information.
                                 </p>
                                 <Image
                                   src="/step4.png"
@@ -175,7 +185,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 />
                                 <br />
                                 <p className="text-lg">
-                                  Step 5. Define the scopes as shown in the image below.
+                                  Step 5. Define the scopes as shown in the
+                                  image below.
                                 </p>
                                 <Image
                                   src="/scope1.png"
@@ -191,7 +202,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 />
                                 <br />
                                 <p className="text-lg">
-                                  Step 6. Copy the generated token and paste it here.
+                                  Step 6. Copy the generated token and paste it
+                                  here.
                                 </p>
                                 <Image
                                   src="/step6.png"
