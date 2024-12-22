@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +38,7 @@ export default function RootLayout({
           <TooltipProvider>
             <QueryProvider>
               <Toaster richColors theme="light" />
+              <Analytics />
               {children}
             </QueryProvider>
           </TooltipProvider>
