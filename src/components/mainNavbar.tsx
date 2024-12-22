@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ModeToggle } from "./ModeToggle";
 import Link from "next/link";
 import { Logo } from "./Logo";
+import { Button } from "./ui/button";
 
 export function Navbar({ className }: { className?: string }) {
   return (
@@ -19,6 +20,9 @@ export function Navbar({ className }: { className?: string }) {
           <Logo />
         </Link>
         <div className="flex items-center">
+          <Link href="/sign-up" className="mr-4">
+            <Button variant={"secondary"}>Sign Up</Button>
+          </Link>
           <ModeToggle />
         </div>
       </div>
