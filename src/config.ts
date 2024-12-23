@@ -7,3 +7,4 @@ export const ROOMS_ID = process.env.NEXT_PUBLIC_APPWRITE_ROOMS_ID!;
 export const IMAGES_BUCKET_ID =
   process.env.NEXT_PUBLIC_APPWRITE_IMAGES_BUCKET_ID!;
 export const MESSAGE_ID = process.env.NEXT_PUBLIC_APPWRITE_MESSAGES_ID!;
+export const PR_ID = process.env.NEXT_PUBLIC_APPWRITE_PR_ID!;

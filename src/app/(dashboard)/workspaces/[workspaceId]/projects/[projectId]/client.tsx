@@ -1,5 +1,5 @@
 "use client";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -12,6 +12,7 @@ import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
+import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -20,6 +21,8 @@ export const ProjectIdClient = () => {
   });
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
+
+  const { open } = useCreatePrModal();
 
   const isLoading = projectsLoading || analyticsLoading;
 
@@ -46,6 +49,10 @@ export const ProjectIdClient = () => {
               Canvas
             </Link>
           </Button> */}
+          <Button onClick={open} variant={"default"} size={"sm"}>
+            Create Pull Request
+            <Plus className="size-1 mr-1" />
+          </Button>
           <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
             <Link href={href}>
               <Pencil className="size-4 mr-2" />

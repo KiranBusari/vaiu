@@ -1,3 +1,4 @@
+import { title } from "process";
 import { z } from "zod";
 
 export const createProjectSchema = z.object({
@@ -26,5 +27,12 @@ export const updateProjectSchema = z.object({
     .optional(),
 });
 
+export const createPrSchema = z.object({
+  title: z.string().trim().min(1, { message: "Required" }),
+  description: z.string().trim().min(1, { message: "Required" }),
+  branch: z.string().trim().min(1, { message: "Required" }),
+});
+
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
+export type CreatePrSchema = z.infer<typeof createPrSchema>;

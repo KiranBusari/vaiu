@@ -97,7 +97,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   <FormItem>
                     <FormLabel>Project name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter project name" className="border border-slate-50"/>
+                      <Input {...field} placeholder="Enter project name" className="border border-slate-50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -217,7 +217,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                         </p>
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter access token" className="border border-slate-50"/>
+                        <Input {...field} placeholder="Enter access token" className="border border-slate-50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
