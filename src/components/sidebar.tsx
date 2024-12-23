@@ -12,7 +12,7 @@ import Link from "next/link";
 export const Sidebar = () => {
   const workspaceId = useWorkspaceId();
   return (
-    <aside className="h-full bg-gray-100 dark:bg-gray-950 p-4 w-full border">
+    <aside className="h-full bg-slate-200 dark:bg-gray-950 p-4 w-full border">
       <div className="flex items-center justify-center">
         <Link href={`/workspaces/${workspaceId}`}>
           <Logo />

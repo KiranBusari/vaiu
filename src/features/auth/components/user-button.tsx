@@ -17,7 +17,7 @@ export const UserButton = () => {
   const { data: user, isLoading } = useCurrent();
   if (isLoading) {
     return (
-      <div className="size-10 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+      <div className="size-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
         <Loader className="size-4 animate-spin text-muted-foreground" />
       </div>
     );
@@ -32,7 +32,7 @@ export const UserButton = () => {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger className="outline-none relative">
         <Avatar className="size-10 hover:opacity-75 transition border border-gray-300 dark:border-gray-700">
-          <AvatarFallback className="bg-gray-200 dark:bg-gray-800 font-medium text-gray-500 dark:text-gray-400 flex items-center justify-center">
+          <AvatarFallback className="bg-slate-200 dark:bg-gray-800 font-medium text-gray-500 dark:text-gray-400 flex items-center justify-center">
             {avatarFallback}
           </AvatarFallback>
         </Avatar>

@@ -40,17 +40,17 @@ export const SignUpCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none">
+    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200 ">
       <CardHeader className="flexx items-center justify-center text-center p-7">
         <CardTitle className="text-2xl">Sign Up</CardTitle>
-        <CardDescription>
+        <CardDescription className="dark:text-slate-10 text-black">
           By signing up, you agree to our{" "}
           <Link href="/privacy">
-            <span className="text-neutral-700">Privacy Policy</span>
+            <span className="text-gray-400 underline">Privacy Policy</span>
           </Link>{" "}
           and{" "}
           <Link href="/terms">
-            <span className="text-neutral-700">terms</span>
+            <span className="text-gray-400 underline">terms</span>
           </Link>
         </CardDescription>
       </CardHeader>
@@ -70,6 +70,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="text"
                       placeholder="Enter your name"
+                      className="border border-zinc-600"
                     />
                   </FormControl>
                   <FormMessage />
@@ -86,6 +87,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="email"
                       placeholder="Enter email address"
+                      className="border border-zinc-600"
                     />
                   </FormControl>
                   <FormMessage />
@@ -102,6 +104,7 @@ export const SignUpCard = () => {
                       {...field}
                       type="password"
                       placeholder="Enter your password"
+                      className="border border-zinc-600"
                     />
                   </FormControl>
                   <FormMessage />
@@ -123,7 +126,7 @@ export const SignUpCard = () => {
           disabled={isPending}
           variant="secondary"
           size="lg"
-          className="w-full"
+          className="border border-zinc-600 w-full"
         >
           <FaGithub className="size-5 mr-2" />
           Login with Github

@@ -34,7 +34,7 @@ export const SignInCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none">
+    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200">
       <CardHeader className="flexx items-center justify-center text-center p-7">
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
       </CardHeader>
@@ -54,6 +54,7 @@ export const SignInCard = () => {
                       {...field}
                       type="email"
                       placeholder="Enter email address"
+                      className="border border-zinc-600"
                     />
                   </FormControl>
                   <FormMessage />
@@ -70,6 +71,7 @@ export const SignInCard = () => {
                       {...field}
                       type="password"
                       placeholder="Enter password"
+                      className="border border-zinc-600"
                     />
                   </FormControl>
                   <FormMessage />
@@ -96,7 +98,7 @@ export const SignInCard = () => {
           disabled={isPending}
           variant="secondary"
           size="lg"
-          className="w-full"
+          className="border border-zinc-600 w-full"
         >
           <FaGithub className="size-5 mr-2" />
           Login with Github
