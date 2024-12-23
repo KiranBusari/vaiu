@@ -79,7 +79,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   };
 
   return (
-    <Card className="size-full border-none shadow-none">
+    <Card className="size-full border-none shadow-none sm:bg-slate-800">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">Create new project</CardTitle>
       </CardHeader>
@@ -97,7 +97,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   <FormItem>
                     <FormLabel>Project name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter project name" />
+                      <Input {...field} placeholder="Enter project name" className="border border-slate-50"/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,13 +129,13 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                           </Tooltip>
                         </div>
                         <p className="text-sm text-blue-400">
-                          <Dialog>
+                          <Dialog >
                             <DialogTrigger asChild>
                               <button className="underline">
                                 Steps to generate personal access token
                               </button>
                             </DialogTrigger>
-                            <DialogContent className="size-[600px] overflow-y-auto">
+                            <DialogContent className="size-[400px] sm:size-[600px] overflow-y-auto">
                               <DialogTitle>
                                 Steps to generate personal access token from
                                 Github
@@ -217,7 +217,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                         </p>
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter access token" />
+                        <Input {...field} placeholder="Enter access token" className="border border-slate-50"/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

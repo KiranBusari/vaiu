@@ -67,9 +67,9 @@ export const TaskViewSwitcher = ({
       className="flex-1 w-full border rounded-lg"
     >
       <div className="h-full flex flex-col overflow-auto p-4">
-        <div className="flex flex-col gap-y-2 mx-2 lg:flex-row justify-between">
+        <div className="flex flex-col gap-y-2 mx-2 lg:flex-row justify-between ">
           <p>Tasks</p>
-          <Button size={"sm"} onClick={open} className="w-full lg:w-auto">
+          <Button size={"sm"} onClick={open} className="w-full lg:w-auto bg-slate-200 text-black hover:bg-slate-400">
             <PlusIcon className="size-4" />
             New
           </Button>
@@ -77,7 +77,7 @@ export const TaskViewSwitcher = ({
         <div className="flex lg:flex-row gap-y-2 items-center justify-start w-full">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-gray-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
               value="table"
             >
               Table
@@ -85,7 +85,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-gray-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
               value="kanban"
             >
               Kanban
@@ -93,7 +93,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-gray-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
               value="calendar"
             >
               Calendar
