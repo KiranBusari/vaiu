@@ -1,5 +1,5 @@
 "use client";
-import { Pencil } from "lucide-react";
+import { Pencil, UserPlus2 } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -12,6 +12,7 @@ import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
+import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/add-collaborator-to-project-modal";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -20,6 +21,8 @@ export const ProjectIdClient = () => {
   });
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
+
+  const { open } = useAddCollaboratorToProjectModal();
 
   const isLoading = projectsLoading || analyticsLoading;
 
@@ -40,13 +43,16 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div className="space-x-4 flex items-center">
-          {/* <Button variant={"default"} size={"sm"}>
-            <Link href={canvasHref} className="flex items-center">
-              <PresentationIcon className="size-1 mr-1" />
-              Canvas
-            </Link>
-          </Button> */}
-          <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
+          <Button variant={"default"} size={"sm"} onClick={open}>
+            <UserPlus2 className="size-4 mr-2" />
+            Add Collaborator
+          </Button>
+          <Button
+            variant="ghost"
+            className="dark:bg-gray-800"
+            size="sm"
+            asChild
+          >
             <Link href={href}>
               <Pencil className="size-4 mr-2" />
               Edit Project

@@ -68,8 +68,12 @@ export const TaskViewSwitcher = ({
     >
       <div className="h-full flex flex-col overflow-auto p-4">
         <div className="flex flex-col gap-y-2 mx-2 lg:flex-row justify-between ">
-          <p>Tasks</p>
-          <Button size={"sm"} onClick={open} className="w-full lg:w-auto bg-slate-200 text-black hover:bg-slate-400">
+          <p>Issues</p>
+          <Button
+            size={"sm"}
+            onClick={open}
+            className="w-full lg:w-auto bg-slate-200 text-black hover:bg-slate-400"
+          >
             <PlusIcon className="size-4" />
             New
           </Button>

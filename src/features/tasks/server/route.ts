@@ -167,7 +167,7 @@ const app = new Hono()
             Query.equal("workspaceId", workspaceId),
           ]
         );
-        console.log("projects:", projects);
+        // console.log("projects:", projects);
 
         const { accessToken } = projects.documents.filter(
           (project) => project.$id === projectId
@@ -186,7 +186,6 @@ const app = new Hono()
         if (!fetchAssinee) {
           return c.json({ error: "Assignee not found" }, 404);
         }
-        console.log("fetchAssinee:", fetchAssinee);
 
         const octokit = new Octokit({
           auth: accessToken,
@@ -201,6 +200,12 @@ const app = new Hono()
         if (!member) {
           return c.json({ error: "Unauthorized" }, 401);
         }
+        
+
+        if (projects.documents[0].projectAdmin !== member.$id) {
+          return c.json({ error: "Only Admins can create Issues" }, 403);
+        }
+
         const highestPositionTask = await databases.listDocuments(
           DATABASE_ID,
           TASKS_ID,
@@ -216,8 +221,10 @@ const app = new Hono()
             ? highestPositionTask.documents[0].position + 1000
             : 1000;
 
+        const owner = await octokit.rest.users.getAuthenticated();
+
         const issueInGit = await octokit.rest.issues.create({
-          owner: 'prathyarthi',
+          owner: owner.data.login,
           repo: projects.documents[0].name,
           title: name,
           body: "This is a test task",

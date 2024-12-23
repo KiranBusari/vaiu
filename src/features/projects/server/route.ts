@@ -1,3 +1,4 @@
+import { Member } from "./../../members/types";
 import { z } from "zod";
 import { Hono } from "hono";
 import { ID, Query } from "node-appwrite";
@@ -71,6 +72,7 @@ const app = new Hono()
         const repo = await octokit.rest.repos.createForAuthenticatedUser({
           name: name,
         });
+
         const project = await databases.createDocument(
           DATABASE_ID,
           PROJECTS_ID,
@@ -80,6 +82,7 @@ const app = new Hono()
             imageUrl: uploadedImage,
             accessToken,
             workspaceId,
+            projectAdmin: member.$id,
           }
         );
 
@@ -382,6 +385,71 @@ const app = new Hono()
     // TODO: delete  tasks
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
     return c.json({ data: { $id: existingProject.$id } });
+  })
+  .post("/addCollaborator/:projectId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
+    const { projectId } = c.req.param();
+    const { username } = await c.req.json();
+
+    const existingProject = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    );
+
+    if (!existingProject) {
+      return c.json({ error: "Project not found" }, 404);
+    }
+
+    const member = await getMember({
+      databases,
+      workspaceId: existingProject.workspaceId,
+      userId: user.$id,
+    });
+
+    if (!member || existingProject.projectAdmin !== member.$id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const octokit = new Octokit({
+      auth: existingProject.accessToken,
+    });
+
+    const owner = await octokit.rest.users.getAuthenticated();
+
+    console.log(owner.data);
+
+    // const collaborators = await octokit.rest.projects.listCollaborators({
+    //   project_id: existingProject.projectId,
+    // });
+
+    try {
+      // await octokit.rest.projects.addCollaborator({
+      //   project_id:
+      // });
+
+      // Update project collaborators array
+      const updatedCollaborators = [
+        ...existingProject.projectCollaborators,
+        username,
+      ];
+      await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
+        projectCollaborators: updatedCollaborators,
+      });
+
+      // Add collaborator to database
+      await databases.createDocument(DATABASE_ID, PROJECTS_ID, ID.unique(), {
+        projectId: projectId,
+        username: username,
+        addedBy: member.$id,
+        workspaceId: existingProject.workspaceId,
+      });
+
+      return c.json({ success: true });
+    } catch (error) {
+      return c.json({ error: "Failed to add collaborator" }, 500);
+    }
   });
 
 export default app;
