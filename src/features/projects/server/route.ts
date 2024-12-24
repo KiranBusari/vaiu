@@ -1,4 +1,3 @@
-import { Member } from "./../../members/types";
 import { z } from "zod";
 import { Hono } from "hono";
 import { ID, Query } from "node-appwrite";
@@ -8,7 +7,12 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { getMember } from "@/features/members/utilts";
 import { DATABASE_ID, IMAGES_BUCKET_ID, PR_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 
-import { createProjectSchema, createPrSchema, updateProjectSchema } from "../schemas";
+import {
+  addCollaboratorToProjectSchema,
+  createProjectSchema,
+  updateProjectSchema,
+  createPrSchema
+} from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
@@ -396,6 +400,18 @@ const app = new Hono()
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
     return c.json({ data: { $id: existingProject.$id } });
   })
+  .post(
+    "/:projectId/addCollaborator",
+    sessionMiddleware,
+    zValidator("json", addCollaboratorToProjectSchema),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId } = c.req.param();
+      const { assigneeId } = c.req.valid("json");
+
+      console.log("assigneeId", assigneeId);
+      console.log("projectId", projectId);
   .post('/:projectId/submit-pull-request', sessionMiddleware, zValidator('form', createPrSchema), async (c) => {
     const databases = c.get('databases');
     const user = c.get('user');
@@ -408,33 +424,100 @@ const app = new Hono()
       return c.json({ error: 'Description and branch are required' }, 400);
     }
 
+      const existingProject = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId
+      );
+      console.log(existingProject);
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
       projectId
     );
 
+      if (!existingProject) {
+        return c.json({ error: "Project not found" }, 404);
+      }
     if (!project) {
       return c.json({ error: 'Project not found' }, 404);
     }
 
 
+      const member = await getMember({
+        databases,
+        workspaceId: existingProject.workspaceId,
+        userId: user.$id,
+      });
+      console.log("Member", member);
     const member = await getMember({
       databases,
       workspaceId: project.workspaceId,
       userId: user.$id,
     });
 
+      if (!member || existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     if (!member) {
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+      const octokit = new Octokit({
+        auth: existingProject.accessToken,
+      });
     const octokit = new Octokit({
       auth: project.accessToken,
     })
 
-    const owner = await octokit.rest.users.getAuthenticated();
+      const owner = await octokit.rest.users.getAuthenticated();
 
+      console.log(owner.data);
+
+      // const collaborators = await octokit.rest.projects.listCollaborators({
+      //   project_id: existingProject.projectId,
+      // });
+
+      try {
+        const repos = await octokit.rest.repos.addCollaborator({
+          owner: owner.data.login,
+          repo: existingProject.name,
+          username: owner.data.login,
+          permission: "push",
+        });
+        // await octokit.rest.projects.addCollaborator({
+        //   project_id:
+        // });
+        console.log(repos.data);
+
+        // Update project collaborators array
+        const updatedCollaborators = [
+          ...existingProject.projectCollaborators,
+          owner.data.login,
+        ];
+        await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
+          projectCollaborators: updatedCollaborators,
+        });
+
+        // Add collaborator to database
+        const collaborator = await databases.createDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          ID.unique(),
+          {
+            projectId: projectId,
+            username: owner.data.login,
+            addedBy: member.$id,
+            workspaceId: existingProject.workspaceId,
+          }
+        );
+
+        return c.json({ data: { collaborator } });
+      } catch (error) {
+        return c.json({ error: "Failed to add collaborator" }, 500);
+      }
+    }
+  );
     try {
       const createPR = await octokit.rest.pulls.create({
         owner: owner.data.login,

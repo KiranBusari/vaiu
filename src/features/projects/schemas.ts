@@ -27,6 +27,16 @@ export const updateProjectSchema = z.object({
     .optional(),
 });
 
+export const addCollaboratorToProjectSchema = z.object({
+  projectId: z.string(),
+  assigneeId: z.string(),
+});
+
+export const removeCollaboratorFromProjectSchema = z.object({
+  projectId: z.string(),
+  memberId: z.string(),
+});
+
 export const createPrSchema = z.object({
   title: z.string().trim().min(1, { message: "Required" }),
   description: z.string().trim().min(1, { message: "Required" }),
@@ -35,4 +45,10 @@ export const createPrSchema = z.object({
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
+export type AddCollaboratorToProjectSchema = z.infer<
+  typeof addCollaboratorToProjectSchema
+>;
+export type RemoveCollaboratorFromProjectSchema = z.infer<
+  typeof removeCollaboratorFromProjectSchema
+>;
 export type CreatePrSchema = z.infer<typeof createPrSchema>;

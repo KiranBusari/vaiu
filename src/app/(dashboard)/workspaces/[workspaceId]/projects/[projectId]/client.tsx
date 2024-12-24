@@ -13,6 +13,7 @@ import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
+import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
 import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/add-collaborator-to-project-modal";
 
@@ -59,7 +60,7 @@ export const ProjectIdClient = () => {
           </Button>
           <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
           <Button variant={"default"} size={"sm"} onClick={open}>
-            <UserPlus2 className="size-4 mr-2" />
+            <UserPlus2 className="size-4" />
             Add Collaborator
           </Button>
           <Button
@@ -69,7 +70,7 @@ export const ProjectIdClient = () => {
             asChild
           >
             <Link href={href}>
-              <Pencil className="size-4 mr-2" />
+              <Pencil className="size-4" />
               Edit Project
             </Link>
           </Button>

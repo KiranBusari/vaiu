@@ -15,7 +15,7 @@ export const useCreateProject = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ form }) => {
       const response = await client.api.projects.$post({ form });
-      console.log(response);
+      // console.log(response);
 
       if (!response.ok) throw new Error("Failed to create project");
       return await response.json();
