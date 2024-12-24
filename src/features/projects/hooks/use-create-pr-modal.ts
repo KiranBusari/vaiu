@@ -6,12 +6,12 @@ export const useCreatePrModal = () => {
     parseAsBoolean.withDefault(false).withOptions({ clearOnDefault: true })
   );
 
-  const open = () => setIsOpen(true);
-  const close = () => setIsOpen(false);
+  const openPr = () => setIsOpen(true);
+  const closePr = () => setIsOpen(false);
   return {
     isOpen,
-    open,
-    close,
+    openPr,
+    closePr,
     setIsOpen,
   };
 };

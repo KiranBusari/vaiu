@@ -1,5 +1,5 @@
 "use client";
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Pencil, UserPlus2 } from "lucide-react";
 import Link from "next/link";
 
@@ -15,7 +15,6 @@ import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-
 import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
 import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
-import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/add-collaborator-to-project-modal";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -25,7 +24,7 @@ export const ProjectIdClient = () => {
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
 
-  const { open } = useCreatePrModal();
+  const { openPr } = useCreatePrModal();
 
   const { open } = useAddCollaboratorToProjectModal();
 
@@ -54,11 +53,10 @@ export const ProjectIdClient = () => {
               Canvas
             </Link>
           </Button> */}
-          <Button onClick={open} variant={"default"} size={"sm"}>
+          <Button onClick={openPr} variant={"default"} size={"sm"}>
             Create Pull Request
             <Plus className="size-1 mr-1" />
           </Button>
-          <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
           <Button variant={"default"} size={"sm"} onClick={open}>
             <UserPlus2 className="size-4" />
             Add Collaborator
