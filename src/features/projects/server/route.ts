@@ -5,13 +5,19 @@ import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { getMember } from "@/features/members/utilts";
-import { DATABASE_ID, IMAGES_BUCKET_ID, PR_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import {
+  DATABASE_ID,
+  IMAGES_BUCKET_ID,
+  PR_ID,
+  PROJECTS_ID,
+  TASKS_ID,
+} from "@/config";
 
 import {
   addCollaboratorToProjectSchema,
   createProjectSchema,
   updateProjectSchema,
-  createPrSchema
+  createPrSchema,
 } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
@@ -396,7 +402,7 @@ const app = new Hono()
     await octokit.rest.repos.delete({
       owner: owner.data.login,
       repo: existingProject.name,
-    })
+    });
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
     return c.json({ data: { $id: existingProject.$id } });
   })
@@ -412,72 +418,22 @@ const app = new Hono()
 
       console.log("assigneeId", assigneeId);
       console.log("projectId", projectId);
-  .post('/:projectId/submit-pull-request', sessionMiddleware, zValidator('form', createPrSchema), async (c) => {
-    const databases = c.get('databases');
-    const user = c.get('user');
-
-    const { projectId } = c.req.param();
-
-    const { title, description, branch } = c.req.valid('form');
-
-    if (!title || !description || !branch) {
-      return c.json({ error: 'Description and branch are required' }, 400);
-    }
-
       const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
         projectId
       );
       console.log(existingProject);
-    const project = await databases.getDocument<Project>(
-      DATABASE_ID,
-      PROJECTS_ID,
-      projectId
-    );
-
-      if (!existingProject) {
-        return c.json({ error: "Project not found" }, 404);
-      }
-    if (!project) {
-      return c.json({ error: 'Project not found' }, 404);
-    }
-
-
+      const octokit = new Octokit({
+        auth: existingProject.accessToken,
+      });
       const member = await getMember({
         databases,
         workspaceId: existingProject.workspaceId,
         userId: user.$id,
       });
       console.log("Member", member);
-    const member = await getMember({
-      databases,
-      workspaceId: project.workspaceId,
-      userId: user.$id,
-    });
-
-      if (!member || existingProject.projectAdmin !== member.$id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-
-      const octokit = new Octokit({
-        auth: existingProject.accessToken,
-      });
-    const octokit = new Octokit({
-      auth: project.accessToken,
-    })
-
       const owner = await octokit.rest.users.getAuthenticated();
-
-      console.log(owner.data);
-
-      // const collaborators = await octokit.rest.projects.listCollaborators({
-      //   project_id: existingProject.projectId,
-      // });
-
       try {
         const repos = await octokit.rest.repos.addCollaborator({
           owner: owner.data.login,
@@ -514,40 +470,100 @@ const app = new Hono()
 
         return c.json({ data: { collaborator } });
       } catch (error) {
+        console.error('Failed to add collaborator:', error);
         return c.json({ error: "Failed to add collaborator" }, 500);
       }
     }
-  );
-    try {
-      const createPR = await octokit.rest.pulls.create({
-        owner: owner.data.login,
-        repo: project.name,
-        title: title,
-        head: branch,
-        base: 'main',
-      })
+  )
+  .post(
+    "/:projectId/submit-pull-request",
+    sessionMiddleware,
+    zValidator("form", createPrSchema),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
 
-      await databases.createDocument(
+      const { projectId } = c.req.param();
+
+      const { title, description, branch } = c.req.valid("form");
+
+      if (!title || !description || !branch) {
+        return c.json({ error: "Description and branch are required" }, 400);
+      }
+
+      const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
-        PR_ID,
-        ID.unique(),
-        {
+        PROJECTS_ID,
+        projectId
+      );
+      console.log(existingProject);
+      const project = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId
+      );
+
+      if (!existingProject) {
+        return c.json({ error: "Project not found" }, 404);
+      }
+      if (!project) {
+        return c.json({ error: "Project not found" }, 404);
+      }
+
+      const member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member || existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const octokit = new Octokit({
+        auth: project.accessToken,
+      });
+
+      const owner = await octokit.rest.users.getAuthenticated();
+
+      console.log(owner.data);
+
+      // const collaborators = await octokit.rest.projects.listCollaborators({
+      //   project_id: existingProject.projectId,
+      // });
+      try {
+        const createPR = await octokit.rest.pulls.create({
+          owner: owner.data.login,
+          repo: project.name,
+          title: title,
+          head: branch,
+          base: "main",
+        });
+
+        await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
           title,
           description,
           branch,
           projectId,
-        }
-      )
+        });
 
-      return c.json({
-        success: true,
-        data: {
-          pullRequest: createPR.data
-        }
-      }, 200);
-    } catch (error) {
-      return c.json({ error: 'Failed to create PR' }, 500);
+        return c.json(
+          {
+            success: true,
+            data: {
+              pullRequest: createPR.data,
+            },
+          },
+          200
+        );
+      } catch (error) {
+        console.error("Failed to create PR:", error);
+        return c.json({ error: "Failed to create PR" }, 500);
+      }
     }
-  })
+  );
 
 export default app;
