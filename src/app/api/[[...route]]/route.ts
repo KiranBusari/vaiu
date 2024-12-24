@@ -8,7 +8,7 @@ import projects from "@/features/projects/server/route";
 import tasks from "@/features/tasks/server/route";
 import rooms from "@/features/channels/server/route";
 
-const app = new Hono().basePath("/api");
+const app = new Hono().basePath("/api/v1");
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const routes = app
