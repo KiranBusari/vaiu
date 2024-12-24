@@ -9,12 +9,6 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 
-interface ProjectsProps {
-  $id: string;
-  name: string;
-  imageUrl: string;
-}
-
 export const Projects = () => {
   const pathname = usePathname();
   const workspaceId = useWorkspaceId();
@@ -33,7 +27,7 @@ export const Projects = () => {
           className="size-5 text-gray-500 dark:text-gray-400 cursor-pointer hover:opacity-75 transition"
         />
       </div>
-      {data?.documents.map((project: ProjectsProps) => {
+      {data?.documents.map((project) => {
         const href = `/workspaces/${workspaceId}/projects/${project.$id}`;
         const isActive = pathname === href;
         return (

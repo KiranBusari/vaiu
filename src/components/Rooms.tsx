@@ -11,12 +11,6 @@ import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { DottedSeparator } from "./dotted-separator";
 import { cn } from "@/lib/utils";
 
-interface Room {
-  $id: string;
-  name: string;
-  roomType: "AUDIO" | "VIDEO";
-}
-
 const Rooms = () => {
   const pathname = usePathname();
   const workspaceId = useWorkspaceId();
@@ -26,11 +20,11 @@ const Rooms = () => {
   const { data } = useGetRooms({ workspaceId });
 
   const audioRooms = data?.documents.filter(
-    (room: Room) => room.roomType === "AUDIO"
+    (room) => room.roomType === "AUDIO"
   );
 
   const videoRooms = data?.documents.filter(
-    (room: Room) => room.roomType === "VIDEO"
+    (room) => room.roomType === "VIDEO"
   );
 
   return (
@@ -51,7 +45,7 @@ const Rooms = () => {
               Audio Rooms
             </p>
             <div className="space-y-[2px]">
-              {audioRooms.map((room: Room) => (
+              {audioRooms.map((room) => (
                 <Link
                   key={room.$id}
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
@@ -78,7 +72,7 @@ const Rooms = () => {
               Video Rooms
             </p>
             <div className="space-y-[2px]">
-              {videoRooms.map((room: Room) => (
+              {videoRooms.map((room) => (
                 <Link
                   key={room.$id}
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
