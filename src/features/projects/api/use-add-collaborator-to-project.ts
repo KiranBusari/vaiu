@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.projects)[":projectId"]["addCollaborator"]["$post"],
+  (typeof client.api.v1.projects)[":projectId"]["addCollaborator"]["$post"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.projects)[":projectId"]["addCollaborator"]["$post"]
+  (typeof client.api.v1.projects)[":projectId"]["addCollaborator"]["$post"]
 >;
 
 export const useAddCollaboratorToProject = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
-      const response = await client.api.projects[":projectId"][
+      const response = await client.api.v1.projects[":projectId"][
         "addCollaborator"
       ].$post({ json, param: { projectId: json.projectId } });
       if (!response.ok) throw new Error("Failed to add collaborator");

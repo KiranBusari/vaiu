@@ -7,7 +7,7 @@ export const useGetMembers = ({ workspaceId }: UseGetMembersProps) => {
   const query = useQuery({
     queryKey: ["members", workspaceId],
     queryFn: async () => {
-      const response = await client.api.members.$get({
+      const response = await client.api.v1.members.$get({
         query: { workspaceId },
       });
       if (!response.ok) {

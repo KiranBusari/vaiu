@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.members)[":memberId"]["$delete"],
+  (typeof client.api.v1.members)[":memberId"]["$delete"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.members)[":memberId"]["$delete"]
+  (typeof client.api.v1.members)[":memberId"]["$delete"]
 >;
 
 export const useDeleteMember = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.members[":memberId"].$delete({
+      const response = await client.api.v1.members[":memberId"].$delete({
         param,
       });
       if (!response.ok) throw new Error("Failed to delete member");

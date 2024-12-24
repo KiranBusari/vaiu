@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.tasks)[":taskId"]["$patch"],
+  (typeof client.api.v1.tasks)[":taskId"]["$patch"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.tasks)[":taskId"]["$patch"]
+  (typeof client.api.v1.tasks)[":taskId"]["$patch"]
 >;
 
 export const useUpdateTask = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json, param }) => {
-      const response = await client.api.tasks[":taskId"].$patch({
+      const response = await client.api.v1.tasks[":taskId"].$patch({
         json,
         param,
       });

@@ -6,7 +6,7 @@ interface UseGetProjectAnalyticsProps {
   projectId: string;
 }
 export type ProjectAnalyticsResponseType = InferResponseType<
-  (typeof client.api.projects)[":projectId"]["analytics"]["$get"],
+  (typeof client.api.v1.projects)[":projectId"]["analytics"]["$get"],
   200
 >;
 export const useGetProjectAnalytics = ({
@@ -15,7 +15,9 @@ export const useGetProjectAnalytics = ({
   const query = useQuery({
     queryKey: ["project-analytics", projectId],
     queryFn: async () => {
-      const response = await client.api.projects[":projectId"].analytics.$get({
+      const response = await client.api.v1.projects[
+        ":projectId"
+      ].analytics.$get({
         param: { projectId },
       });
       if (!response.ok) {

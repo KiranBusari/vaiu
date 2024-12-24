@@ -8,7 +8,7 @@ export const useGetWorkspace = ({ workspaceId }: useGetWorkspaceProps) => {
   const query = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: async () => {
-      const response = await client.api.workspaces[":workspaceId"].$get({
+      const response = await client.api.v1.workspaces[":workspaceId"].$get({
         param: { workspaceId },
       });
       if (!response.ok) {

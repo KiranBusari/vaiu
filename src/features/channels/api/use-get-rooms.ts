@@ -8,7 +8,7 @@ export const useGetRooms = ({ workspaceId }: useGetRoomsProps) => {
   const query = useQuery({
     queryKey: ["rooms", workspaceId],
     queryFn: async () => {
-      const response = await client.api.rooms.$get({
+      const response = await client.api.v1.rooms.$get({
         query: { workspaceId },
       });
       if (!response.ok) {

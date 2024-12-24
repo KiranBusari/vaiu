@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.workspaces)[":workspaceId"]["join"]["$post"],
+  (typeof client.api.v1.workspaces)[":workspaceId"]["join"]["$post"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.workspaces)[":workspaceId"]["join"]["$post"]
+  (typeof client.api.v1.workspaces)[":workspaceId"]["join"]["$post"]
 >;
 
 export const useJoinWorkspace = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param, json }) => {
-      const response = await client.api.workspaces[":workspaceId"][
+      const response = await client.api.v1.workspaces[":workspaceId"][
         "join"
       ].$post({
         param,

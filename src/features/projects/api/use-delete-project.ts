@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.projects)[":projectId"]["$delete"],
+  (typeof client.api.v1.projects)[":projectId"]["$delete"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.projects)[":projectId"]["$delete"]
+  (typeof client.api.v1.projects)[":projectId"]["$delete"]
 >;
 
 export const useDeleteProject = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.projects[":projectId"].$delete({
+      const response = await client.api.v1.projects[":projectId"].$delete({
         param,
       });
 

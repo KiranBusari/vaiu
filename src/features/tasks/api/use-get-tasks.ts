@@ -29,7 +29,7 @@ export const useGetTasks = ({
       dueDate,
     ],
     queryFn: async () => {
-      const response = await client.api.tasks.$get({
+      const response = await client.api.v1.tasks.$get({
         query: {
           workspaceId,
           projectId: projectId ?? undefined,

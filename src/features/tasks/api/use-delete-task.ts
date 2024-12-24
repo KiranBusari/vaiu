@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.tasks)[":taskId"]["$delete"],
+  (typeof client.api.v1.tasks)[":taskId"]["$delete"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.tasks)[":taskId"]["$delete"]
+  (typeof client.api.v1.tasks)[":taskId"]["$delete"]
 >;
 
 export const useDeleteTask = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.tasks[":taskId"].$delete({ param });
+      const response = await client.api.v1.tasks[":taskId"].$delete({ param });
       if (!response.ok) throw new Error("Failed to create task");
       return await response.json();
     },

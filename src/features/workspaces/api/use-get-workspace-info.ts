@@ -8,11 +8,11 @@ export const useGetWorkspaceInfo = ({ workspaceId }: useGetWorkspaceInfo) => {
   const query = useQuery({
     queryKey: ["workspace-info", workspaceId],
     queryFn: async () => {
-      const response = await client.api.workspaces[":workspaceId"]["info"].$get(
-        {
-          param: { workspaceId },
-        }
-      );
+      const response = await client.api.v1.workspaces[":workspaceId"][
+        "info"
+      ].$get({
+        param: { workspaceId },
+      });
       if (!response.ok) {
         throw new Error("Failed to get workspace info");
       }

@@ -8,7 +8,7 @@ export const useGetRoom = ({ roomId }: useGetRoomProps) => {
   const query = useQuery({
     queryKey: ["room", roomId],
     queryFn: async () => {
-      const response = await client.api.rooms[":roomId"].$get({
+      const response = await client.api.v1.rooms[":roomId"].$get({
         param: { roomId },
       });
       if (!response.ok) {
