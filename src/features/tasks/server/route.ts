@@ -13,6 +13,7 @@ import { createTaskSchema } from "../schemas";
 import { Task, TaskStatus } from "../types";
 import { Project } from "@/features/projects/types";
 import { Octokit } from "octokit";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 const app = new Hono()
   .delete("/:taskId", sessionMiddleware, async (c) => {
@@ -34,8 +35,41 @@ const app = new Hono()
     if (!member) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+
+    const projectId = useProjectId();
+
+    const existingProject = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    );
+
+    if (!existingProject) {
+      return c.json({ error: "Project not found" }, 404);
+    }
+
+    if (existingProject.projectAdmin !== member.$id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const octokit = new Octokit({
+      auth: existingProject.accessToken,
+    });
+
+    const owner = await octokit.rest.users.getAuthenticated();
+
+    await octokit.rest.repos.delete({
+      owner: owner.data.login,
+      repo: existingProject.name,
+    })
+
     await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
-    return c.json({ data: { $id: taskId } });
+    return c.json({
+      success: true,
+      data: {
+        $id: taskId
+      }
+    });
   })
   .get(
     "/",

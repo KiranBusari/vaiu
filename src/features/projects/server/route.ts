@@ -12,6 +12,7 @@ import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
 import { Octokit } from "octokit";
+import { MemberRole } from "@/features/members/types";
 
 const app = new Hono()
   .post(
@@ -376,10 +377,20 @@ const app = new Hono()
       workspaceId: existingProject.workspaceId,
       userId: user.$id,
     });
-    if (!member) {
+    if (!member || existingProject.projectAdmin !== member.$id) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+
+    const octokit = new Octokit({
+      auth: existingProject.accessToken,
+    });
+
+    const owner = await octokit.rest.users.getAuthenticated();
     // TODO: delete  tasks
+    await octokit.rest.repos.delete({
+      owner: owner.data.login,
+      repo: existingProject.name,
+    })
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
     return c.json({ data: { $id: existingProject.$id } });
   })
