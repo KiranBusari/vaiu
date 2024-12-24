@@ -34,8 +34,56 @@ const app = new Hono()
     if (!member) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+
+    const projectId = task.projectId
+
+    const existingProject = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    );
+
+    if (!existingProject) {
+      return c.json({ error: "Project not found" }, 404);
+    }
+
+    if (existingProject.projectAdmin !== member.$id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const octokit = new Octokit({
+      auth: existingProject.accessToken,
+    });
+
+    const owner = await octokit.rest.users.getAuthenticated();
+
+    const issues = await octokit.rest.issues.listForRepo({
+      owner: owner.data.login,
+      repo: existingProject.name
+    })
+
+    const currentIssue = issues.data.find((issue) => issue.title === task.name);
+
+    if (!currentIssue) {
+      return c.json({ error: "Issue not found" }, 404);
+    }
+
+    const issue_number = currentIssue.number
+
+    await octokit.rest.issues.update({
+      owner: owner.data.login,
+      repo: existingProject.name,
+      issue_number: issue_number,
+      state: "closed"
+    })
+
     await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
-    return c.json({ data: { $id: taskId } });
+    return c.json({
+      success: true,
+      data: {
+        $id: taskId
+      }
+    });
   })
   .get(
     "/",

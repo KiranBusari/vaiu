@@ -1,4 +1,5 @@
 "use client";
+import { Pencil, Plus } from "lucide-react";
 import { Pencil, UserPlus2 } from "lucide-react";
 import Link from "next/link";
 
@@ -12,6 +13,7 @@ import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
+import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/add-collaborator-to-project-modal";
 
 export const ProjectIdClient = () => {
@@ -21,6 +23,8 @@ export const ProjectIdClient = () => {
   });
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
+
+  const { open } = useCreatePrModal();
 
   const { open } = useAddCollaboratorToProjectModal();
 
@@ -43,6 +47,17 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div className="space-x-4 flex items-center">
+          {/* <Button variant={"default"} size={"sm"}>
+            <Link href={canvasHref} className="flex items-center">
+              <PresentationIcon className="size-1 mr-1" />
+              Canvas
+            </Link>
+          </Button> */}
+          <Button onClick={open} variant={"default"} size={"sm"}>
+            Create Pull Request
+            <Plus className="size-1 mr-1" />
+          </Button>
+          <Button variant="secondary" className="dark:bg-gray-800" size="sm" asChild>
           <Button variant={"default"} size={"sm"} onClick={open}>
             <UserPlus2 className="size-4 mr-2" />
             Add Collaborator

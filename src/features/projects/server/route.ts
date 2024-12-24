@@ -6,9 +6,9 @@ import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { getMember } from "@/features/members/utilts";
-import { DATABASE_ID, IMAGES_BUCKET_ID, PROJECTS_ID, TASKS_ID } from "@/config";
+import { DATABASE_ID, IMAGES_BUCKET_ID, PR_ID, PROJECTS_ID, TASKS_ID } from "@/config";
 
-import { createProjectSchema, updateProjectSchema } from "../schemas";
+import { createProjectSchema, createPrSchema, updateProjectSchema } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
@@ -379,35 +379,6 @@ const app = new Hono()
       workspaceId: existingProject.workspaceId,
       userId: user.$id,
     });
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-    // TODO: delete  tasks
-    await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
-    return c.json({ data: { $id: existingProject.$id } });
-  })
-  .post("/addCollaborator/:projectId", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
-    const user = c.get("user");
-    const { projectId } = c.req.param();
-    const { username } = await c.req.json();
-
-    const existingProject = await databases.getDocument<Project>(
-      DATABASE_ID,
-      PROJECTS_ID,
-      projectId
-    );
-
-    if (!existingProject) {
-      return c.json({ error: "Project not found" }, 404);
-    }
-
-    const member = await getMember({
-      databases,
-      workspaceId: existingProject.workspaceId,
-      userId: user.$id,
-    });
-
     if (!member || existingProject.projectAdmin !== member.$id) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -417,39 +388,83 @@ const app = new Hono()
     });
 
     const owner = await octokit.rest.users.getAuthenticated();
+    // TODO: delete  tasks
+    await octokit.rest.repos.delete({
+      owner: owner.data.login,
+      repo: existingProject.name,
+    })
+    await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
+    return c.json({ data: { $id: existingProject.$id } });
+  })
+  .post('/:projectId/submit-pull-request', sessionMiddleware, zValidator('form', createPrSchema), async (c) => {
+    const databases = c.get('databases');
+    const user = c.get('user');
 
-    console.log(owner.data);
+    const { projectId } = c.req.param();
 
-    // const collaborators = await octokit.rest.projects.listCollaborators({
-    //   project_id: existingProject.projectId,
-    // });
+    const { title, description, branch } = c.req.valid('form');
+
+    if (!title || !description || !branch) {
+      return c.json({ error: 'Description and branch are required' }, 400);
+    }
+
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    );
+
+    if (!project) {
+      return c.json({ error: 'Project not found' }, 404);
+    }
+
+
+    const member = await getMember({
+      databases,
+      workspaceId: project.workspaceId,
+      userId: user.$id,
+    });
+
+    if (!member) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const octokit = new Octokit({
+      auth: project.accessToken,
+    })
+
+    const owner = await octokit.rest.users.getAuthenticated();
 
     try {
-      // await octokit.rest.projects.addCollaborator({
-      //   project_id:
-      // });
+      const createPR = await octokit.rest.pulls.create({
+        owner: owner.data.login,
+        repo: project.name,
+        title: title,
+        head: branch,
+        base: 'main',
+      })
 
-      // Update project collaborators array
-      const updatedCollaborators = [
-        ...existingProject.projectCollaborators,
-        username,
-      ];
-      await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
-        projectCollaborators: updatedCollaborators,
-      });
+      await databases.createDocument(
+        DATABASE_ID,
+        PR_ID,
+        ID.unique(),
+        {
+          title,
+          description,
+          branch,
+          projectId,
+        }
+      )
 
-      // Add collaborator to database
-      await databases.createDocument(DATABASE_ID, PROJECTS_ID, ID.unique(), {
-        projectId: projectId,
-        username: username,
-        addedBy: member.$id,
-        workspaceId: existingProject.workspaceId,
-      });
-
-      return c.json({ success: true });
+      return c.json({
+        success: true,
+        data: {
+          pullRequest: createPR.data
+        }
+      }, 200);
     } catch (error) {
-      return c.json({ error: "Failed to add collaborator" }, 500);
+      return c.json({ error: 'Failed to create PR' }, 500);
     }
-  });
+  })
 
 export default app;
