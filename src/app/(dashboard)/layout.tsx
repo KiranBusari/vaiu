@@ -6,10 +6,12 @@ import { CreateProjectModal } from "@/features/projects/components/create-projec
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { EditTaskModal } from "@/features/tasks/components/edit-task-modal";
 import { CreateRooomModal } from "@/features/channels/components/create-channel-modal";
+import { AddCollaboratorToProjectModal } from "@/features/projects/components/add-collaborator-to-project-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="min-h-screen dark:bg-gray-950 bg-gray-100">
+      <AddCollaboratorToProjectModal />
       <CreateWorkspaceModal />
       <CreateProjectModal />
       <CreateRooomModal />

@@ -12,7 +12,7 @@ import { PageLoader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
-import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/add-collaborator-to-project-modal";
+import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -44,7 +44,7 @@ export const ProjectIdClient = () => {
         </div>
         <div className="space-x-4 flex items-center">
           <Button variant={"default"} size={"sm"} onClick={open}>
-            <UserPlus2 className="size-4 mr-2" />
+            <UserPlus2 className="size-4" />
             Add Collaborator
           </Button>
           <Button
@@ -54,7 +54,7 @@ export const ProjectIdClient = () => {
             asChild
           >
             <Link href={href}>
-              <Pencil className="size-4 mr-2" />
+              <Pencil className="size-4" />
               Edit Project
             </Link>
           </Button>

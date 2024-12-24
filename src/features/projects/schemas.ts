@@ -26,5 +26,21 @@ export const updateProjectSchema = z.object({
     .optional(),
 });
 
+export const addCollaboratorToProjectSchema = z.object({
+  projectId: z.string(),
+  assigneeId: z.string(),
+});
+
+export const removeCollaboratorFromProjectSchema = z.object({
+  projectId: z.string(),
+  memberId: z.string(),
+});
+
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
+export type AddCollaboratorToProjectSchema = z.infer<
+  typeof addCollaboratorToProjectSchema
+>;
+export type RemoveCollaboratorFromProjectSchema = z.infer<
+  typeof removeCollaboratorFromProjectSchema
+>;
