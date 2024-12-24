@@ -13,7 +13,6 @@ import { createTaskSchema } from "../schemas";
 import { Task, TaskStatus } from "../types";
 import { Project } from "@/features/projects/types";
 import { Octokit } from "octokit";
-import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 const app = new Hono()
   .delete("/:taskId", sessionMiddleware, async (c) => {
@@ -58,9 +57,24 @@ const app = new Hono()
 
     const owner = await octokit.rest.users.getAuthenticated();
 
-    await octokit.rest.repos.delete({
+    const issues = await octokit.rest.issues.listForRepo({
+      owner: owner.data.login,
+      repo: existingProject.name
+    })
+
+    const currentIssue = issues.data.find((issue) => issue.title === task.name);
+
+    if (!currentIssue) {
+      return c.json({ error: "Issue not found" }, 404);
+    }
+
+    const issue_number = currentIssue.number
+
+    await octokit.rest.issues.update({
       owner: owner.data.login,
       repo: existingProject.name,
+      issue_number: issue_number,
+      state: "closed"
     })
 
     await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);

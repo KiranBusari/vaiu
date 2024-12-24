@@ -12,7 +12,6 @@ import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
 import { Octokit } from "octokit";
-import { MemberRole } from "@/features/members/types";
 
 const app = new Hono()
   .post(
