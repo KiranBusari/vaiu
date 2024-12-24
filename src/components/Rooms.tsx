@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -10,6 +11,12 @@ import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { DottedSeparator } from "./dotted-separator";
 import { cn } from "@/lib/utils";
 
+interface Room {
+  $id: string;
+  name: string;
+  roomType: "AUDIO" | "VIDEO";
+}
+
 const Rooms = () => {
   const pathname = usePathname();
   const workspaceId = useWorkspaceId();
@@ -19,10 +26,11 @@ const Rooms = () => {
   const { data } = useGetRooms({ workspaceId });
 
   const audioRooms = data?.documents.filter(
-    (room) => room.roomType === "AUDIO"
+    (room: Room) => room.roomType === "AUDIO"
   );
+
   const videoRooms = data?.documents.filter(
-    (room) => room.roomType === "VIDEO"
+    (room: Room) => room.roomType === "VIDEO"
   );
 
   return (
@@ -37,24 +45,24 @@ const Rooms = () => {
         />
       </div>
       <ScrollArea className="flex-1">
-
         {!!audioRooms?.length && (
           <div className="mb-2">
             <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
               Audio Rooms
             </p>
             <div className="space-y-[2px]">
-              {audioRooms.map((room) => (
+              {audioRooms.map((room: Room) => (
                 <Link
                   key={room.$id}
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
+                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
+                      pathname ===
                       `/workspaces/${workspaceId}/rooms/${room.$id}`
-                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                      : "text-gray-500"
-                      }`}
+                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                        : "text-gray-500"
+                    }`}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>
@@ -70,7 +78,7 @@ const Rooms = () => {
               Video Rooms
             </p>
             <div className="space-y-[2px]">
-              {videoRooms.map((room) => (
+              {videoRooms.map((room: Room) => (
                 <Link
                   key={room.$id}
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
