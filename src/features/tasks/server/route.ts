@@ -36,7 +36,7 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const projectId = useProjectId();
+    const projectId = task.projectId
 
     const existingProject = await databases.getDocument<Project>(
       DATABASE_ID,
