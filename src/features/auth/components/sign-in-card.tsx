@@ -69,9 +69,9 @@ export const SignInCard = () => {
               name="password"
               control={form.control}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col items-start">
                   <FormControl>
-                    <div className="relative">
+                    <div className="relative w-full">
                       <Input
                         {...field}
                         type={showPassword ? "text" : "password"}
@@ -94,6 +94,13 @@ export const SignInCard = () => {
                     </div>
                   </FormControl>
                   <FormMessage />
+                  <Button type="button" variant={"link"} className="-ml-4">
+                    <Link href="/forgot-password">
+                      <span className="text-sm text-gray-100 dark:text-gray-400 cursor-pointer">
+                        Forgot Password?
+                      </span>
+                    </Link>
+                  </Button>
                 </FormItem>
               )}
             />

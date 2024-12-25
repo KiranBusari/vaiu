@@ -7,7 +7,13 @@ import { createAdminClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { AUTH_COOKIE } from "../constants";
-import { loginSchema, registerSchema } from "../schemas";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "../schemas";
+import { headers } from "next/headers";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
@@ -50,6 +56,33 @@ const app = new Hono()
     deleteCookie(c, AUTH_COOKIE);
     await account.deleteSession("current");
     return c.json({ success: true });
-  });
+  })
+  .post(
+    "/forgot-password",
+    zValidator("json", forgotPasswordSchema),
+    async (c) => {
+      const { email } = c.req.valid("json");
+      const { account } = await createAdminClient();
 
+      const origin = (await headers()).get("origin") ?? "";
+
+      await account.createRecovery(email, `${origin}/reset-password`);
+      return c.json({ success: true });
+    }
+  )
+  .post(
+    "/update-password",
+    zValidator("json", resetPasswordSchema),
+    async (c) => {
+      const { userId, secret, password } = c.req.valid("json");
+      const { account } = await createAdminClient();
+
+      try {
+        await account.updateRecovery(userId, secret, password);
+        return c.json({ success: true });
+      } catch (error) {
+        return c.json({ error });
+      }
+    }
+  );
 export default app;
