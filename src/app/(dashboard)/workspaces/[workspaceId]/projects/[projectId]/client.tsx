@@ -47,26 +47,15 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div className="space-x-4 flex items-center">
-          {/* <Button variant={"default"} size={"sm"}>
-            <Link href={canvasHref} className="flex items-center">
-              <PresentationIcon className="size-1 mr-1" />
-              Canvas
-            </Link>
-          </Button> */}
-          <Button onClick={openPr} variant={"default"} size={"sm"}>
+          <Button onClick={openPr} variant={"outline"} size={"sm"}>
             Create Pull Request
             <Plus className="size-1 mr-1" />
           </Button>
-          <Button variant={"default"} size={"sm"} onClick={open}>
+          <Button variant={"outline"} size={"sm"} onClick={open}>
             <UserPlus2 className="size-4" />
             Add Collaborator
           </Button>
-          <Button
-            variant="ghost"
-            className="dark:bg-gray-800"
-            size="sm"
-            asChild
-          >
+          <Button variant="outline" size="sm" asChild>
             <Link href={href}>
               <Pencil className="size-4" />
               Edit Project

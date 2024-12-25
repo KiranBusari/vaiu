@@ -59,7 +59,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
   };
 
   return (
-    <Card className="size-full border-none shadow-none sm:bg-slate-800">
+    <Card className="size-full border-none shadow-none">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create a pull request
