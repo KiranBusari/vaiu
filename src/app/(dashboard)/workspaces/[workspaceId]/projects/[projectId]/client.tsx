@@ -15,6 +15,7 @@ import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-
 import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
 import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
+import { toast } from "sonner";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -24,6 +25,13 @@ export const ProjectIdClient = () => {
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
 
+  const handleCreatePr = async () => {
+    try {
+      await openPr();
+    } catch (error) {
+      toast.error("You have to push to the specified branch first.");
+    }
+  }
   const { openPr } = useCreatePrModal();
 
   const { open } = useAddCollaboratorToProjectModal();
@@ -47,7 +55,7 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
         <div className="space-x-4 flex items-center">
-          <Button onClick={openPr} variant={"outline"} size={"sm"}>
+          <Button onClick={handleCreatePr} variant={"outline"} size={"sm"}>
             Create Pull Request
             <Plus className="size-1 mr-1" />
           </Button>

@@ -389,7 +389,7 @@ const app = new Hono()
       workspaceId: existingProject.workspaceId,
       userId: user.$id,
     });
-    
+
     if (!member || existingProject.projectAdmin !== member.$id) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -516,7 +516,7 @@ const app = new Hono()
         workspaceId: project.workspaceId,
         userId: user.$id,
       });
-      
+
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
       }
@@ -526,17 +526,13 @@ const app = new Hono()
       });
 
       const owner = await octokit.rest.users.getAuthenticated();
-
-      console.log(owner.data);
-
-      // const collaborators = await octokit.rest.projects.listCollaborators({
-      //   project_id: existingProject.projectId,
-      // });
+      
       try {
         const createPR = await octokit.rest.pulls.create({
           owner: owner.data.login,
           repo: project.name,
           title: title,
+          body: description,
           head: branch,
           base: "main",
         });
