@@ -389,6 +389,7 @@ const app = new Hono()
       workspaceId: existingProject.workspaceId,
       userId: user.$id,
     });
+    
     if (!member || existingProject.projectAdmin !== member.$id) {
       return c.json({ error: "Unauthorized" }, 401);
     }
@@ -496,7 +497,7 @@ const app = new Hono()
         PROJECTS_ID,
         projectId
       );
-      console.log(existingProject);
+
       const project = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
@@ -515,10 +516,7 @@ const app = new Hono()
         workspaceId: project.workspaceId,
         userId: user.$id,
       });
-
-      if (!member || existingProject.projectAdmin !== member.$id) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
       }
