@@ -415,61 +415,58 @@ const app = new Hono()
       const databases = c.get("databases");
       const user = c.get("user");
       const { projectId } = c.req.param();
-      const { assigneeId } = c.req.valid("json");
 
-      console.log("assigneeId", assigneeId);
-      console.log("projectId", projectId);
+      const { username } = c.req.valid("json");
+
       const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
         projectId
       );
-      console.log(existingProject);
+
       const octokit = new Octokit({
         auth: existingProject.accessToken,
       });
+
       const member = await getMember({
         databases,
         workspaceId: existingProject.workspaceId,
         userId: user.$id,
       });
-      console.log("Member", member);
+
+      if (!member || existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      if (existingProject.projectCollaborators.includes(username)) {
+        return c.json({ error: "Collaborator already exists" }, 400);
+      }
+
       const owner = await octokit.rest.users.getAuthenticated();
+
       try {
-        const repos = await octokit.rest.repos.addCollaborator({
+        await octokit.rest.repos.addCollaborator({
           owner: owner.data.login,
           repo: existingProject.name,
-          username: owner.data.login,
+          username: username,
           permission: "push",
         });
-        // await octokit.rest.projects.addCollaborator({
-        //   project_id:
-        // });
-        console.log(repos.data);
 
-        // Update project collaborators array
-        const updatedCollaborators = [
-          ...existingProject.projectCollaborators,
-          owner.data.login,
-        ];
-        await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
-          projectCollaborators: updatedCollaborators,
-        });
+        const projectCollaborators = Array.isArray(existingProject.projectCollaborators)
+          ? existingProject.projectCollaborators
+          : [];
 
-        // Add collaborator to database
-        const collaborator = await databases.createDocument(
+        const updatedCollaborators = [...projectCollaborators, username];
+
+        await databases.updateDocument(
           DATABASE_ID,
           PROJECTS_ID,
-          ID.unique(),
+          projectId,
           {
-            projectId: projectId,
-            username: owner.data.login,
-            addedBy: member.$id,
-            workspaceId: existingProject.workspaceId,
-          }
-        );
+            projectCollaborators: updatedCollaborators
+          });
 
-        return c.json({ data: { collaborator } });
+        return c.json({ data: { updatedCollaborators } });
       } catch (error) {
         console.error('Failed to add collaborator:', error);
         return c.json({ error: "Failed to add collaborator" }, 500);
@@ -526,7 +523,7 @@ const app = new Hono()
       });
 
       const owner = await octokit.rest.users.getAuthenticated();
-      
+
       try {
         const createPR = await octokit.rest.pulls.create({
           owner: owner.data.login,

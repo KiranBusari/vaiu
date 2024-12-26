@@ -29,6 +29,7 @@ export const ProjectIdClient = () => {
     try {
       await openPr();
     } catch (error) {
+      console.log(error);
       toast.error("You have to push to the specified branch first.");
     }
   }

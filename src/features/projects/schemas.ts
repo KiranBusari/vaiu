@@ -28,7 +28,7 @@ export const updateProjectSchema = z.object({
 
 export const addCollaboratorToProjectSchema = z.object({
   projectId: z.string(),
-  assigneeId: z.string(),
+  username: z.string(),
 });
 
 export const removeCollaboratorFromProjectSchema = z.object({

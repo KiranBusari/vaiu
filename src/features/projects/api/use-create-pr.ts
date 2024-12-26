@@ -22,7 +22,6 @@ export const useCreatePr = () => {
         param,
         form,
       });
-      console.log(response);
 
       if (!response.ok) throw new Error("Failed to create PR");
       return await response.json();
