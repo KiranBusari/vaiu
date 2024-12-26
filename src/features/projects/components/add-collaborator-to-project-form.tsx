@@ -35,20 +35,23 @@ export const AddCollaboratorToProjectForm = ({
     },
   });
   const onSubmit = () => {
-    mutate({
-      json: {
-        projectId,
-        username: form.getValues("username"),
+    mutate(
+      {
+        json: {
+          projectId,
+          username: form.getValues("username"),
+        },
+        param: {
+          projectId,
+        },
       },
-      param: {
-        projectId,
-      },
-    }, {
-      onSuccess: () => {
-        form.reset();
-        router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
-      },
-    });
+      {
+        onSuccess: () => {
+          form.reset();
+          router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
+        },
+      }
+    );
   };
 
   return (

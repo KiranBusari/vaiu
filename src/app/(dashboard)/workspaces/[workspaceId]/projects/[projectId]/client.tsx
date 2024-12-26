@@ -1,6 +1,5 @@
 "use client";
-import { Plus } from "lucide-react";
-import { Pencil, UserPlus2 } from "lucide-react";
+import { Plus, Pencil, UserPlus2 } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -32,7 +31,7 @@ export const ProjectIdClient = () => {
       console.log(error);
       toast.error("You have to push to the specified branch first.");
     }
-  }
+  };
   const { openPr } = useCreatePrModal();
 
   const { open } = useAddCollaboratorToProjectModal();
