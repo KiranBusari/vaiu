@@ -1,9 +1,7 @@
 import React from "react";
 import { useProjectId } from "../hooks/use-projectId";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAddCollaboratorToProject } from "../api/use-add-collaborator-to-project";
 import { Input } from "@/components/ui/input";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 interface AddCollaboratorToProjectProps {
   onCancel?: () => void;
@@ -25,8 +24,11 @@ interface AddCollaboratorToProjectProps {
 export const AddCollaboratorToProjectForm = ({
   onCancel,
 }: AddCollaboratorToProjectProps) => {
+  const workspaceId = useWorkspaceId();
   const projectId = useProjectId();
   const { mutate, isPending } = useAddCollaboratorToProject();
+
+  const router = useRouter();
   const form = useForm({
     defaultValues: {
       username: "",
@@ -40,6 +42,11 @@ export const AddCollaboratorToProjectForm = ({
       },
       param: {
         projectId,
+      },
+    }, {
+      onSuccess: () => {
+        form.reset();
+        router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
       },
     });
   };
@@ -63,6 +70,7 @@ export const AddCollaboratorToProjectForm = ({
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Github Username</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
