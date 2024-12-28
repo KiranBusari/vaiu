@@ -8,4 +8,5 @@ export const RoomSchema = z.object({
         .max(32, "Channel Name is too long"),
     roomType: z.nativeEnum(RoomType),
     workspaceId: z.string(),
+    projectId: z.string(),
 });

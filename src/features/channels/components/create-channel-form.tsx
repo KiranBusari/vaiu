@@ -33,6 +33,8 @@ import { useCreateRoom } from "../api/use-create-room";
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { RoomType } from "../types";
+import { useGetProjects } from "@/features/projects/api/use-get-projects";
+import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 
 interface CreateRoomFormProps {
   onCancel?: () => void;
@@ -44,6 +46,16 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
   const router = useRouter();
 
   const { mutate, isPending } = useCreateRoom();
+
+  const { data: projects } = useGetProjects({
+    workspaceId: workspaceId,
+  });
+
+  const projectOptions = projects?.documents.map((project) => ({
+    id: project.$id,
+    name: project.name,
+    imageUrl: project.imageUrl,
+  }));
 
   const form = useForm<z.infer<typeof RoomSchema>>({
     resolver: zodResolver(RoomSchema),
@@ -112,7 +124,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus-visible:ring-offset-0 capitalize outline-none">
+                        <SelectTrigger className="bg-zinc-300 border-0 focus:ring-0 text-black ring-offset-0 focus-visible:ring-offset-0 capitalize outline-none">
                           <SelectValue placeholder="Select a room type" />
                         </SelectTrigger>
                       </FormControl>
@@ -125,6 +137,43 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                             className="capitalize"
                           >
                             {type.toLowerCase()}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="projectId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select a project</FormLabel>
+                    <Select
+                      disabled={isPending}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-zinc-300 border-0 focus:ring-0 text-black ring-offset-0 focus-visible:ring-offset-0 capitalize outline-none">
+                          <SelectValue placeholder="Select a project" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {projectOptions?.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            <div className="flex items-center gap-x-2">
+                              <ProjectAvatar
+                                image={project.imageUrl}
+                                className="size-6"
+                                name={project.name}
+                              />
+                              {project.name}
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

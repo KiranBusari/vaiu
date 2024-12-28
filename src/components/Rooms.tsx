@@ -17,7 +17,7 @@ const Rooms = () => {
   const projectId = useProjectId();
 
   const { open } = useCreateRoomModal();
-  const { data } = useGetRooms({ workspaceId });
+  const { data } = useGetRooms({ workspaceId, projectId });
 
   const audioRooms = data?.documents.filter(
     (room) => room.roomType === "AUDIO"
@@ -51,12 +51,11 @@ const Rooms = () => {
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
-                      pathname ===
-                      `/workspaces/${workspaceId}/rooms/${room.$id}`
-                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                        : "text-gray-500"
-                    }`}
+                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
+                      `/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`
+                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                      : "text-gray-500"
+                      }`}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>
