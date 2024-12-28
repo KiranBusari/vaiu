@@ -21,35 +21,45 @@ const app = new Hono()
     return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
-    const { email, password } = c.req.valid("json");
+    try {
+      const { email, password } = c.req.valid("json");
 
-    const { account } = await createAdminClient();
-    const session = await account.createEmailPasswordSession(email, password);
-    setCookie(c, AUTH_COOKIE, session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+      const { account } = await createAdminClient();
+      const session = await account.createEmailPasswordSession(email, password);
+      setCookie(c, AUTH_COOKIE, session.secret, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30,
+      });
 
-    return c.json({ success: true });
+      return c.json({ success: true });
+    } catch (error) {
+      return c.json({ error });
+    }
   })
   .post("/register", zValidator("json", registerSchema), async (c) => {
-    const { name, email, password } = c.req.valid("json");
-    const { account } = await createAdminClient();
+    try {
+      const { name, email, password } = c.req.valid("json");
+      console.log(name, email, password);
 
-    await account.create(ID.unique(), email, password, name);
-    const session = await account.createEmailPasswordSession(email, password);
+      const { account } = await createAdminClient();
 
-    setCookie(c, AUTH_COOKIE, session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-    return c.json({ success: true });
+      await account.create(ID.unique(), email, password, name);
+      const session = await account.createEmailPasswordSession(email, password);
+
+      setCookie(c, AUTH_COOKIE, session.secret, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      return c.json({ success: true });
+    } catch (error) {
+      return c.json({ error });
+    }
   })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");

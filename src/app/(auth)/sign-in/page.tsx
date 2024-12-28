@@ -6,6 +6,8 @@ import { getCurrent } from "@/features/auth/queries";
 
 const SignIn = async () => {
   const user = await getCurrent();
+  console.log("User", user);
+
   if (!user) return <SignInCard />;
   else {
     const workspaces = await getWorkspaces();

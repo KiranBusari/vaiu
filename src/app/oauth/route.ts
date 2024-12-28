@@ -1,10 +1,7 @@
-// src/app/oauth/route.js
-
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/appwrite";
-
 import { AUTH_COOKIE } from "@/features/auth/constants";
 
 export async function GET(request: NextRequest) {
@@ -17,7 +14,6 @@ export async function GET(request: NextRequest) {
 
   const { account } = await createAdminClient();
   const session = await account.createSession(userId, secret);
-
   (await cookies()).set(AUTH_COOKIE, session.secret, {
     path: "/",
     httpOnly: true,
