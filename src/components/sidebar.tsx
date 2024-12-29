@@ -1,6 +1,5 @@
 "use client";
 
-import { Projects } from "./projects";
 import { Navigation } from "./navigation";
 import { DottedSeparator } from "./dotted-separator";
 import { WorkspaceSwitcher } from "./workspace-switcher";
@@ -8,6 +7,7 @@ import Rooms from "./Rooms";
 import { Logo } from "./Logo";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import Link from "next/link";
+import { ProjectSwitcher } from "./project-switcher";
 
 export const Sidebar = () => {
   const workspaceId = useWorkspaceId();
@@ -23,7 +23,7 @@ export const Sidebar = () => {
       <DottedSeparator className="my-4" />
       <Navigation />
       <DottedSeparator className="my-4" />
-      <Projects />
+      <ProjectSwitcher />
       <DottedSeparator className="my-4" />
       <Rooms />
     </aside>

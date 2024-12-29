@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Pencil, UserPlus2 } from "lucide-react";
+import { Pencil, UserPlus2, GitPullRequestCreateArrowIcon } from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -56,10 +56,10 @@ export const ProjectIdClient = () => {
         </div>
         <div className="space-x-4 flex items-center">
           <Button onClick={handleCreatePr} variant={"outline"} size={"sm"}>
+            <GitPullRequestCreateArrowIcon className="size-4" />
             Create Pull Request
-            <Plus className="size-1 mr-1" />
           </Button>
-          <Button variant={"outline"} size={"sm"} onClick={open}>
+          <Button variant={"default"} size={"sm"} onClick={open}>
             <UserPlus2 className="size-4" />
             Add Collaborator
           </Button>

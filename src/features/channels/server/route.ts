@@ -46,7 +46,10 @@ const app = new Hono()
   .get(
     "/",
     sessionMiddleware,
-    zValidator("query", z.object({ workspaceId: z.string(), projectId: z.string() })),
+    zValidator(
+      "query",
+      z.object({ workspaceId: z.string(), projectId: z.string() })
+    ),
     async (c) => {
       const databases = c.get("databases");
 

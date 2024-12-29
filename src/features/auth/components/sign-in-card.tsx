@@ -94,9 +94,13 @@ export const SignInCard = () => {
                     </div>
                   </FormControl>
                   <FormMessage />
-                  <Button type="button" variant={"link"} className="-ml-4">
+                  <Button
+                    type="button"
+                    variant={"link"}
+                    className="-ml-4 hover:underline text-gray-800"
+                  >
                     <Link href="/forgot-password">
-                      <span className="text-sm text-gray-100 dark:text-gray-400 cursor-pointer">
+                      <span className="text-sm text-gray-800 hover:dark:underline dark:text-gray-400 cursor-pointer">
                         Forgot Password?
                       </span>
                     </Link>

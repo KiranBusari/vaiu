@@ -62,7 +62,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
   };
 
   return (
-    <Card className="size-full border-none shadow-none">
+    <Card className="size-full border-none shadow-none dark:bg-slate-800">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create new workspace
@@ -82,7 +82,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                   <FormItem>
                     <FormLabel>Workspace name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter workspace name" />
+                      <Input {...field} placeholder="Enter workspace name" className="border border-slate-200"/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -108,9 +108,9 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                           />
                         </div>
                       ) : (
-                        <Avatar className="size-[72px]">
-                          <AvatarFallback>
-                            <ImageIcon className="size-[36px] text-neutral-400" />
+                        <Avatar className="size-[72px] ">
+                          <AvatarFallback className="bg-slate-200 dark:bg-gray-800">
+                            <ImageIcon className="size-[36px] text-black dark:text-gray-200" />
                           </AvatarFallback>
                         </Avatar>
                       )}
@@ -132,7 +132,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                             size="sm"
                             type="button"
                             variant="destructive"
-                            className="w-fit mt-2"
+                            className="w-fit mt-2 dark:bg-gray-800 dark:gray-200 bg-slate-200 hover:bg-slate-300"
                             disabled={isPending}
                             onClick={() => {
                               field.onChange(null);
@@ -146,7 +146,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                             size="sm"
                             type="button"
                             variant="secondary"
-                            className="w-fit mt-2"
+                            className="w-fit mt-2 dark:bg-gray-800 dark:gray-200 bg-slate-200 hover:bg-slate-300"
                             disabled={isPending}
                             onClick={() => inputRef.current?.click()}
                           >
@@ -167,11 +167,11 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")}
+                className={cn(!onCancel && "invisible")+ "dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black hover:bg-slate-300" }
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg">
+              <Button disabled={isPending} type="submit" size="lg" className="dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black hover:bg-slate-300">
                 Create workspace
               </Button>
             </div>
