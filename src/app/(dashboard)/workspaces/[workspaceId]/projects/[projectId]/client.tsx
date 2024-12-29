@@ -53,11 +53,11 @@ export const ProjectIdClient = () => {
               Canvas
             </Link>
           </Button> */}
-          <Button onClick={openPr} variant={"default"} size={"sm"}>
+          <Button onClick={openPr} variant={"default"} size={"sm"} className="dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black">
             Create Pull Request
             <Plus className="size-1 mr-1" />
           </Button>
-          <Button variant={"default"} size={"sm"} onClick={open}>
+          <Button variant={"default"} size={"sm"} onClick={open} className="dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black">
             <UserPlus2 className="size-4" />
             Add Collaborator
           </Button>

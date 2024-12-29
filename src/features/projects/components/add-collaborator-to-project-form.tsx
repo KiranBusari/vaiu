@@ -55,7 +55,7 @@ export const AddCollaboratorToProjectForm = ({
   };
 
   return (
-    <Card className="size-full border-none shadow-none">
+    <Card className="size-full border-none shadow-none dark:bg-slate-900 bg-white">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Add New Collaborator
@@ -111,11 +111,11 @@ export const AddCollaboratorToProjectForm = ({
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")}
+                className={cn(!onCancel && "invisible") + " bg-slate-200 text-black dark:bg-slate-800 dark:text-white"}
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg">
+              <Button disabled={isPending} type="submit" size="lg" className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white">
                 Add Collaborator
               </Button>
             </div>

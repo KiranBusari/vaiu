@@ -59,7 +59,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
   };
 
   return (
-    <Card className="size-full border-none shadow-none sm:bg-slate-800">
+    <Card className="size-full border-none shadow-none dark:bg-slate-800 bg-white">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create a pull request
@@ -140,11 +140,11 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")}
+                className={cn(!onCancel && "invisible")+ " bg-slate-200 text-black dark:bg-slate-800 dark:text-white" }
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg">
+              <Button disabled={isPending} type="submit" size="lg" className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white">
                 Create Pull Request
               </Button>
             </div>
