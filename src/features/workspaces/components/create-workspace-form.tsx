@@ -167,7 +167,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")+ "dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black hover:bg-slate-300" }
+                className={cn(!onCancel && "invisible")+ "dark:bg-gray-800 dark:text-gray-100 text-black" }
               >
                 Cancel
               </Button>

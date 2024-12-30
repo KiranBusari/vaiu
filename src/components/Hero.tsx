@@ -15,7 +15,7 @@ const Hero = () => {
         />
         <div className="text-center leading-8">
           <h1 className="bg-gradient-to-b from-neutral-400 to-neutral-800 dark:from-neutral-200 dark:to-neutral-500 bg-clip-text text-[40px] sm:text-5xl md:text-7xl font-bold leading-[150%] tracking-tight text-transparent">
-            Transform your Learning with <br/>
+            Transform your Learning with <br />
             <span className="bg-gradient-to-b from-blue-400 to-blue-700 bg-clip-text sm:text-7xl md:text-9xl text-[54px] font-semibold text-transparent">
               Contributions
             </span>

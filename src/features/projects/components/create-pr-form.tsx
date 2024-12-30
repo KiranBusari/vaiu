@@ -4,7 +4,13 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { DottedSeparator } from "@/components/dotted-separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -64,6 +70,9 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
         <CardTitle className="text-xl font-bold">
           Create a pull request
         </CardTitle>
+        <CardDescription className="">
+          To create a PR you need to push the changes first to your branch.
+        </CardDescription>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
@@ -140,11 +149,19 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")+ " bg-slate-200 text-black dark:bg-slate-800 dark:text-white" }
+                className={
+                  cn(!onCancel && "invisible") +
+                  " bg-slate-200 text-black dark:bg-slate-800 dark:text-white"
+                }
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg" className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white">
+              <Button
+                disabled={isPending}
+                type="submit"
+                size="lg"
+                className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white"
+              >
                 Create Pull Request
               </Button>
             </div>

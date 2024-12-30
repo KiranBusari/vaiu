@@ -45,26 +45,26 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
       <ConfirmDialog />
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-48 text-sm">
           <DropdownMenuItem
             onClick={onOpenTask}
-            className="font-medium p-[10px]"
+            className="font-medium p-[10px] text-sm"
           >
-            <ExternalLinkIcon className="size-5 mr-2 sroke-2" />
+            <ExternalLinkIcon className="size-4 mr-2 sroke-2" />
             Task Details
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={onOpenProject}
             className="font-medium p-[10px]"
           >
-            <ExternalLinkIcon className="size-5 mr-2 sroke-2" />
+            <ExternalLinkIcon className="size-4 mr-2 sroke-2" />
             Open Project
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => open(id)}
             className="font-medium p-[10px]"
           >
-            <PencilIcon className="size-5 mr-2 sroke-2" />
+            <PencilIcon className="size-4 mr-2 sroke-2" />
             Edit Task
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -72,7 +72,7 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
             disabled={isPending}
             className="font-medium p-[10px] text-amber-700 focus:text-amber-700"
           >
-            <TrashIcon className="size-5 mr-2 sroke-2" />
+            <TrashIcon className="size-4 mr-2 sroke-2" />
             Delete Task
           </DropdownMenuItem>
         </DropdownMenuContent>

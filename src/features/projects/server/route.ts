@@ -76,6 +76,8 @@ const app = new Hono()
         ]
       );
 
+      const correctedName = name.replace(/\s+/g, "-").toLowerCase();
+
       if (existingProject.total !== 0) {
         return c.json({ error: "Project with this name already exists" }, 400);
       } else {
@@ -83,12 +85,16 @@ const app = new Hono()
           name: name,
         });
 
+        if (!repo.data) {
+          return c.json({ error: "Failed to create repository" }, 500);
+        }
+
         const project = await databases.createDocument(
           DATABASE_ID,
           PROJECTS_ID,
           ID.unique(),
           {
-            name,
+            name: correctedName,
             imageUrl: uploadedImage,
             accessToken,
             workspaceId,
@@ -452,23 +458,21 @@ const app = new Hono()
           permission: "push",
         });
 
-        const projectCollaborators = Array.isArray(existingProject.projectCollaborators)
+        const projectCollaborators = Array.isArray(
+          existingProject.projectCollaborators
+        )
           ? existingProject.projectCollaborators
           : [];
 
         const updatedCollaborators = [...projectCollaborators, username];
 
-        await databases.updateDocument(
-          DATABASE_ID,
-          PROJECTS_ID,
-          projectId,
-          {
-            projectCollaborators: updatedCollaborators
-          });
+        await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
+          projectCollaborators: updatedCollaborators,
+        });
 
         return c.json({ data: { updatedCollaborators } });
       } catch (error) {
-        console.error('Failed to add collaborator:', error);
+        console.error("Failed to add collaborator:", error);
         return c.json({ error: "Failed to add collaborator" }, 500);
       }
     }

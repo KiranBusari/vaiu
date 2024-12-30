@@ -97,7 +97,11 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   <FormItem>
                     <FormLabel>Project name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter project name" className="border border-slate-50" />
+                      <Input
+                        {...field}
+                        placeholder="Enter project name"
+                        className="border border-slate-50"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -129,7 +133,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                           </Tooltip>
                         </div>
                         <p className="text-sm text-blue-400">
-                          <Dialog >
+                          <Dialog>
                             <DialogTrigger asChild>
                               <button className="underline">
                                 Steps to generate personal access token
@@ -200,6 +204,12 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                   width={600}
                                   height={400}
                                 />
+                                <Image
+                                  src={"/scope3.png"}
+                                  alt="github token"
+                                  width={600}
+                                  height={400}
+                                />
                                 <br />
                                 <p className="text-lg">
                                   Step 6. Copy the generated token and paste it
@@ -217,7 +227,11 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                         </p>
                       </FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter access token" className="border border-slate-50" />
+                        <Input
+                          {...field}
+                          placeholder="Enter access token"
+                          className="border border-slate-50"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

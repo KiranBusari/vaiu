@@ -1,23 +1,14 @@
 "use client";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+
 import { PropsWithChildren } from "react";
-import Link from "next/link";
-import { Logo } from "@/components/Logo";
+import { Navbar } from "@/components/mainNavbar";
 
 const AuthLayout = ({ children }: PropsWithChildren) => {
-  const pathname = usePathname();
-  const isSignIn = pathname === "/sign-in";
   return (
-    <main className="bg-neutral-100 dark:bg-neutral-900 min-h-screen">
+    <main className="bg-neutral-100 dark:bg-neutral-900 min-h-[90vh]">
       <div className="mx-auto max-w-screen-2xl p-4">
         <nav className="flex items-center justify-between">
-          <Logo />
-          <Button asChild variant="outline">
-            <Link href={isSignIn ? "/sign-up" : "/sign-in"}>
-              {isSignIn ? "Sign Up" : "Login"}
-            </Link>
-          </Button>
+          <Navbar />
         </nav>
         <div className="flex flex-col items-center justify-center pt-4 md:py-14">
           {children}
