@@ -67,10 +67,10 @@ export const TaskViewSwitcher = ({
       className="flex-1 w-full border rounded-lg"
     >
       <div className="h-full flex flex-col overflow-auto p-4">
-        <div className="flex flex-col gap-y-2 mx-2 lg:flex-row justify-between ">
-          <p>Issues</p>
+        <div className="flex flex-col gap-y-2 lg:flex-row justify-between ">
+          <p className="text-center flex items-center">Issues</p>
           <Button
-            size={"sm"}
+            size={"default"}
             onClick={open}
             className="w-full lg:w-auto bg-slate-200 text-black hover:bg-slate-400"
           >
@@ -78,7 +78,7 @@ export const TaskViewSwitcher = ({
             New
           </Button>
         </div>
-        <div className="flex lg:flex-row gap-y-2 items-center justify-start w-full">
+        <div className="flex lg:flex-row gap-y-2 mt-4 items-center justify-start w-full">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
               className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
