@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description:
     "Plan, track, and manage your agile and software development projects in Jira. Customize your workflow, collaborate, and release great software",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon.svg",
   },
 };
 
