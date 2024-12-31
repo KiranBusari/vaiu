@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { UserButton } from "@/features/auth/components/user-button";
 import { Logo } from "@/components/Logo";
+import { Logo2 } from "@/components/Logo2";
 
 const StandaloneLayout = async ({ children }: PropsWithChildren) => {
   return (
@@ -9,7 +10,8 @@ const StandaloneLayout = async ({ children }: PropsWithChildren) => {
       <div className="mx-auto max-w-screen-2xl p-4">
         <nav className="flex justify-between items-center h-[73px]">
           <Link href="/">
-            <Logo />
+            <Logo className="dark:hidden" />
+            <Logo2 className="hidden dark:block" />
           </Link>
           <UserButton />
         </nav>
