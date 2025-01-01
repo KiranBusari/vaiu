@@ -140,10 +140,10 @@ export const SignUpCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="px-7">
+      <div className="px-7 hidden">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex flex-col gap-y-2">
+      <CardContent className="p-7 flex-col gap-y-2 hidden">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
