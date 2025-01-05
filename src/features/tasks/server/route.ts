@@ -35,7 +35,7 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
-    const projectId = task.projectId
+    const projectId = task.projectId;
 
     const existingProject = await databases.getDocument<Project>(
       DATABASE_ID,
@@ -59,8 +59,8 @@ const app = new Hono()
 
     const issues = await octokit.rest.issues.listForRepo({
       owner: owner.data.login,
-      repo: existingProject.name
-    })
+      repo: existingProject.name,
+    });
 
     const currentIssue = issues.data.find((issue) => issue.title === task.name);
 
@@ -68,21 +68,21 @@ const app = new Hono()
       return c.json({ error: "Issue not found" }, 404);
     }
 
-    const issue_number = currentIssue.number
+    const issue_number = currentIssue.number;
 
     await octokit.rest.issues.update({
       owner: owner.data.login,
       repo: existingProject.name,
       issue_number: issue_number,
-      state: "closed"
-    })
+      state: "closed",
+    });
 
     await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId);
     return c.json({
       success: true,
       data: {
-        $id: taskId
-      }
+        $id: taskId,
+      },
     });
   })
   .get(
@@ -165,12 +165,34 @@ const app = new Hono()
 
       const assignees = await Promise.all(
         members.documents.map(async (member) => {
-          const user = await users.get(member.userId);
-          return {
-            ...member,
-            name: user.name || user.email,
-            email: user.email,
-          };
+          try {
+            const user = await users.get(member.userId);
+            return {
+              ...member,
+              name: user.name || user.email,
+              email: user.email,
+            };
+          } catch (error) {
+            if (
+              typeof error === "object" &&
+              error &&
+              "code" in error &&
+              error.code === 404
+            ) {
+              // User not found in Appwrite
+              return {
+                ...member,
+                name: "Unknown User",
+                email: "user-not-found@example.com",
+              };
+            }
+            console.error(`Error fetching user ${member.userId}:`, error);
+            return {
+              ...member,
+              name: "Error Fetching User",
+              email: "error@example.com",
+            };
+          }
         })
       );
 
@@ -248,7 +270,6 @@ const app = new Hono()
         if (!member) {
           return c.json({ error: "Unauthorized" }, 401);
         }
-        
 
         if (projects.documents[0].projectAdmin !== member.$id) {
           return c.json({ error: "Only Admins can create Issues" }, 403);
@@ -371,13 +392,36 @@ const app = new Hono()
       task.assigneeId
     );
 
-    const user = await users.get(member.userId);
-
-    const assignee = {
-      ...member,
-      name: user.name || user.email,
-      email: user.email,
-    };
+    let assignee;
+    try {
+      const user = await users.get(member.userId);
+      assignee = {
+        ...member,
+        name: user.name || user.email,
+        email: user.email,
+      };
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error &&
+        "code" in error &&
+        error.code === 404
+      ) {
+        // User not found in Appwrite
+        assignee = {
+          ...member,
+          name: "Unknown User",
+          email: "user-not-found@example.com",
+        };
+      } else {
+        console.error(`Error fetching user ${member.userId}:`, error);
+        assignee = {
+          ...member,
+          name: "Error Fetching User",
+          email: "error@example.com",
+        };
+      }
+    }
 
     return c.json({
       data: {
