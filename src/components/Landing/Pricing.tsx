@@ -1,7 +1,5 @@
 import React from "react";
 
-import Rocket from "@/components/Landing/images/rocket.png";
-import Cup from "@/components/Landing/images/cup.png";
 import { IoRocket } from "react-icons/io5";
 import { BsFillCupHotFill } from "react-icons/bs";
 import { FaRegDotCircle } from "react-icons/fa";
@@ -9,7 +7,7 @@ import { FaRegDotCircle } from "react-icons/fa";
 const Pricing = () => {
   return (
     <div className="max-w-7xl mx-auto pb-10 text-center">
-      {/* <Navbar /> */}
+      
       <h3 className="text-lg font-semibold dark:text-white">Our Pricing</h3>
       <h1 className="text-4xl font-bold text-gray-600 mt-2 mb-4">
         Choose the Plan That Suits You Best
@@ -23,7 +21,7 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-              <IoRocket className="w-8 h-8" />
+              <IoRocket className="w-8 h-8 dark:text-black" />
             </div>
           </div>
           <div className="mt-8 ">
@@ -33,7 +31,7 @@ const Pricing = () => {
             </p>
             <p className="text-4xl font-bold text-blue-600 mt-4">$29.99</p>
             <p className="text-gray-500 text-sm">/ month</p>
-            <ul className="text-left mt-4 space-y-2 pl-28 lg:pl-[5rem] text-gray-600">
+            <ul className="text-left mt-4 space-y-2 pl-36 lg:pl-[5rem] text-gray-600">
               <li className="dark:text-white">
                 <span className="text-blue-600 font-bold">✔</span> 1 User
                 Account
@@ -64,7 +62,7 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-            <BsFillCupHotFill className="w-8 h-8 "/>
+            <BsFillCupHotFill className="w-8 h-8 dark:text-black"/>
             </div>
           </div>
           <h1 className="flex absolute right-0 top-0 rounded-xl  rounded-bl-sm rounded-tl-none rounded-br-none border bg-blue-600 w-fit px-4 text-white ">
@@ -77,7 +75,7 @@ const Pricing = () => {
             </p>
             <p className="text-4xl font-bold text-blue-600 mt-4">$59.99</p>
             <p className="text-gray-500 text-sm">/ month</p>
-            <ul className="text-left mt-4 space-y-2 pl-28 lg:pl-[5rem] text-gray-600">
+            <ul className="text-left mt-4 space-y-2 pl-36 lg:pl-[5rem] text-gray-600">
               <li className="dark:text-white">
                 <span className="text-blue-600 font-bold text-xl">←</span> All
                 Starter Features
@@ -108,7 +106,7 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-            <FaRegDotCircle className="w-8 h-8"/>
+            <FaRegDotCircle className="w-8 h-8 dark:text-black"/>
             </div>
           </div>
           <div className="mt-8">
@@ -118,7 +116,7 @@ const Pricing = () => {
             </p>
             <p className="text-4xl font-bold text-blue-600 mt-4">$99.99</p>
             <p className="text-gray-500 text-sm">/ month</p>
-            <ul className="text-left mt-4 space-y-2 pl-28 lg:pl-[5rem] text-gray-600">
+            <ul className="text-left mt-4 space-y-2 pl-36 lg:pl-[5rem] text-gray-600">
               <li className="dark:text-white">
                 <span className="text-blue-600 font-bold text-xl">←</span> All
                 Growth Features
