@@ -1,8 +1,10 @@
 import React from "react";
-// import { Navbar } from "@/components/mainNavbar";
 
 import Rocket from "@/components/Landing/images/rocket.png";
 import Cup from "@/components/Landing/images/cup.png";
+import { IoRocket } from "react-icons/io5";
+import { BsFillCupHotFill } from "react-icons/bs";
+import { FaRegDotCircle } from "react-icons/fa";
 
 const Pricing = () => {
   return (
@@ -21,7 +23,7 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-              <img src={Rocket.src} alt="Rocket Icon" className="w-8 h-8 " />
+              <IoRocket className="w-8 h-8" />
             </div>
           </div>
           <div className="mt-8 ">
@@ -62,10 +64,10 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-              <img src={Cup.src} alt="Rocket Icon" className="w-8 h-8 " />
+            <BsFillCupHotFill className="w-8 h-8 "/>
             </div>
           </div>
-          <h1 className="flex absolute right-0 top-0 rounded-xl rounded-bl-sm rounded-tl-none rounded-br-none border bg-blue-600 w-fit px-4 text-white ">
+          <h1 className="flex absolute right-0 top-0 rounded-xl  rounded-bl-sm rounded-tl-none rounded-br-none border bg-blue-600 w-fit px-4 text-white ">
             Best seller
           </h1>
           <div className="mt-8">
@@ -106,7 +108,7 @@ const Pricing = () => {
         <div className=" rounded-xl shadow-lg hover:shadow-2xl dark:bg-[#181818] p-6 relative ">
           <div className="absolute -top-5 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-100 p-3 rounded-full shadow-md">
-              <img src={Rocket.src} alt="Rocket Icon" className="w-8 h-8 " />
+            <FaRegDotCircle className="w-8 h-8"/>
             </div>
           </div>
           <div className="mt-8">
