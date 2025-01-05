@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import Sprout from "@/components/Landing/images/sprout.png";  
-import Gear from "@/components/Landing/images/gear.png";  
-import Cal from "@/components/Landing/images/cal.png";
-import Pre from "@/components/Landing/images/pre.png";
-import Building from "@/components/Landing/images/build.png";
-import Trophy from "@/components/Landing/images/trophy.png";
+import { LuSprout } from "react-icons/lu";
+import { PiGearSixFill } from "react-icons/pi";
+import { IoCalendar } from "react-icons/io5";
+import { FaCrown } from "react-icons/fa";
+import { PiBuildingsFill } from "react-icons/pi";
+import { HiMiniTrophy } from "react-icons/hi2";
 
 const Features = () => {
   const featuresData = [
     {
       id: 1,
-      icon: Sprout,  
+      icon: <LuSprout className="text-green-600 w-6 h-6" />, // Use icon component directly
       title: "Basic",
       shortDescription: "Start contributing to real-world projects.",
       fullDescription:
@@ -20,7 +20,7 @@ const Features = () => {
     },
     {
       id: 2,
-      icon: Gear,
+      icon: <PiGearSixFill className="text-gray-600 w-6 h-6" />,
       title: "Standard",
       shortDescription: "Take your contributions to the next level.",
       fullDescription:
@@ -28,7 +28,7 @@ const Features = () => {
     },
     {
       id: 3,
-      icon: Cal,
+      icon: <IoCalendar className="text-blue-500 w-6 h-6" />,
       title: "Professional",
       shortDescription: "Designed for experienced contributors.",
       fullDescription:
@@ -36,7 +36,7 @@ const Features = () => {
     },
     {
       id: 4,
-      icon: Pre,
+      icon: <FaCrown className="text-yellow-500 w-6 h-6" />,
       title: "Premium",
       shortDescription: "Maximize your learning potential.",
       fullDescription:
@@ -44,7 +44,7 @@ const Features = () => {
     },
     {
       id: 5,
-      icon: Building,
+      icon: <PiBuildingsFill className="text-indigo-500 w-6 h-6" />,
       title: "Enterprise",
       shortDescription: "For organizations and large teams.",
       fullDescription:
@@ -52,7 +52,7 @@ const Features = () => {
     },
     {
       id: 6,
-      icon: Trophy,
+      icon: <HiMiniTrophy className="text-orange-500 w-6 h-6" />,
       title: "Ultimate",
       shortDescription: "Experience the pinnacle of contribution.",
       fullDescription:
@@ -64,21 +64,16 @@ const Features = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-24 text-center">
-      <h3 className="text-lg font-semibold dark:text-white left-0 flex pb-5">Our Features</h3>
-      
+      <h3 className="text-lg font-semibold flex dark:text-white pb-5">Features</h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {featuresData.map((feature) => (
           <div
             key={feature.id}
-            className="relative rounded-xl shadow-lg dark:bg-[#181818] p-6 group hover:shadow-2xl transition"
+            className="relative rounded-xl shadow-lg dark:bg-[#181818] p-6 group mb-10 hover:shadow-2xl transition"
           >
             <div className="absolute top-4 left-4 bg-blue-100 p-3 rounded-full shadow-md">
-              <img
-                src={typeof feature.icon === 'string' ? feature.icon : feature.icon.src}
-                alt={`${feature.title} Icon`}
-                className="w-6 h-6"
-              />
+              {feature.icon} 
             </div>
 
             <div className="mt-8">
