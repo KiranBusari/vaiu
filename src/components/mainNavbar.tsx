@@ -2,7 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "./ModeToggle";
+import { ModeToggle } from "./ui/ModeToggle";
 import Link from "next/link";
 import { Logo } from "./Logo";
 import { Button } from "./ui/button";

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { UserButton } from "@/features/auth/components/user-button";
 
 import { MobileSidebar } from "./mobile-sidebar";
-import { ModeToggle } from "./ModeToggle";
+import { ModeToggle } from "./ui/ModeToggle";
 
 const pathnameMap = {
   tasks: {
