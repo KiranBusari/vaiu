@@ -204,7 +204,7 @@ const app = new Hono()
       try {
         const databases = c.get("databases");
         const user = c.get("user");
-        const { name, status, dueDate, projectId, assigneeId, workspaceId } =
+        const { name, description, status, dueDate, projectId, assigneeId, workspaceId } =
           c.req.valid("json");
 
         const projects = await databases.listDocuments(
@@ -215,7 +215,6 @@ const app = new Hono()
             Query.equal("workspaceId", workspaceId),
           ]
         );
-        // console.log("projects:", projects);
 
         const { accessToken } = projects.documents.filter(
           (project) => project.$id === projectId
@@ -248,7 +247,6 @@ const app = new Hono()
         if (!member) {
           return c.json({ error: "Unauthorized" }, 401);
         }
-        
 
         if (projects.documents[0].projectAdmin !== member.$id) {
           return c.json({ error: "Only Admins can create Issues" }, 403);
@@ -264,6 +262,7 @@ const app = new Hono()
             Query.limit(1),
           ]
         );
+
         const newPosition =
           highestPositionTask.documents.length > 0
             ? highestPositionTask.documents[0].position + 1000
@@ -271,11 +270,16 @@ const app = new Hono()
 
         const owner = await octokit.rest.users.getAuthenticated();
 
+        const collaborators = await octokit.rest.repos.listCollaborators({
+          owner: owner.data.login,
+          repo: projects.documents[0].name
+        })
+
         const issueInGit = await octokit.rest.issues.create({
           owner: owner.data.login,
           repo: projects.documents[0].name,
           title: name,
-          body: "This is a test task",
+          body: description,
         });
 
         const task = await databases.createDocument<Task>(
@@ -284,6 +288,7 @@ const app = new Hono()
           ID.unique(),
           {
             name,
+            description,
             status,
             dueDate,
             workspaceId,

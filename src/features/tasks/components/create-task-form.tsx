@@ -33,6 +33,7 @@ import {
 
 import { TaskStatus } from "../types";
 import { useCreateTask } from "../api/use-create-task";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateTaskFormProps {
   onCancel?: () => void;
@@ -100,6 +101,19 @@ export const CreateTaskForm = ({
               />
               <FormField
                 control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} placeholder="Enter description" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
@@ -111,6 +125,40 @@ export const CreateTaskForm = ({
                   </FormItem>
                 )}
               />
+              {/* <FormField
+                control={form.control}
+                name="assigneeId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Assignee</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an assignee" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <FormMessage />
+                      <SelectContent>
+                        {memberOptions.map((member) => (
+                          <SelectItem key={member.id} value={member.id}>
+                            <div className="flex items-center gap-x-2">
+                              <MemberAvatar
+                                className="size-6"
+                                name={member.name}
+                              />
+                              {member.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                        <FormMessage />
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              /> */}
               <FormField
                 control={form.control}
                 name="assigneeId"
