@@ -9,6 +9,7 @@ const SignIn = async () => {
   console.log("User", user);
 
   if (!user) return <SignInCard />;
+  // if (!user || !user.emailVerification === true) return <SignInCard />;
   else {
     const workspaces = await getWorkspaces();
     if (workspaces.total === 0 && user) {

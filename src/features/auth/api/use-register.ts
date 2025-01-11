@@ -23,7 +23,7 @@ export const useRegister = () => {
       return await response.json();
     },
     onSuccess: () => {
-      router.refresh();
+      router.push("/sign-in");
       toast.success("Registered successfully!");
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },
