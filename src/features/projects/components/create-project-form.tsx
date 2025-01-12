@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { DottedSeparator } from "@/components/dotted-separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -245,7 +251,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   };
 
   return (
-    <Tabs defaultValue="create-new-project p-4" className="w-full">
+    <Tabs defaultValue="create-new-project" className="w-full pt-8">
       <TabsList className="grid grid-cols-2">
         <TabsTrigger
           className={cn(
@@ -456,6 +462,9 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
             <CardTitle className="text-xl font-bold">
               Add existing project
             </CardTitle>
+            <CardDescription>
+              Add your existing github repository here as project
+            </CardDescription>
           </CardHeader>
           <div className="px-7">
             <DottedSeparator />
@@ -482,9 +491,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                     )}
                   />
                 </div>
-
                 <DottedSeparator className="my-7" />
-
                 <div className="flex items-center justify-between">
                   <Button
                     type="button"

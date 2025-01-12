@@ -124,10 +124,12 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId } = c.req.valid("form");
-      console.log("projectLink", projectLink);
-
+      // console.log("projectLink", projectLink);
+      if (!projectLink) {
+        return c.json({ error: "Please Paste the project link" }, 401);
+      }
       const repoName = extractRepoName(projectLink);
-      console.log("repoName", repoName);
+      // console.log("repoName", repoName);
 
       const member = await getMember({
         databases,
