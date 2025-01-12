@@ -1,7 +1,7 @@
 import { PropsWithChildren } from "react";
 import { useMedia } from "react-use";
-import { Dialog, DialogContent } from "./ui/dialog";
-import { Drawer, DrawerContent } from "./ui/drawer";
+import { Dialog, DialogContent, DialogOverlay } from "./ui/dialog";
+import { Drawer, DrawerContent, DrawerOverlay } from "./ui/drawer";
 
 export const ResponsiveModal = ({
   open,
@@ -15,6 +15,7 @@ export const ResponsiveModal = ({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogOverlay className="bg-background/5 backdrop-blur-sm" />
         <DialogContent className="w-full sm:max-w-lg p-0 border-none overflow-y-auto hide-scrollbar max-h-[85vh]">
           {children}
         </DialogContent>
@@ -23,6 +24,7 @@ export const ResponsiveModal = ({
   }
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerOverlay className="bg-background/5 backdrop-blur-sm" />
       <DrawerContent>
         <div className="overflow-y-auto hide-scrollbar max-h-[85vh]">
           {children}
