@@ -42,6 +42,11 @@ export const createPrSchema = z.object({
   branch: z.string().trim().min(1, { message: "Required" }),
 });
 
+export const addExistingProjectSchema = z.object({
+  workspaceId: z.string(),
+  projectLink: z.string(),
+});
+
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
 export type AddCollaboratorToProjectSchema = z.infer<
@@ -51,3 +56,4 @@ export type RemoveCollaboratorFromProjectSchema = z.infer<
   typeof removeCollaboratorFromProjectSchema
 >;
 export type CreatePrSchema = z.infer<typeof createPrSchema>;
+export type AddExistingProjectSchema = z.infer<typeof addExistingProjectSchema>;

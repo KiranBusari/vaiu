@@ -18,11 +18,20 @@ import {
   createProjectSchema,
   updateProjectSchema,
   createPrSchema,
+  addExistingProjectSchema,
 } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { TaskStatus } from "@/features/tasks/types";
 import { Octokit } from "octokit";
+
+const extractRepoName = (githubUrl: string): string => {
+  // Split by '/' and get the last segment
+  const segments = githubUrl.split("/");
+  // Get the last segment and remove .git
+  const repoName = segments[segments.length - 1].replace(".git", "");
+  return repoName;
+};
 
 const app = new Hono()
   .post(
@@ -104,6 +113,44 @@ const app = new Hono()
 
         return c.json({ data: project, repo: repo.data });
       }
+    }
+  )
+  .post(
+    "/add-existing-project",
+    sessionMiddleware,
+    zValidator("form", addExistingProjectSchema),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const { projectLink, workspaceId } = c.req.valid("form");
+      console.log("projectLink", projectLink);
+
+      const repoName = extractRepoName(projectLink);
+      console.log("repoName", repoName);
+
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const project = await databases.createDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        ID.unique(),
+        {
+          name: repoName,
+          workspaceId,
+          projectAdmin: member.$id,
+        }
+      );
+
+      return c.json({ data: project });
     }
   )
   .get(
