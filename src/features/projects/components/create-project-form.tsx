@@ -49,147 +49,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
-import { Zoom } from "@/components/ui/zoom";
-import { Steps } from "@/components/ui/steps";
 import { useAddExistingProject } from "../api/use-add-existing-project";
 
 interface CreateProjectFormProps {
   onCancel?: () => void;
 }
-
-const TokenSetupGuide = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [imagePreview, setImagePreview] = useState("");
-
-  const steps = [
-    {
-      title: "Navigate to Settings",
-      images: ["/step1.png"],
-      description: "Go to GitHub settings page",
-    },
-    {
-      title: "Access Developer Settings",
-      images: ["/step2.png"],
-      description: "Click on Developer Settings in the sidebar",
-    },
-    {
-      title: "Personal Access Tokens",
-      images: ["/step3.png"],
-      description: "Select Personal Access Tokens",
-    },
-    {
-      title: "Generate Token",
-      images: ["/step4.png"],
-      description: "Click on Generate new token and enter details",
-    },
-    {
-      title: "Set Permissions",
-      images: ["/scope1.png", "/scope2.png", "/scope3.png"],
-      description: "Define the required scopes",
-    },
-  ];
-
-  return (
-    <div className="w-full max-w-3xl mx-auto p-4">
-      <Tabs defaultValue="steps" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="steps">Step by Step Guide</TabsTrigger>
-          <TabsTrigger value="quick">Quick Overview</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="steps">
-          <Steps
-            currentStep={currentStep}
-            steps={steps}
-            onStepClick={setCurrentStep}
-          />
-
-          <div className="mt-6 space-y-4">
-            <h3 className="text-xl font-semibold">
-              {steps[currentStep].title}
-            </h3>
-            <p className="text-lg text-gray-700">
-              {steps[currentStep].description}
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-              {steps[currentStep].images.map((image, idx) => (
-                <div key={idx} className="relative group">
-                  <Image
-                    src={image}
-                    alt={`${steps[currentStep].title} - Image ${idx + 1}`}
-                    width={280}
-                    height={200}
-                    className="rounded-lg border cursor-zoom-in transition-transform hover:scale-[1.02]"
-                    onClick={() => setImagePreview(image)}
-                  />
-                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors" />
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-between mt-4">
-              <Button
-                variant="outline"
-                disabled={currentStep === 0}
-                onClick={() => setCurrentStep((prev) => prev - 1)}
-              >
-                Previous
-              </Button>
-              <Button
-                disabled={currentStep === steps.length - 1}
-                onClick={() => setCurrentStep((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="quick">
-          <div className="grid grid-cols-2 gap-4">
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className="p-4 border rounded-lg hover:shadow-md transition-shadow"
-              >
-                <h4 className="font-medium mb-2">{step.title}</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {step.images.map((image, idx) => (
-                    <Image
-                      key={idx}
-                      src={image}
-                      alt={`${step.title} - Image ${idx + 1}`}
-                      width={130}
-                      height={100}
-                      className="rounded cursor-pointer"
-                      onClick={() => setImagePreview(image)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Image Preview Dialog */}
-      <Dialog open={!!imagePreview} onOpenChange={() => setImagePreview("")}>
-        <DialogContent className="max-w-4xl">
-          <Zoom>
-            <Image
-              src={imagePreview}
-              alt="Preview"
-              width={800}
-              height={600}
-              className="rounded-lg"
-            />
-          </Zoom>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
 
 export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const workspaceId = useWorkspaceId();
@@ -343,7 +207,84 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                     Github
                                   </DialogTitle>
                                   <DialogDescription>
-                                    <TokenSetupGuide />
+                                    <p className="text-lg">
+                                      Step 1. Go to your Github account
+                                      settings.
+                                    </p>
+                                    <Image
+                                      src="/step1.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <br />
+                                    <p className="text-lg">
+                                      Step 2. Scroll to the bottom and Click on
+                                      &quot;Developer settings&quot;.
+                                    </p>
+                                    <Image
+                                      src="/step2.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <br />
+                                    <p className="text-lg">
+                                      Step 3. Click on &quot;Personal access
+                                      tokens&quot;. Choose Tokens(Classic)
+                                    </p>
+                                    <Image
+                                      src="/step3.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <br />
+                                    <p className="text-lg">
+                                      Step 4. Click on &quot;Generate new
+                                      token&quot;. Enter the required
+                                      information.
+                                    </p>
+                                    <Image
+                                      src="/step4.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <br />
+                                    <p className="text-lg">
+                                      Step 5. Define the scopes as shown in the
+                                      image below.
+                                    </p>
+                                    <Image
+                                      src="/scope1.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <Image
+                                      src="/scope2.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <Image
+                                      src={"/scope3.png"}
+                                      alt="github token"
+                                      width={600}
+                                      height={400}
+                                    />
+                                    <br />
+                                    <p className="text-lg">
+                                      Step 6. Copy the generated token and paste
+                                      it here.
+                                    </p>
+                                    <Image
+                                      src="/step6.png"
+                                      alt="Github Token"
+                                      width={600}
+                                      height={400}
+                                    />
                                   </DialogDescription>
                                 </DialogContent>
                               </Dialog>
