@@ -85,7 +85,7 @@ export const ProjectIdClient = () => {
         <div className="md:hidden block">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="lg:hidden">
+              <Button variant="outline" size={"icon"} className="lg:hidden">
                 <EllipsisVertical className="size-2 " />
               </Button>
             </DropdownMenuTrigger>
