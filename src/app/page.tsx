@@ -1,14 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrent } from "@/features/auth/queries";
 
-import Hero from "@/components/Hero";
+import Landing from "@/components/Landing/Landing";
 import { getWorkspaces } from "@/features/workspaces/queries";
 
 export default async function Home() {
   const current = await getCurrent();
 
   if (!current) {
-    return <Hero />;
+    return <Landing />;
   }
 
   const workspaces = await getWorkspaces();
