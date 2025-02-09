@@ -254,7 +254,9 @@ export const EditWorkspaceForm = ({
                   onClick={() => {
                     navigator.clipboard
                       .writeText(absoluteInviteLink)
-                      .then(() => toast.success("Copied to clipboard"));
+                      .then(() =>
+                        toast.success("Invite Link Copied to clipboard")
+                      );
                   }}
                   variant="secondary"
                   className="size-12"
