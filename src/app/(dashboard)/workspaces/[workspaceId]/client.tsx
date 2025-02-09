@@ -1,28 +1,30 @@
 "use client";
 
+import {
+  CalendarIcon,
+  PlusIcon,
+  SettingsIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/features/tasks/types";
 import { formatDistanceToNow } from "date-fns";
-import { CalendarIcon, PlusIcon, SettingsIcon } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
+import { Member } from "@/features/members/types";
+import { Analytics } from "@/components/analytics";
+import { Project } from "@/features/projects/types";
+import { PageError } from "@/components/page-error";
+import { PageLoader } from "@/components/page-loader";
+import { Card, CardContent } from "@/components/ui/card";
+import { DottedSeparator } from "@/components/dotted-separator";
 import { useGetTasks } from "@/features/tasks/api/use-get-tasks";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
+import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
 import { useGetWorkspaceAnalytics } from "@/features/workspaces/api/use-get-workspace-analytics";
-
-import { DottedSeparator } from "@/components/dotted-separator";
-import { Card, CardContent } from "@/components/ui/card";
-import { PageLoader } from "@/components/page-loader";
-import { Project } from "@/features/projects/types";
-import { PageError } from "@/components/page-error";
-import { Analytics } from "@/components/analytics";
-import { Button } from "@/components/ui/button";
-import { ProjectAvatar } from "@/features/projects/components/project-avatar";
-import { Member } from "@/features/members/types";
-import { MemberAvatar } from "@/features/members/components/members-avatar";
 
 export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
@@ -101,7 +103,11 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             No issues found
           </li>
         </ul>
-        <Button variant="secondary" className="mt-4 w-full" asChild>
+        <Button
+          variant="outline"
+          className="mt-4 w-full bg-slate-100 dark:bg-gray-900 transition-all duration-300 ease-in-out"
+          asChild
+        >
           <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
         </Button>
       </div>
@@ -164,7 +170,7 @@ export const MembersList = ({ data, total }: MembersListProps) => {
   const workspaceId = useWorkspaceId();
 
   return (
-    <div className="flex flex-col gap-y-4 col-span-1">
+    <div className="flex flex-col gap-y-4 col-span-1 container">
       <div className="bg-slate-200 dark:bg-gray-800 border rounded-lg p-4">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Members ({total})</p>
@@ -175,27 +181,32 @@ export const MembersList = ({ data, total }: MembersListProps) => {
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data.map((member) => (
-            <li key={member.$id}>
-              <Card className="bg-slate-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg overflow-hidden">
-                <CardContent className="p-3 flex-col flex items-center gap-x-2">
-                  <MemberAvatar className="size-12" name={member.name} />
-                  <div className="flex flex-col items-center overflow-hidden">
-                    <p className="text-lg font-medium line-clamp-1 max-w-36">
-                      {member.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground line-clamp-1 max-w-36">
-                      {member.email}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 place-items-center">
+          {data && data.length > 0 ? (
+            <>
+              {data.map((member) => (
+                <li key={member.$id} className="flex gap-4 w-fit">
+                  <Card className="bg-slate-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg overflow-hidden">
+                    <CardContent className="p-2 flex-col flex items-center gap-x-2">
+                      <MemberAvatar className="size-12" name={member.name} />
+                      <div className="flex flex-col items-center overflow-hidden p-2">
+                        <p className="text-lg font-medium line-clamp-1 max-w-36">
+                          {member.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {member.email}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </li>
+              ))}
+            </>
+          ) : (
+            <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+              No members found
             </li>
-          ))}
-          <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
-            No members found
-          </li>
+          )}
         </ul>
       </div>
     </div>
