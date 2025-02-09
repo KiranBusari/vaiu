@@ -1,5 +1,10 @@
 "use client";
-import { Pencil, UserPlus2, GitPullRequestCreateArrowIcon } from "lucide-react";
+import {
+  Pencil,
+  UserPlus2,
+  GitPullRequestCreateArrowIcon,
+  EllipsisVertical,
+} from "lucide-react";
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -15,6 +20,11 @@ import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
 import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -54,21 +64,60 @@ export const ProjectIdClient = () => {
           />
           <p className="text-lg font-semibold">{project.name}</p>
         </div>
-        <div className="space-x-4 flex items-center">
-          <Button onClick={handleCreatePr} variant={"outline"} size={"sm"}>
-            <GitPullRequestCreateArrowIcon className="size-4" />
-            Create Pull Request
-          </Button>
-          <Button variant={"default"} size={"sm"} onClick={open}>
-            <UserPlus2 className="size-4" />
-            Add Collaborator
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link href={href}>
-              <Pencil className="size-4" />
-              Edit Project
-            </Link>
-          </Button>
+        <div className="hidden md:block">
+          <div className="space-x-4 flex items-center">
+            <Button onClick={handleCreatePr} variant={"outline"} size={"sm"}>
+              <GitPullRequestCreateArrowIcon className="size-4" />
+              Create Pull Request
+            </Button>
+            <Button variant={"default"} size={"sm"} onClick={open}>
+              <UserPlus2 className="size-4" />
+              Add Collaborator
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href={href}>
+                <Pencil className="size-4" />
+                Edit Project
+              </Link>
+            </Button>
+          </div>
+        </div>
+        <div className="md:hidden block">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="lg:hidden">
+                <EllipsisVertical className="size-2 " />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="p-2">
+              <div className="space-y-2 flex flex-col items-center">
+                <Button
+                  className="w-full"
+                  onClick={handleCreatePr}
+                  variant={"outline"}
+                  size={"sm"}
+                >
+                  <GitPullRequestCreateArrowIcon className="size-4" />
+                  Create Pull Request
+                </Button>
+                <Button
+                  className="w-full bg-slate-200 hover:bg-slate-300 text-black"
+                  variant={"default"}
+                  size={"sm"}
+                  onClick={open}
+                >
+                  <UserPlus2 className="size-4" />
+                  Add Collaborator
+                </Button>
+                <Button className="w-full" variant="outline" size="sm" asChild>
+                  <Link href={href}>
+                    <Pencil className="size-4" />
+                    Edit Project
+                  </Link>
+                </Button>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {analytics ? <Analytics data={analytics} /> : null}
