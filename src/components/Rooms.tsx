@@ -30,7 +30,7 @@ const Rooms = () => {
   return (
     <div className="flex flex-col gap-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs uppercase text-gray-500 dark:text-gray-400">
+        <p className="text-xs uppercase text-gray-500 font-semibold  dark:text-gray-400">
           Rooms
         </p>
         <RiAddCircleFill
@@ -51,11 +51,12 @@ const Rooms = () => {
                   href={`/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`}
                 >
                   <div
-                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${pathname ===
+                    className={`p-2.5 rounded-md hover:opacity-75 transition cursor-pointer ${
+                      pathname ===
                       `/workspaces/${workspaceId}/projects/${projectId}/rooms/${room.$id}`
-                      ? "bg-white shadow-sm hover:opacity-100 text-primary"
-                      : "text-gray-500"
-                      }`}
+                        ? "bg-white shadow-sm hover:opacity-100 text-primary"
+                        : "text-gray-500"
+                    }`}
                   >
                     <span className="truncate">{room.name}</span>
                   </div>

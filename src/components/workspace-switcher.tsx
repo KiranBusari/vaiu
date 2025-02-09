@@ -34,10 +34,10 @@ export const WorkspaceSwitcher = () => {
         />
       </div>
       <Select onValueChange={onSelect} value={workspaceId}>
-        <SelectTrigger className="w-full bg-slate-200 dark:bg-gray-800 font-medium p-1">
+        <SelectTrigger className="w-full bg-slate-100 dark:bg-slate-800 font-medium p-1">
           <SelectValue placeholder="No workspace selected" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="">
           {wokspaces?.documents.map((workspace) => (
             <SelectItem value={workspace.$id} key={workspace.$id}>
               <div className="flex justify-start items-center gap-3 font-medium">
