@@ -28,11 +28,10 @@ export function Navbar({ className }: { className?: string }) {
           <Button
             asChild
             variant="outline"
-            className="text-blue-500 border hover:text-blue-700 "
-            size="default"
+            className="font-semibold text-blue-600 hover:text-blue-500"
           >
             <Link href={isSignIn ? "/sign-up" : "/sign-in"}>
-              {isSignIn ? "Sign Up" : "Login"}
+              {isSignIn ? "SignUp" : "SignIn"}
             </Link>
           </Button>
           <ModeToggle />

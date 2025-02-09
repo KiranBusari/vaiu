@@ -3,6 +3,7 @@ import { PropsWithChildren } from "react";
 import { UserButton } from "@/features/auth/components/user-button";
 import { Logo } from "@/components/Logo";
 import { Logo2 } from "@/components/Logo2";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 
 const StandaloneLayout = async ({ children }: PropsWithChildren) => {
   return (
@@ -13,7 +14,10 @@ const StandaloneLayout = async ({ children }: PropsWithChildren) => {
             <Logo className="dark:hidden" />
             <Logo2 className="hidden dark:block" />
           </Link>
-          <UserButton />
+          <div className="">
+            <UserButton />
+            <ModeToggle />
+          </div>
         </nav>
         <div className="flex flex-col items-center justify-center py-4">
           {children}
