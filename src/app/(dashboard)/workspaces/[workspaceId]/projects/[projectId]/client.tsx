@@ -66,15 +66,25 @@ export const ProjectIdClient = () => {
         </div>
         <div className="hidden md:block">
           <div className="space-x-4 flex items-center">
-            <Button onClick={handleCreatePr} variant={"outline"} size={"sm"}>
+            <Button
+              className="bg-slate-200 hover:bg-slate-300 text-black"
+              onClick={handleCreatePr}
+              variant={"default"}
+              size={"sm"}
+            >
               <GitPullRequestCreateArrowIcon className="size-4" />
               Create Pull Request
             </Button>
-            <Button variant={"default"} size={"sm"} onClick={open}>
+            <Button variant={"outline"} size={"sm"} onClick={open}>
               <UserPlus2 className="size-4" />
               Add Collaborator
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              className="bg-slate-200 hover:bg-slate-300 text-black"
+              variant={"default"}
+              size="sm"
+              asChild
+            >
               <Link href={href}>
                 <Pencil className="size-4" />
                 Edit Project
@@ -95,24 +105,17 @@ export const ProjectIdClient = () => {
                   className="w-full bg-slate-200 hover:bg-slate-300 text-black"
                   onClick={handleCreatePr}
                   variant={"default"}
-                  size={"sm"}
                 >
                   <GitPullRequestCreateArrowIcon className="size-4" />
                   Create Pull Request
                 </Button>
-                <Button
-                  className="w-full"
-                  variant={"outline"}
-                  size={"sm"}
-                  onClick={open}
-                >
+                <Button className="w-full" variant={"outline"} onClick={open}>
                   <UserPlus2 className="size-4" />
                   Add Collaborator
                 </Button>
                 <Button
                   className="w-full bg-slate-200 hover:bg-slate-300 text-black"
                   variant={"default"}
-                  size="sm"
                   asChild
                 >
                   <Link href={href}>
