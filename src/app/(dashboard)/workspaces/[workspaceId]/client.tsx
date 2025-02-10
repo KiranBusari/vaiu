@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  CalendarIcon,
-  PlusIcon,
-  SettingsIcon,
-} from "lucide-react";
+import { CalendarIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import { Task } from "@/features/tasks/types";
 import { formatDistanceToNow } from "date-fns";
@@ -53,7 +49,7 @@ export const WorkspaceIdClient = () => {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <TaskList data={tasks.documents} total={tasks.total} />
         <ProjectList data={projects.documents} total={projects.total} />
-        <MembersList data={members.documents} total={projects.total} />
+        <MembersList data={members.documents} total={members.total} />
       </div>
     </div>
   );
