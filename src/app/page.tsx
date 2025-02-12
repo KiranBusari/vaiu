@@ -8,7 +8,12 @@ export default async function Home() {
   const current = await getCurrent();
 
   if (!current) {
-    return <Hero />;
+    return (
+      <div>
+        <div className="grid-background"></div>
+        <Hero />
+      </div>
+    );
   }
 
   const workspaces = await getWorkspaces();
