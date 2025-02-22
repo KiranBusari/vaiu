@@ -62,7 +62,7 @@ export const ProjectIdClient = () => {
             image={project.imageUrl}
             className="size-8"
           />
-          <p className="text-lg font-semibold">{project.name}</p>
+          <p className="text-lg font-semibold capitalize">{project.name}</p>
         </div>
         <div className="hidden md:block">
           <div className="space-x-4 flex items-center">

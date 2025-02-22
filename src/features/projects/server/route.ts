@@ -123,8 +123,11 @@ const app = new Hono()
       const databases = c.get("databases");
       const user = c.get("user");
 
-      const { projectLink, workspaceId } = c.req.valid("form");
+      const { projectLink, workspaceId, accessToken } = c.req.valid("form");
       // console.log("projectLink", projectLink);
+      // console.log("workspaceId", workspaceId);
+      // console.log("accessToken", accessToken);
+
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
@@ -149,6 +152,7 @@ const app = new Hono()
           name: repoName,
           workspaceId,
           projectAdmin: member.$id,
+          accessToken,
         }
       );
 

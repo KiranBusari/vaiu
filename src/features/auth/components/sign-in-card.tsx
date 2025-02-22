@@ -141,8 +141,8 @@ export const SignInCard = () => {
         <p>
           Don&apos;t have an account?
           <Link href="/sign-up">
-            <span className="text-gray-700 dark:text-gray-400">
-              &nbsp;Sign Up
+            <span className="text-gray-700 dark:text-gray-400 hover:underline cursor-pointer underline-offset-4">
+              &nbsp;Signup
             </span>
           </Link>
         </p>

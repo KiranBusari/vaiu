@@ -54,7 +54,7 @@ export const ProjectSwitcher = () => {
             >
               <div className="flex justify-start items-center gap-3 font-medium">
                 <ProjectAvatar name={project.name} image={project.imageUrl} />
-                <span className="truncate">{project.name}</span>
+                <span className="truncate capitalize">{project.name}</span>
               </div>
             </SelectItem>
           ))}

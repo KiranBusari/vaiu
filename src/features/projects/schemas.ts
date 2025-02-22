@@ -45,6 +45,13 @@ export const createPrSchema = z.object({
 export const addExistingProjectSchema = z.object({
   workspaceId: z.string(),
   projectLink: z.string(),
+  accessToken: z.string().optional(),
+  image: z
+    .union([
+      z.instanceof(File),
+      z.string().transform((value) => (value === "" ? undefined : value)),
+    ])
+    .optional(),
 });
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;

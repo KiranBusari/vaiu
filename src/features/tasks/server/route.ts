@@ -317,6 +317,10 @@ const app = new Hono()
         return c.json({ data: task, issue: issueInGit });
       } catch (error) {
         console.error("Error:", error);
+        if (error instanceof Error) {
+          return c.json({ error: error.message }, 500);
+        }
+        return c.json({ error: "An unexpected error occurred" }, 500);
       }
     }
   )
@@ -466,9 +470,12 @@ const app = new Hono()
       );
 
       if (workspaceIds.size !== 1) {
-        return c.json({
-          error: "All tasks must belong to the same workspace",
-        });
+        return c.json(
+          {
+            error: "All tasks must belong to the same workspace",
+          },
+          400
+        );
       }
       const workspaceId = workspaceIds.values().next().value;
       if (!workspaceId) {

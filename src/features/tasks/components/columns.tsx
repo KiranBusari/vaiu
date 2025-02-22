@@ -48,6 +48,14 @@ export const columns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       const project = row.original.project;
 
+      if (!project) {
+        return (
+          <div className="flex items-center gap-x-2 font-medium">
+            <p className="text-muted-foreground">No project</p>
+          </div>
+        );
+      }
+
       return (
         <div className="flex items-center gap-x-2 font-medium">
           <ProjectAvatar
@@ -127,9 +135,23 @@ export const columns: ColumnDef<Task>[] = [
     id: "actions",
     cell: ({ row }) => {
       const id = row.original.$id;
-      const projectId = row.original.project.$id;
+      const project = row.original.project;
+
+      if (!project) {
+        return (
+          <Button
+            variant="ghost"
+            className="size-8 p-0"
+            disabled
+            title="No project associated"
+          >
+            <MoreVerticalIcon className="size-4" />
+          </Button>
+        );
+      }
+
       return (
-        <TaskActions id={id} projectId={projectId}>
+        <TaskActions id={id} projectId={project.$id}>
           <Button variant="ghost" className="size-8 p-0">
             <MoreVerticalIcon className="size-4" />
           </Button>

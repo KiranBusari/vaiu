@@ -32,7 +32,7 @@ export const ProjectAvatar = ({
           fallbackClassName
         )}
       >
-        {name[0]}
+        {name.charAt(0).toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
