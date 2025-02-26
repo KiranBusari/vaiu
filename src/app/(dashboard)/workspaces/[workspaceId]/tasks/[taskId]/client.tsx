@@ -1,6 +1,6 @@
 "use client";
 
-import { PageLoader } from "@/components/page-loader";
+import { Loader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 
 import { useGetTask } from "@/features/tasks/api/use-get-task";
@@ -14,7 +14,7 @@ export const TaskIdClient = () => {
   const taskId = UseTaskId();
   const { data, isLoading } = useGetTask({ taskId });
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <Loader />;
 
   if (!data) return <PageError />;
 

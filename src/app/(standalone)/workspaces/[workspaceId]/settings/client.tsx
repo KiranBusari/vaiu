@@ -4,13 +4,13 @@ import { EditWorkspaceForm } from "@/features/workspaces/components/edit-workspa
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 import { PageError } from "@/components/page-error";
-import { PageLoader } from "@/components/page-loader";
+import { Loader } from "@/components/page-loader";
 
 export const WorkspaceIdSettingsClient = () => {
   const workspaceId = useWorkspaceId();
   const { data: initialValues, isLoading } = useGetWorkspace({ workspaceId });
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <Loader />;
   if (!initialValues) return <PageError message="Workspace not found" />;
 
   return (

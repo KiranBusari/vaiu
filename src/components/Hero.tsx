@@ -1,12 +1,33 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Github  from "@/components/github"
+import Image from "next/image";
 
 const Hero = () => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const imageElement = imageRef.current;
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThereshold = 100;
+      if (scrollPosition > scrollThereshold) {
+        imageElement?.classList.add("scrolled");
+      } else {
+        imageElement?.classList.remove("scrolled");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto flex min-h-[80vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screeen mx-auto relative">
+      <Github/>
+      <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
           className="sm:-top-40 top-44 left-0 md:left-60 md:top-10"
           fill="blue"
@@ -35,6 +56,18 @@ const Hero = () => {
             </Button>
           </Link>
         </div>
+      </div>
+      <div className="hero-image-wrapper mt-5 md:mt-0">
+      <div ref={imageRef} className='hero-image'>
+        <Image
+          src={'/onboardingPage.png'}
+          alt={'Onboarding Page'}
+          width={'1280'}
+          height={'100'}
+          className="rounded-lg shadow-xl border mx-auto"
+          priority
+        />
+      </div>
       </div>
     </div>
   );
