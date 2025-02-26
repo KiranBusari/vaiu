@@ -9,7 +9,7 @@ import { Member } from "@/features/members/types";
 import { Analytics } from "@/components/analytics";
 import { Project } from "@/features/projects/types";
 import { PageError } from "@/components/page-error";
-import { PageLoader } from "@/components/page-loader";
+import { Loader } from "@/components/page-loader";
 import { Card, CardContent } from "@/components/ui/card";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { useGetTasks } from "@/features/tasks/api/use-get-tasks";
@@ -39,7 +39,7 @@ export const WorkspaceIdClient = () => {
   const isLoading =
     analyticsLoading || tasksLoading || projectsLoading || membersLoading;
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <Loader />;
 
   if (!analytics || !tasks || !projects || !members)
     return <PageError message="Failed to load workspace data" />;

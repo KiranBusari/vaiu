@@ -1,7 +1,7 @@
 "use client";
 
 import { PageError } from "@/components/page-error";
-import { PageLoader } from "@/components/page-loader";
+import { Loader } from "@/components/page-loader";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
 import { JoinWorkspaceForm } from "@/features/workspaces/components/join-workspace-form";
 import { useInviteCode } from "@/features/workspaces/hooks/use-invite-code";
@@ -14,7 +14,7 @@ export const WorkspaceIdJoinClient = () => {
     workspaceId,
   });
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <Loader />;
   if (!initialValues) return <PageError message="Workspace not found" />;
 
   return (

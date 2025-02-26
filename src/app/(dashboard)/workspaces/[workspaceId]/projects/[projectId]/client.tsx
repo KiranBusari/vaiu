@@ -13,7 +13,7 @@ import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher
 import { Button } from "@/components/ui/button";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useGetProject } from "@/features/projects/api/use-get-project";
-import { PageLoader } from "@/components/page-loader";
+import { Loader }  from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
@@ -48,7 +48,7 @@ export const ProjectIdClient = () => {
 
   const isLoading = projectsLoading || analyticsLoading;
 
-  if (isLoading) return <PageLoader />;
+  if (isLoading) return <Loader />;
   if (!project) return <PageError message="Project not found" />;
 
   const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;

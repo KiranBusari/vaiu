@@ -38,7 +38,7 @@ export const SignInCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200">
+    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-neutral-900 bg-neutral-200">
       <CardHeader className="flexx items-center justify-center text-center p-7">
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
       </CardHeader>
@@ -141,7 +141,7 @@ export const SignInCard = () => {
         <p>
           Don&apos;t have an account?
           <Link href="/sign-up">
-            <span className="text-gray-700 dark:text-gray-400 hover:underline cursor-pointer underline-offset-4">
+            <span className="text-neutral-950 dark:text-gray-400 hover:underline cursor-pointer underline-offset-4">
               &nbsp;Signup
             </span>
           </Link>
