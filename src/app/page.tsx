@@ -2,12 +2,13 @@ import { redirect } from "next/navigation";
 import { getCurrent } from "@/features/auth/queries";
 
 import Hero from "@/components/Hero";
+import Features from "@/components/Features";
 import { getWorkspaces } from "@/features/workspaces/queries";
 import { Navbar } from "@/components/mainNavbar";
-import { CrossCircledIcon } from "@radix-ui/react-icons";
-import { CircleCheck } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { whatWeProvideData } from "@/data/what-we-provide-data";
+// import { CrossCircledIcon } from "@radix-ui/react-icons";
+// import { CircleCheck } from "lucide-react";
+// import { Card, CardContent, CardHeader } from "@/components/ui/card";
+// import { whatWeProvideData } from "@/data/what-we-provide-data";
 
 export default async function Home() {
   const current = await getCurrent();
@@ -17,7 +18,8 @@ export default async function Home() {
       <div className="container mx-auto w-full">
         <Navbar />
         <Hero />
-        <section id='what-do-we-provide' className='h-[60vh] mt-12'>
+        <Features/>
+        {/* <section id='what-do-we-provide' className='h-[60vh] mt-12'>
           <div className=''>
             <h1 className='text-3xl font-bold tracking-wide text-center mb-12'>Powerful Features</h1>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto'>
@@ -30,8 +32,8 @@ export default async function Home() {
               ))}
             </div>
           </div>
-        </section>
-        <section className="container h-[40vh]">
+        </section> */}
+        {/* <section className="container h-[40vh]">
           <div className='grid grid-cols-2 mx-auto gap-4'>
             <div className='bg-destructive/15 rounded-lg py-8 px-10 mx-4 space-y-4'>
               <h1 className='text-xl flex items-center gap-2 text-red-500'><CrossCircledIcon className=''/> Without Vaiu</h1>
@@ -50,7 +52,7 @@ export default async function Home() {
               </ul>
             </div>
           </div>
-        </section>
+        </section> */}
       </div>
     );
   }

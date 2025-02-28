@@ -5,7 +5,7 @@ import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import Github  from "@/components/github"
-import Image from "next/image";
+// import Image from "next/image";
 
 const Hero = () => {
   const imageRef = useRef<HTMLDivElement>(null);
@@ -57,7 +57,7 @@ const Hero = () => {
           </Link>
         </div>
       </div>
-      <div className="hero-image-wrapper mt-5 md:mt-0">
+      {/* <div className="hero-image-wrapper mt-5 md:mt-0">
       <div ref={imageRef} className='hero-image'>
         <Image
           src={'/onboardingPage.png'}
@@ -68,7 +68,7 @@ const Hero = () => {
           priority
         />
       </div>
-      </div>
+      </div> */}
     </div>
   );
 };

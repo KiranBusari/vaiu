@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Vaiu",
   description:
-    "Plan, track, and manage your agile and software development projects in Jira. Customize your workflow, collaborate, and release great software",
+    "Plan, track, and manage your agile and software development projects in vaiu. Customize your workflow, collaborate, and release great software",
   icons: {
     icon: "/favicon.svg",
   },
