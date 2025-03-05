@@ -3,8 +3,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, BarChart2, Clock, Users, Zap, ChevronRight, Star } from "lucide-react"
 import { useState } from "react";
-import { Logo2 } from "./Logo2";
-import { Logo } from "./Logo";
+
 
 export default function BoldDesign() {
   const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
@@ -252,28 +251,7 @@ export default function BoldDesign() {
             </div>
           </div>
         </section>
-        <footer className="w-full border-t border-slate-800 bg-background py-6 md:py-12">
-          <div className="container flex flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6">
-            <div className="flex items-center gap-2">
-              <Link href="/" className="flex items-center">
-                <Logo className="dark:hidden" />
-                <Logo2 className="hidden dark:block" />
-              </Link>
-            </div>
-            <div className="flex flex-wrap gap-4 sm:gap-6">
-              <Link href="#" className="text-sm text-gray-600 dark:text-slate-400">
-                Terms
-              </Link>
-              <Link href="#" className="text-sm text-gray-600 dark:text-slate-400">
-                Privacy
-              </Link>
-              <Link href="#" className="text-sm text-gray-600 dark:text-slate-400">
-                Contact
-              </Link>
-            </div>
-            <div className="text-sm text-gray-600 dark:text-slate-400">© {new Date().getFullYear()} Vaiu. All rights reserved.</div>
-          </div>
-        </footer>
+        
        </main>
      </div>
   )
