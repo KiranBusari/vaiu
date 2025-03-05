@@ -44,7 +44,7 @@ export default function RootLayout({
               <Analytics />
               {children}
               <footer className="w-full border-t border-slate-800 bg-background py-6 md:py-12">
-                <div className="container flex flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6">
+                <div className="container flex flex-col items-center justify-between gap-4 px-4 md:flex-row md:px-6 mx-auto">
                   <div className="flex items-center gap-2">
                     <Link href="/" className="flex items-center">
                       <Logo className="dark:hidden" />
