@@ -16,7 +16,7 @@ export function Navbar({ className }: { className?: string }) {
     <div
       className={cn(
         "wrapper sticky top-0 z-50 mx-auto flex w-full items-center py-6",
-        className
+        className,
       )}
     >
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between rounded-2xl border border-primary/10 bg-secondary/20 px-6 py-3 shadow-lg shadow-neutral-600/5 backdrop-blur-lg">
