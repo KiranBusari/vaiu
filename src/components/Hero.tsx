@@ -1,20 +1,29 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import Github  from "@/components/github"
-// import Image from "next/image";
+import Github from "@/components/github";
+import Image from "next/image";
+import { useTheme } from "next-themes"; // Import this
 
 const Hero = () => {
   const imageRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme(); // Use this instead of localStorage
+
+  // Only run on client-side
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const imageElement = imageRef.current;
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      const scrollThereshold = 100;
-      if (scrollPosition > scrollThereshold) {
+      const scrollThreshold = 100; // Fixed typo here
+      if (scrollPosition > scrollThreshold) {
         imageElement?.classList.add("scrolled");
       } else {
         imageElement?.classList.remove("scrolled");
@@ -24,8 +33,14 @@ const Hero = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Set image based on theme
+  const imageSrc = mounted && resolvedTheme === 'light' 
+    ? '/onboardinglight.jpeg'  // Fixed typo in filename
+    : '/onboardingPage.png';
+
   return (
-    <div className="min-h-screeen mx-auto relative">
+    <div className="min-h-screen mx-auto relative"> {/* Fixed typo in min-h-screen */}
       <Github/>
       <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
@@ -57,18 +72,19 @@ const Hero = () => {
           </Link>
         </div>
       </div>
-      {/* <div className="hero-image-wrapper mt-5 md:mt-0">
-      <div ref={imageRef} className='hero-image'>
-        <Image
-          src={'/onboardingPage.png'}
-          alt={'Onboarding Page'}
-          width={'1280'}
-          height={'100'}
-          className="rounded-lg shadow-xl border mx-auto"
-          priority
-        />
+      <div className="hero-image-wrapper mt-5 md:mt-0">
+        <div ref={imageRef} className='hero-image relative'>
+          <Image
+            src={imageSrc}
+            alt={'Onboarding Page'}
+            width={1070}
+            height={100}
+            className="rounded-lg  mx-auto transition-all duration-300"
+            priority
+          />
+          <div className="pt-[70%] -inset-x-64 bottom-0 bg-gradient-to-t from-white/100 to-transparent dark:bg-gradient-to-t dark:from-background dark:to-transparent absolute overflow-hidden"></div>
+        </div>
       </div>
-      </div> */}
     </div>
   );
 };

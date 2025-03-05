@@ -41,11 +41,11 @@ export default function RootLayout({
               <Analytics />
               {children}
               <section id='footer-section' className=''>
-                <footer className="py-6 text-center">
+                {/* <footer className="py-6 text-center">
                   <div>
                     <p className='text-sm'>&copy; {new Date()?.getFullYear()} VAIU All rights reserved.</p>
                   </div>
-                </footer>
+                </footer> */}
               </section>
             </QueryProvider>
           </TooltipProvider>
