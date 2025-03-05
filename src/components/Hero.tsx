@@ -1,50 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import Github from "@/components/github";
-import Image from "next/image";
-import { useTheme } from "next-themes"; // Import this
 
 const Hero = () => {
-  const imageRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme } = useTheme(); // Use this instead of localStorage
-
-  // Only run on client-side
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const imageElement = imageRef.current;
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      const scrollThreshold = 100; // Fixed typo here
-      if (scrollPosition > scrollThreshold) {
-        imageElement?.classList.add("scrolled");
-      } else {
-        imageElement?.classList.remove("scrolled");
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Set image based on theme
-  const imageSrc =
-    mounted && resolvedTheme === "light"
-      ? "/onboardinglight.jpeg" // Fixed typo in filename
-      : "/onboardingPage.png";
-
   return (
     <div className="relative mx-auto min-h-screen">
-      {" "}
-      {/* Fixed typo in min-h-screen */}
-      <Github />
       <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
           className="left-0 top-44 sm:-top-40 md:left-60 md:top-10"
@@ -73,19 +36,6 @@ const Hero = () => {
               Get Started
             </Button>
           </Link>
-        </div>
-      </div>
-      <div className="hero-image-wrapper mt-5 md:mt-0">
-        <div ref={imageRef} className="hero-image relative overflow-hidden">
-          <Image
-            src={imageSrc}
-            alt={"Onboarding Page"}
-            width={1200}
-            height={100}
-            className="mx-auto rounded-lg transition-all duration-300"
-            priority
-          />
-          <div className="absolute -inset-x-64 bottom-0 bg-gradient-to-t from-white/100 to-transparent pt-[600px] dark:bg-gradient-to-t dark:from-background dark:to-transparent"></div>
         </div>
       </div>
     </div>
