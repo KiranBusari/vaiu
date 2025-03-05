@@ -159,7 +159,7 @@ export default function BoldDesign() {
               ))}
             </div>
             <p className="text-sm md:text-base dark:text-slate-300 text-gray-500">
-              "{testimonial.quote}"
+              &quot;{testimonial.quote}&quot;
             </p>
             <div className="flex items-center gap-3 md:gap-4 pt-3 md:pt-4 border-t border-slate-800">
               <div className="h-8 w-8 md:h-10 md:w-10 rounded-full dark:bg-slate-800 flex items-center justify-center">
@@ -187,7 +187,7 @@ export default function BoldDesign() {
                   Simple, transparent pricing
                 </h2>
                 <p className="max-w-[900px] text-blue-600 text-sm md:text-base lg:text-base/relaxed xl:text-xl/relaxed">
-                  Choose the plan that's right for your team.
+                  Choose the plan that&apos;s right for your team.
                 </p>
               </div>
             </div>
