@@ -35,26 +35,29 @@ const Hero = () => {
   }, []);
 
   // Set image based on theme
-  const imageSrc = mounted && resolvedTheme === 'light' 
-    ? '/onboardinglight.jpeg'  // Fixed typo in filename
-    : '/onboardingPage.png';
+  const imageSrc =
+    mounted && resolvedTheme === "light"
+      ? "/onboardinglight.jpeg" // Fixed typo in filename
+      : "/onboardingPage.png";
 
   return (
-    <div className="min-h-screen mx-auto relative"> {/* Fixed typo in min-h-screen */}
-      <Github/>
+    <div className="relative mx-auto min-h-screen">
+      {" "}
+      {/* Fixed typo in min-h-screen */}
+      <Github />
       <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
-          className="sm:-top-40 top-44 left-0 md:left-60 md:top-10"
+          className="left-0 top-44 sm:-top-40 md:left-60 md:top-10"
           fill="blue"
         />
         <div className="text-center leading-8">
-          <h1 className="bg-gradient-to-b from-neutral-400 to-neutral-800 dark:from-neutral-200 dark:to-neutral-500 bg-clip-text text-[40px] sm:text-5xl md:text-7xl font-bold leading-[150%] tracking-wide text-transparent relative">
+          <h1 className="relative bg-gradient-to-b from-neutral-400 to-neutral-800 bg-clip-text text-[40px] font-bold leading-[150%] tracking-wide text-transparent dark:from-neutral-200 dark:to-neutral-500 sm:text-5xl md:text-7xl">
             Transform your learning with <br />
-            <span className="bg-gradient-to-b text-center from-blue-400 to-blue-700 bg-clip-text sm:text-7xl md:text-9xl text-[54px] tracking-wide font-semibold text-transparent">
+            <span className="bg-gradient-to-b from-blue-400 to-blue-700 bg-clip-text text-center text-[54px] font-semibold tracking-wide text-transparent sm:text-7xl md:text-9xl">
               Contributions
             </span>
           </h1>
-          <p className="sm:text-lg text-gray-400 text-sm">
+          <p className="text-sm text-gray-400 sm:text-lg">
             A platform where you can contribute to{" "}
             <br className="block md:hidden" /> real-world projects in a closed
             environment.
@@ -63,7 +66,7 @@ const Hero = () => {
         <div className="mt-10">
           <Link href={"/sign-in"}>
             <Button
-              className="text-slate-900 hover:text-slate-800 dark:hover:text-slate-200 dark:text-slate-100 font-bold rounded-full outline-blue-600 outline"
+              className="rounded-full font-bold text-slate-900 outline outline-blue-600 hover:text-slate-800 dark:text-slate-100 dark:hover:text-slate-200"
               variant={"outline"}
               size={"lg"}
             >
@@ -73,16 +76,16 @@ const Hero = () => {
         </div>
       </div>
       <div className="hero-image-wrapper mt-5 md:mt-0">
-        <div ref={imageRef} className='hero-image relative'>
+        <div ref={imageRef} className="hero-image relative overflow-hidden">
           <Image
             src={imageSrc}
-            alt={'Onboarding Page'}
-            width={1070}
+            alt={"Onboarding Page"}
+            width={1200}
             height={100}
-            className="rounded-lg  mx-auto transition-all duration-300"
+            className="mx-auto rounded-lg transition-all duration-300"
             priority
           />
-          <div className="pt-[70%] -inset-x-64 bottom-0 bg-gradient-to-t from-white/100 to-transparent dark:bg-gradient-to-t dark:from-background dark:to-transparent absolute overflow-hidden"></div>
+          <div className="absolute -inset-x-64 bottom-0 bg-gradient-to-t from-white/100 to-transparent pt-[600px] dark:bg-gradient-to-t dark:from-background dark:to-transparent"></div>
         </div>
       </div>
     </div>
