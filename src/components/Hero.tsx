@@ -9,7 +9,7 @@ const Hero = () => {
   return (
     <div className="relative mx-auto h-auto">
       <div
-        className="mx-auto sm:min-h-[75vh] min-h-svh max-w-7xl flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        className="mx-auto sm:min-h-[75vh] min-h-[74vh] max-w-7xl flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
           className="left-0 top-16 sm:-top-40 md:left-60 md:top-10"
           fill="blue"
