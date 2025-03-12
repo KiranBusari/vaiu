@@ -7,16 +7,17 @@ import { Button } from "./ui/button";
 
 const Hero = () => {
   return (
-    <div className="relative mx-auto min-h-screen">
-      <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="relative mx-auto h-auto">
+      <div className="mx-auto min-h-[74vh] max-w-7xl flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <Spotlight
-          className="left-0 top-44 sm:-top-40 md:left-60 md:top-10"
+          className="left-0 top-16 sm:-top-40 md:left-60 md:top-10"
           fill="blue"
         />
+        <div className='flex flex-col items-center justify-center'>
         <div className="text-center leading-8">
-          <h1 className="relative bg-gradient-to-b from-neutral-400 to-neutral-800 bg-clip-text text-[40px] font-bold leading-[150%] tracking-wide text-transparent dark:from-neutral-200 dark:to-neutral-500 sm:text-5xl md:text-7xl">
+          <h1 className="relative bg-gradient-to-b from-neutral-400 to-neutral-800 bg-clip-text text-[40px] font-bold leading-[150%] tracking-normal text-transparent dark:from-neutral-200 dark:to-neutral-500 sm:text-5xl md:text-7xl">
             Transform your learning with <br />
-            <span className="bg-gradient-to-b from-blue-400 to-blue-700 bg-clip-text text-center text-[54px] font-semibold tracking-wide text-transparent sm:text-7xl md:text-9xl">
+            <span className="bg-gradient-to-b from-blue-400 to-blue-700 bg-clip-text text-center text-[54px] font-semibold tracking-normal text-transparent sm:text-7xl md:text-9xl">
               Contributions
             </span>
           </h1>
@@ -36,6 +37,7 @@ const Hero = () => {
               Get Started
             </Button>
           </Link>
+        </div>
         </div>
       </div>
     </div>

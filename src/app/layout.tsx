@@ -28,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "min-h-screen antialiased")}>
+      <body className={cn(inter.className, "h-screen antialiased")}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
