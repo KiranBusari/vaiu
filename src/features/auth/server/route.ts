@@ -3,7 +3,7 @@ import { ID } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { deleteCookie, setCookie } from "hono/cookie";
 
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { AUTH_COOKIE } from "../constants";
@@ -11,7 +11,7 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
-  resetPasswordSchema,
+  resetPasswordSchema
 } from "../schemas";
 import { headers } from "next/headers";
 
@@ -31,7 +31,7 @@ const app = new Hono()
         httpOnly: true,
         secure: true,
         sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30,
+        maxAge: 60 * 60 * 24 * 30
       });
 
       return c.json({ success: true });
@@ -54,12 +54,22 @@ const app = new Hono()
         httpOnly: true,
         secure: true,
         sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30,
+        maxAge: 60 * 60 * 24 * 30
       });
       return c.json({ success: true });
     } catch (error) {
       return c.json({ error });
     }
+  })
+  .post("/verify", async (c) => {
+    const { account } = await createSessionClient();
+    const origin = (await headers().get("origin") ?? "");
+    console.log(origin);
+    const response = await account.createVerification(`${origin}/verify-user`);
+    console.log(response);
+    c.json({
+      message:"hello"
+    });
   })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");
