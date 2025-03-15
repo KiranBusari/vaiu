@@ -14,7 +14,7 @@ const StandaloneLayout = async ({ children }: PropsWithChildren) => {
             <Logo className="dark:hidden" />
             <Logo2 className="hidden dark:block" />
           </Link>
-          <div className="">
+          <div className="flex items-center gap-x-4 justify-center">
             <UserButton />
             <ModeToggle />
           </div>
