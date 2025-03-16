@@ -11,7 +11,8 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
+  verifyUserSchema,
 } from "../schemas";
 import { headers } from "next/headers";
 
@@ -31,7 +32,7 @@ const app = new Hono()
         httpOnly: true,
         secure: true,
         sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30
+        maxAge: 60 * 60 * 24 * 30,
       });
 
       return c.json({ success: true });
@@ -54,7 +55,7 @@ const app = new Hono()
         httpOnly: true,
         secure: true,
         sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30
+        maxAge: 60 * 60 * 24 * 30,
       });
       return c.json({ success: true });
     } catch (error) {
@@ -63,13 +64,20 @@ const app = new Hono()
   })
   .post("/verify", async (c) => {
     const { account } = await createSessionClient();
-    const origin = (await headers().get("origin") ?? "");
-    console.log(origin);
-    const response = await account.createVerification(`${origin}/verify-user`);
-    console.log(response);
-    c.json({
-      message:"hello"
-    });
+    const origin = headers().get("origin") ?? "";
+    // console.log(origin);
+    await account.createVerification(`${origin}/verify-user`);
+    return c.json({ success: true });
+  })
+  .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
+    const { userId, secret } = c.req.valid("json");
+    const { account } = await createSessionClient();
+    try {
+      await account.updateVerification(userId, secret);
+      return c.json({ success: true });
+    } catch (e) {
+      console.log(e);
+    }
   })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");
@@ -84,7 +92,7 @@ const app = new Hono()
       const { email } = c.req.valid("json");
       const { account } = await createAdminClient();
 
-      const origin = (await headers()).get("origin") ?? "";
+      const origin = headers().get("origin") ?? "";
 
       await account.createRecovery(email, `${origin}/reset-password`);
       return c.json({ success: true });

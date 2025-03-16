@@ -1,17 +1,19 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import axios from "axios";
+import { VerifyUserCard } from "@/features/auth/components/verify-user-card";
+import { getCurrent } from "@/features/auth/queries";
+import { getWorkspaces } from "@/features/workspaces/queries";
+import { redirect } from "next/navigation";
 
-const page =()=> {
-  const verifyUser =async ()=>{
-    const token = await axios.post('http://localhost:3000/api/v1/auth/verify')
-    console.log(token);
+const page = async () => {
+  const user = await getCurrent();
+  // console.log(user);
+  if (!user?.emailVerification) return <VerifyUserCard />;
+  else {
+    const workspaces = await getWorkspaces();
+    if (workspaces.total === 0 && user) {
+      redirect("/workspaces/create");
+    } else {
+      redirect(`/workspaces/${workspaces.documents[0].$id}`);
+    }
   }
-  return(
-    <div className='h-screen flex items-center justify-center'>
-      <div>Verification Page</div>
-      <div><Button onClick={verifyUser}>Verify</Button></div>
-    </div>
-  )
-}
+};
 export default page;
