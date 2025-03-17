@@ -23,7 +23,7 @@ export const VerifyUserCard = () => {
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(
-          err.response.data.message || "Failed to verify. Please try again."
+          err.response.data.message || "Failed to verify. Please try again.",
         );
       }
     } finally {
@@ -38,7 +38,7 @@ export const VerifyUserCard = () => {
         <CardDescription>Click below to verify your account</CardDescription>
       </CardHeader>
       <CardContent>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && <p className="mb-4 text-red-500">{error}</p>}
         <Button onClick={onSubmit} disabled={isLoading} className="w-full">
           {isLoading ? "Verifying..." : "Verify Account"}
         </Button>

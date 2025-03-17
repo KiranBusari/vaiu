@@ -38,8 +38,8 @@ export const SignInCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-neutral-900 bg-neutral-200">
-      <CardHeader className="flexx items-center justify-center text-center p-7">
+    <Card className="size-full border-none bg-neutral-200 shadow-none dark:bg-neutral-900 md:w-[487px]">
+      <CardHeader className="flexx items-center justify-center p-7 text-center">
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
       </CardHeader>
       <div className="px-7">
@@ -97,10 +97,10 @@ export const SignInCard = () => {
                   <Button
                     type="button"
                     variant={"link"}
-                    className="-ml-4 hover:underline text-gray-800"
+                    className="-ml-4 text-gray-800 hover:underline"
                   >
                     <Link href="/forgot-password">
-                      <span className="text-sm text-gray-800 hover:dark:underline dark:text-gray-400 cursor-pointer">
+                      <span className="cursor-pointer text-sm text-gray-800 dark:text-gray-400 hover:dark:underline">
                         Forgot Password?
                       </span>
                     </Link>
@@ -119,29 +119,29 @@ export const SignInCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="px-7 hidden">
+      <div className="hidden px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 hidden flex-col gap-y-4">
+      <CardContent className="hidden flex-col gap-y-4 p-7">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
           variant="secondary"
           size="lg"
-          className="border border-zinc-600 w-full"
+          className="w-full border border-zinc-600"
         >
-          <FaGithub className="size-5 mr-2" />
+          <FaGithub className="mr-2 size-5" />
           Login with Github
         </Button>
       </CardContent>
       <div className="px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex items-center justify-center">
+      <CardContent className="flex items-center justify-center p-7">
         <p>
           Don&apos;t have an account?
           <Link href="/sign-up">
-            <span className="text-neutral-950 dark:text-gray-400 hover:underline cursor-pointer underline-offset-4">
+            <span className="cursor-pointer text-neutral-950 underline-offset-4 hover:underline dark:text-gray-400">
               &nbsp;Signup
             </span>
           </Link>

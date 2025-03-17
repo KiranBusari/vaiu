@@ -44,10 +44,10 @@ export const SignUpCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200 ">
-      <CardHeader className="flexx items-center justify-center text-center p-7">
+    <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
+      <CardHeader className="flexx items-center justify-center p-7 text-center">
         <CardTitle className="text-2xl">Sign Up</CardTitle>
-        <CardDescription className="dark:text-slate-10 dark:text-slate-200 text-slate-900">
+        <CardDescription className="dark:text-slate-10 text-slate-900 dark:text-slate-200">
           By signing up, you agree to our{" "}
           <Link href="/privacy">
             <span className="text-gray-400 underline underline-offset-2">
@@ -140,29 +140,29 @@ export const SignUpCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="px-7 hidden">
+      <div className="hidden px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex-col gap-y-2 hidden">
+      <CardContent className="hidden flex-col gap-y-2 p-7">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
           variant="secondary"
           size="lg"
-          className="border border-zinc-600 w-full"
+          className="w-full border border-zinc-600"
         >
-          <FaGithub className="size-5 mr-2" />
+          <FaGithub className="mr-2 size-5" />
           Login with Github
         </Button>
       </CardContent>
       <div className="px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex items-center justify-center">
+      <CardContent className="flex items-center justify-center p-7">
         <p>
           already have an account?
           <Link href="/sign-in">
-            <span className="text-gray-700 dark:text-gray-400 hover:underline underline-offset-2">
+            <span className="text-gray-700 underline-offset-2 hover:underline dark:text-gray-400">
               &nbsp;Sign In
             </span>
           </Link>

@@ -88,7 +88,7 @@ const app = new Hono()
           success: false,
           message: "Failed to verify user",
         },
-        400
+        400,
       );
     }
   })
@@ -109,7 +109,7 @@ const app = new Hono()
 
       await account.createRecovery(email, `${origin}/reset-password`);
       return c.json({ success: true });
-    }
+    },
   )
   .post(
     "/update-password",
@@ -124,6 +124,6 @@ const app = new Hono()
       } catch (error) {
         return c.json({ error });
       }
-    }
+    },
   );
 export default app;

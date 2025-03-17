@@ -32,7 +32,7 @@ const VerifyUserPage = () => {
       try {
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify-user`,
-          { userId, secret }
+          { userId, secret },
         );
 
         if (response.data.success) {
@@ -48,7 +48,7 @@ const VerifyUserPage = () => {
           setError(err.response.data.message);
         } else {
           setError(
-            "Failed to verify user. Please try again or contact support."
+            "Failed to verify user. Please try again or contact support.",
           );
         }
       } finally {
@@ -77,9 +77,9 @@ const VerifyUserPage = () => {
             Please wait while we verify your email...
           </div>
         )}
-        {error && <div className="text-red-500 text-center">{error}</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
         {success && (
-          <div className="text-green-500 text-center">
+          <div className="text-center text-green-500">
             Your email has been verified successfully! Redirecting to login...
           </div>
         )}
