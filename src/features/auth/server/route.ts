@@ -19,6 +19,8 @@ import { headers } from "next/headers";
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
+    console.log(user);
+
     return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
@@ -71,12 +73,23 @@ const app = new Hono()
   })
   .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
     const { userId, secret } = c.req.valid("json");
+    console.log(userId, secret);
     const { account } = await createSessionClient();
     try {
       await account.updateVerification(userId, secret);
-      return c.json({ success: true });
+      return c.json({
+        success: true,
+        message: "User verified successfully",
+      });
     } catch (e) {
       console.log(e);
+      return c.json(
+        {
+          success: false,
+          message: "Failed to verify user",
+        },
+        400
+      );
     }
   })
   .post("/logout", sessionMiddleware, async (c) => {

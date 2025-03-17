@@ -1,42 +1,47 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useSearchParams } from "next/navigation";
-import { useVerifyUser } from "@/features/auth/api/use-verify-user";
-import { verifyUserSchema, VerifyUserSchema } from "@/features/auth/schemas";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import axios from "axios";
-export const VerifyUserCard = () => {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get("userId") ?? "";
-  const secret = searchParams.get("secret") ?? "";
-  const { mutate, isPending } = useVerifyUser();
-  const [values, setValues] = useState<VerifyUserSchema>({
-    userId: userId,
-    secret: secret,
-  });
+import { useRouter } from "next/navigation";
 
-  // const onSubmit = (values: VerifyUserSchema) => {
-  //   mutate(values);
-  // };
+export const VerifyUserCard = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const onSubmit = async () => {
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify`
-    );
-    console.log(res);
+    try {
+      setIsLoading(true);
+      setError(null);
+      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify`);
+      // router.push("/k");
+    } catch (err) {
+      setError("Failed to verify. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="max-h-screen flex justify-center items-center">
-      <div>
-        {/*<h1 className='text-4xl text-center'>Verification Page</h1>*/}
-        <div className="">
-          <Button disabled={isPending} onClick={onSubmit}>
-            Verify
-          </Button>
-        </div>
-      </div>
-    </div>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Verify Your Account</CardTitle>
+        <CardDescription>Click below to verify your account</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <Button onClick={onSubmit} disabled={isLoading} className="w-full">
+          {isLoading ? "Verifying..." : "Verify Account"}
+        </Button>
+      </CardContent>
+    </Card>
   );
 };

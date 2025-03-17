@@ -1,19 +1,88 @@
-import { VerifyUserCard } from "@/features/auth/components/verify-user-card";
-import { getCurrent } from "@/features/auth/queries";
-import { getWorkspaces } from "@/features/workspaces/queries";
-import { redirect } from "next/navigation";
+"use client";
 
-const page = async () => {
-  const user = await getCurrent();
-  // console.log(user);
-  if (!user?.emailVerification) return <VerifyUserCard />;
-  else {
-    const workspaces = await getWorkspaces();
-    if (workspaces.total === 0 && user) {
-      redirect("/workspaces/create");
-    } else {
-      redirect(`/workspaces/${workspaces.documents[0].$id}`);
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+const VerifyUserPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const userId = searchParams.get("userId");
+    const secret = searchParams.get("secret");
+
+    if (!userId || !secret) {
+      setError("Invalid verification link");
+      setIsLoading(false);
+      return;
     }
-  }
+
+    const verifyUser = async () => {
+      try {
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify-user`,
+          { userId, secret }
+        );
+
+        if (response.data.success) {
+          setSuccess(true);
+          setTimeout(() => {
+            router.push("/sign-in");
+          }, 2000);
+        } else {
+          throw new Error(response.data.message || "Verification failed");
+        }
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message ||
+            "Failed to verify user. Please try again or contact support."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifyUser();
+  }, [searchParams, router]);
+
+  return (
+    <Card className="w-full max-w-md p-6">
+      <CardHeader>
+        <CardTitle>Email Verification</CardTitle>
+        <CardDescription>
+          {isLoading
+            ? "Verifying your email..."
+            : success
+              ? "Email verified successfully!"
+              : "Verification status"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading && (
+          <div className="text-center">
+            Please wait while we verify your email...
+          </div>
+        )}
+        {error && <div className="text-red-500 text-center">{error}</div>}
+        {success && (
+          <div className="text-green-500 text-center">
+            Your email has been verified successfully! Redirecting to login...
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 };
-export default page;
+
+export default VerifyUserPage;

@@ -5,7 +5,6 @@ const SignIn = async () => {
   const user = await getCurrent();
   console.log("User", user);
   if (!user || !user.emailVerification) return <SignInCard />;
-
 };
 
 export default SignIn;

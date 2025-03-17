@@ -30,7 +30,7 @@ export const resetPasswordSchema = z
 export const verifyUserSchema = z.object({
   userId: z.string(),
   secret: z.string(),
-})
+});
 
 export type LoginSchema = z.infer<typeof loginSchema>;
 export type RegisterSchema = z.infer<typeof registerSchema>;
