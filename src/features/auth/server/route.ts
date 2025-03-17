@@ -3,7 +3,7 @@ import { ID } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { deleteCookie, setCookie } from "hono/cookie";
 
-import { createAdminClient } from "@/lib/appwrite";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { AUTH_COOKIE } from "../constants";
@@ -12,12 +12,15 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
+  verifyUserSchema,
 } from "../schemas";
 import { headers } from "next/headers";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
+    console.log(user);
+
     return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
@@ -61,6 +64,34 @@ const app = new Hono()
       return c.json({ error });
     }
   })
+  .post("/verify", async (c) => {
+    const { account } = await createSessionClient();
+    const origin = headers().get("origin") ?? "";
+    // console.log(origin);
+    await account.createVerification(`${origin}/verify-user`);
+    return c.json({ success: true });
+  })
+  .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
+    const { userId, secret } = c.req.valid("json");
+    console.log(userId, secret);
+    const { account } = await createSessionClient();
+    try {
+      await account.updateVerification(userId, secret);
+      return c.json({
+        success: true,
+        message: "User verified successfully",
+      });
+    } catch (e) {
+      console.log(e);
+      return c.json(
+        {
+          success: false,
+          message: "Failed to verify user",
+        },
+        400
+      );
+    }
+  })
   .post("/logout", sessionMiddleware, async (c) => {
     const account = c.get("account");
     deleteCookie(c, AUTH_COOKIE);
@@ -74,7 +105,7 @@ const app = new Hono()
       const { email } = c.req.valid("json");
       const { account } = await createAdminClient();
 
-      const origin = (await headers()).get("origin") ?? "";
+      const origin = headers().get("origin") ?? "";
 
       await account.createRecovery(email, `${origin}/reset-password`);
       return c.json({ success: true });
