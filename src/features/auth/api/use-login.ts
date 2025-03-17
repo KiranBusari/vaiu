@@ -20,7 +20,7 @@ export const useLogin = () => {
       return await response.json();
     },
     onSuccess: () => {
-      router.push("/verify");
+      router.push("/");
       toast.success("Logged in successfully");
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },

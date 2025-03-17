@@ -43,11 +43,14 @@ const VerifyUserPage = () => {
         } else {
           throw new Error(response.data.message || "Verification failed");
         }
-      } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data?.message) {
+          setError(err.response.data.message);
+        } else {
+          setError(
             "Failed to verify user. Please try again or contact support."
-        );
+          );
+        }
       } finally {
         setIsLoading(false);
       }
