@@ -67,7 +67,7 @@ const app = new Hono()
   .post("/verify", async (c) => {
     const { account } = await createSessionClient();
     const origin = headers().get("origin") ?? "";
-    // console.log(origin);
+    console.log(origin);
     await account.createVerification(`${origin}/verify-user`);
     return c.json({ success: true });
   })
