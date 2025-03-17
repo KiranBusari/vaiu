@@ -10,21 +10,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 
 export const VerifyUserCard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const onSubmit = async () => {
     try {
       setIsLoading(true);
       setError(null);
       await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify`);
-      // router.push("/k");
-    } catch (err) {
-      setError("Failed to verify. Please try again.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setError(
+          err.response.data.message || "Failed to verify. Please try again."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
