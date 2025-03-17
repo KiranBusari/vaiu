@@ -36,7 +36,7 @@ const Hero = () => {
 
   const imageSrc =
     mounted && resolvedTheme === "light"
-      ? "/onboardinglight.jpeg"
+      ? "/onboardinglight.png"
       : "/onboardingPage.png";
 
   return (
