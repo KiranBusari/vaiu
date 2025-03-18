@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,26 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import axios from "axios";
+import { useVerify } from "../api/use-verify";
 
 export const VerifyUserCard = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { mutate: verify, isPending, error } = useVerify();
 
-  const onSubmit = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify`);
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data?.message) {
-        setError(
-          err.response.data.message || "Failed to verify. Please try again.",
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = () => {
+    verify();
   };
 
   return (
@@ -38,9 +24,15 @@ export const VerifyUserCard = () => {
         <CardDescription>Click below to verify your account</CardDescription>
       </CardHeader>
       <CardContent>
-        {error && <p className="mb-4 text-red-500">{error}</p>}
-        <Button onClick={onSubmit} disabled={isLoading} className="w-full">
-          {isLoading ? "Verifying..." : "Verify Account"}
+        {error && (
+          <p className="mb-4 text-red-500">
+            {error instanceof Error
+              ? error.message
+              : "Failed to verify account"}
+          </p>
+        )}
+        <Button onClick={onSubmit} disabled={isPending} className="w-full">
+          {isPending ? "Verifying..." : "Verify Account"}
         </Button>
       </CardContent>
     </Card>
