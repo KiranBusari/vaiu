@@ -19,9 +19,7 @@ export const VerifyUserCard = () => {
     try {
       setIsLoading(true);
       setError(null);
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/api/v1/auth/verify`,
-      );
+      await axios.post(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/verify`);
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setError(
