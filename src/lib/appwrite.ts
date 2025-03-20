@@ -7,7 +7,7 @@ export async function createSessionClient() {
   const client = new Client()
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
-  console.log("Client from session client :", client);
+  // console.log("Client from session client :", client);
 
   const session = await cookies().get(AUTH_COOKIE);
 
@@ -29,7 +29,7 @@ export async function createAdminClient() {
     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
     .setKey(process.env.NEXT_APPWRITE_KEY!);
-  console.log("Client from admin client : ", client);
+  // console.log("Client from admin client : ", client);
 
   return {
     get account() {

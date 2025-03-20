@@ -34,7 +34,7 @@ const app = new Hono()
           roomType,
           workspaceId,
           projectId,
-        }
+        },
       );
 
       return c.json({ data: room });
@@ -48,7 +48,7 @@ const app = new Hono()
     sessionMiddleware,
     zValidator(
       "query",
-      z.object({ workspaceId: z.string(), projectId: z.string() })
+      z.object({ workspaceId: z.string(), projectId: z.string() }),
     ),
     async (c) => {
       const databases = c.get("databases");
@@ -67,7 +67,7 @@ const app = new Hono()
       ]);
 
       return c.json({ data: rooms });
-    }
+    },
   )
   .get("/:roomId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -77,7 +77,7 @@ const app = new Hono()
     const room = await databases.getDocument<Room>(
       DATABASE_ID,
       ROOMS_ID,
-      roomId
+      roomId,
     );
 
     const member = await getMember({
@@ -99,7 +99,7 @@ const app = new Hono()
     const existingRoom = await databases.getDocument<Room>(
       DATABASE_ID,
       ROOMS_ID,
-      roomId
+      roomId,
     );
 
     const member = await getMember({

@@ -63,14 +63,14 @@ const app = new Hono()
         const file = await storage.createFile(
           IMAGES_BUCKET_ID,
           ID.unique(),
-          image
+          image,
         );
         const buffer: ArrayBuffer = await storage.getFilePreview(
           IMAGES_BUCKET_ID,
-          file.$id
+          file.$id,
         );
         uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-          "base64"
+          "base64",
         )}`;
       }
 
@@ -82,7 +82,7 @@ const app = new Hono()
           Query.orderDesc("$createdAt"),
           Query.equal("name", name),
           Query.limit(1),
-        ]
+        ],
       );
 
       const correctedName = name.replace(/\s+/g, "-").toLowerCase();
@@ -108,12 +108,12 @@ const app = new Hono()
             accessToken,
             workspaceId,
             projectAdmin: member.$id,
-          }
+          },
         );
 
         return c.json({ data: project, repo: repo.data });
       }
-    }
+    },
   )
   .post(
     "/add-existing-project",
@@ -153,11 +153,11 @@ const app = new Hono()
           workspaceId,
           projectAdmin: member.$id,
           accessToken,
-        }
+        },
       );
 
       return c.json({ data: project });
-    }
+    },
   )
   .get(
     "/",
@@ -185,11 +185,14 @@ const app = new Hono()
       const projects = await databases.listDocuments<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        [Query.equal("workspaceId", workspaceId), Query.orderDesc("$createdAt")]
+        [
+          Query.equal("workspaceId", workspaceId),
+          Query.orderDesc("$createdAt"),
+        ],
       );
 
       return c.json({ data: projects });
-    }
+    },
   )
   .get("/:projectId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -199,7 +202,7 @@ const app = new Hono()
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
-      projectId
+      projectId,
     );
 
     const member = await getMember({
@@ -221,7 +224,7 @@ const app = new Hono()
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
-      projectId
+      projectId,
     );
 
     const member = await getMember({
@@ -246,7 +249,7 @@ const app = new Hono()
         Query.equal("projectId", projectId),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -255,7 +258,7 @@ const app = new Hono()
         Query.equal("projectId", projectId),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const taskCount = thisMonthTasks.total;
@@ -269,7 +272,7 @@ const app = new Hono()
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -279,7 +282,7 @@ const app = new Hono()
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const assignedTaskCount = thisMonthAssignedTasks.total;
@@ -293,7 +296,7 @@ const app = new Hono()
         Query.notEqual("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -303,7 +306,7 @@ const app = new Hono()
         Query.notEqual("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const incompleteTaskCount = thisMonthIncompleteTasks.total;
@@ -318,7 +321,7 @@ const app = new Hono()
         Query.equal("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -328,7 +331,7 @@ const app = new Hono()
         Query.equal("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const completedTaskCount = thisMonthCompletedTasks.total;
@@ -343,7 +346,7 @@ const app = new Hono()
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -354,7 +357,7 @@ const app = new Hono()
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const overdueTaskCount = thisMonthOverDueTasks.total;
@@ -390,7 +393,7 @@ const app = new Hono()
       const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectId
+        projectId,
       );
       const member = await getMember({
         databases,
@@ -407,14 +410,14 @@ const app = new Hono()
         const file = await storage.createFile(
           IMAGES_BUCKET_ID,
           ID.unique(),
-          image
+          image,
         );
         const buffer: ArrayBuffer = await storage.getFilePreview(
           IMAGES_BUCKET_ID,
-          file.$id
+          file.$id,
         );
         uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-          "base64"
+          "base64",
         )}`;
       } else {
         uploadedImage = image;
@@ -426,11 +429,11 @@ const app = new Hono()
         {
           name,
           imageUrl: uploadedImage,
-        }
+        },
       );
 
       return c.json({ data: updatedProject });
-    }
+    },
   )
   .delete("/:projectId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -440,7 +443,7 @@ const app = new Hono()
     const existingProject = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
-      projectId
+      projectId,
     );
 
     const member = await getMember({
@@ -480,7 +483,7 @@ const app = new Hono()
       const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectId
+        projectId,
       );
 
       const octokit = new Octokit({
@@ -512,7 +515,7 @@ const app = new Hono()
         });
 
         const projectCollaborators = Array.isArray(
-          existingProject.projectCollaborators
+          existingProject.projectCollaborators,
         )
           ? existingProject.projectCollaborators
           : [];
@@ -528,7 +531,7 @@ const app = new Hono()
         console.error("Failed to add collaborator:", error);
         return c.json({ error: "Failed to add collaborator" }, 500);
       }
-    }
+    },
   )
   .post(
     "/:projectId/submit-pull-request",
@@ -549,13 +552,13 @@ const app = new Hono()
       const existingProject = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectId
+        projectId,
       );
 
       const project = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectId
+        projectId,
       );
 
       if (!existingProject) {
@@ -605,13 +608,13 @@ const app = new Hono()
               pullRequest: createPR.data,
             },
           },
-          200
+          200,
         );
       } catch (error) {
         console.error("Failed to create PR:", error);
         return c.json({ error: "Failed to create PR" }, 500);
       }
-    }
+    },
   );
 
 export default app;

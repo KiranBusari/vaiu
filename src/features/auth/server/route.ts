@@ -45,7 +45,7 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { name, email, password } = c.req.valid("json");
-      console.log(name, email, password);
+      // console.log(name, email, password);
 
       const { account } = await createAdminClient();
 
@@ -67,13 +67,13 @@ const app = new Hono()
   .post("/verify", async (c) => {
     const { account } = await createSessionClient();
     const origin = headers().get("origin") ?? "";
-    console.log(origin);
+    // console.log(origin);
     await account.createVerification(`${origin}/verify-user`);
     return c.json({ success: true });
   })
   .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
     const { userId, secret } = c.req.valid("json");
-    console.log(userId, secret);
+    // console.log(userId, secret);
     try {
       const { account } = await createSessionClient();
       await account.updateVerification(userId, secret);

@@ -23,7 +23,7 @@ const app = new Hono()
     const task = await databases.getDocument<Task>(
       DATABASE_ID,
       TASKS_ID,
-      taskId
+      taskId,
     );
     const member = await getMember({
       databases,
@@ -40,7 +40,7 @@ const app = new Hono()
     const existingProject = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
-      projectId
+      projectId,
     );
 
     if (!existingProject) {
@@ -97,7 +97,7 @@ const app = new Hono()
         search: z.string().nullish(),
         dueDate: z.string().nullish(),
         status: z.nativeEnum(TaskStatus).nullish(),
-      })
+      }),
     ),
     async (c) => {
       const { users } = await createAdminClient();
@@ -122,30 +122,30 @@ const app = new Hono()
       ];
 
       if (projectId) {
-        console.log("ProjectId:", projectId);
+        // console.log("ProjectId:", projectId);
         query.push(Query.equal("projectId", projectId));
       }
       if (status) {
-        console.log("status:", status);
+        // console.log("status:", status);
         query.push(Query.equal("status", status));
       }
       if (assigneeId) {
-        console.log("assigneeId:", assigneeId);
+        // console.log("assigneeId:", assigneeId);
         query.push(Query.equal("assigneeId", assigneeId));
       }
       if (dueDate) {
-        console.log("dueDate:", dueDate);
+        // console.log("dueDate:", dueDate);
         query.push(Query.equal("dueDate", dueDate));
       }
       if (search) {
-        console.log("search:", search);
+        // console.log("search:", search);
         query.push(Query.search("name", search));
       }
 
       const tasks = await databases.listDocuments<Task>(
         DATABASE_ID,
         TASKS_ID,
-        query
+        query,
       );
 
       const projectIds = tasks.documents.map((task) => task.projectId);
@@ -154,13 +154,13 @@ const app = new Hono()
       const projects = await databases.listDocuments<Project>(
         DATABASE_ID,
         PROJECTS_ID,
-        projectIds.length > 0 ? [Query.contains("$id", projectIds)] : []
+        projectIds.length > 0 ? [Query.contains("$id", projectIds)] : [],
       );
 
       const members = await databases.listDocuments(
         DATABASE_ID,
         MEMBERS_ID,
-        assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : []
+        assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : [],
       );
 
       const assignees = await Promise.all(
@@ -193,15 +193,15 @@ const app = new Hono()
               email: "error@example.com",
             };
           }
-        })
+        }),
       );
 
       const populatedTask = tasks.documents.map((task) => {
         const project = projects.documents.find(
-          (project) => project.$id === task.projectId
+          (project) => project.$id === task.projectId,
         );
         const assignee = assignees.find(
-          (assignee) => assignee.$id === task.assigneeId
+          (assignee) => assignee.$id === task.assigneeId,
         );
         return {
           ...task,
@@ -216,7 +216,7 @@ const app = new Hono()
           documents: populatedTask,
         },
       });
-    }
+    },
   )
   .post(
     "/",
@@ -235,12 +235,12 @@ const app = new Hono()
           [
             Query.equal("$id", projectId),
             Query.equal("workspaceId", workspaceId),
-          ]
+          ],
         );
         // console.log("projects:", projects);
 
         const { accessToken } = projects.documents.filter(
-          (project) => project.$id === projectId
+          (project) => project.$id === projectId,
         )[0];
 
         if (!accessToken) {
@@ -250,7 +250,7 @@ const app = new Hono()
         const fetchAssinee = await databases.getDocument(
           DATABASE_ID,
           MEMBERS_ID,
-          assigneeId
+          assigneeId,
         );
 
         if (!fetchAssinee) {
@@ -283,7 +283,7 @@ const app = new Hono()
             Query.equal("workspaceId", workspaceId),
             Query.orderAsc("position"),
             Query.limit(1),
-          ]
+          ],
         );
         const newPosition =
           highestPositionTask.documents.length > 0
@@ -311,7 +311,7 @@ const app = new Hono()
             projectId,
             assigneeId,
             position: newPosition,
-          }
+          },
         );
 
         return c.json({ data: task, issue: issueInGit });
@@ -322,7 +322,7 @@ const app = new Hono()
         }
         return c.json({ error: "An unexpected error occurred" }, 500);
       }
-    }
+    },
   )
   .patch(
     "/:taskId",
@@ -338,7 +338,7 @@ const app = new Hono()
       const exisistingTask = await databases.getDocument<Task>(
         DATABASE_ID,
         TASKS_ID,
-        taskId
+        taskId,
       );
 
       const member = await getMember({
@@ -361,10 +361,10 @@ const app = new Hono()
           projectId,
           assigneeId,
           description,
-        }
+        },
       );
       return c.json({ data: task });
-    }
+    },
   )
   .get("/:taskId", sessionMiddleware, async (c) => {
     const { users } = await createAdminClient();
@@ -375,7 +375,7 @@ const app = new Hono()
     const task = await databases.getDocument<Task>(
       DATABASE_ID,
       TASKS_ID,
-      taskId
+      taskId,
     );
     const currentMember = await getMember({
       databases,
@@ -388,12 +388,12 @@ const app = new Hono()
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
-      task.projectId
+      task.projectId,
     );
     const member = await databases.getDocument(
       DATABASE_ID,
       MEMBERS_ID,
-      task.assigneeId
+      task.assigneeId,
     );
 
     let assignee;
@@ -446,9 +446,9 @@ const app = new Hono()
             $id: z.string(),
             status: z.nativeEnum(TaskStatus),
             position: z.number().int().positive().min(1000).max(1_000_000),
-          })
+          }),
         ),
-      })
+      }),
     ),
     async (c) => {
       const databases = c.get("databases");
@@ -461,12 +461,12 @@ const app = new Hono()
         [
           Query.contains(
             "$id",
-            tasks.map((task) => task.$id)
+            tasks.map((task) => task.$id),
           ),
-        ]
+        ],
       );
       const workspaceIds = new Set(
-        taskToUpdate.documents.map((task) => task.workspaceId)
+        taskToUpdate.documents.map((task) => task.workspaceId),
       );
 
       if (workspaceIds.size !== 1) {
@@ -474,7 +474,7 @@ const app = new Hono()
           {
             error: "All tasks must belong to the same workspace",
           },
-          400
+          400,
         );
       }
       const workspaceId = workspaceIds.values().next().value;
@@ -498,11 +498,11 @@ const app = new Hono()
             status,
             position,
           });
-        })
+        }),
       );
 
       return c.json({ data: updatedTasks });
-    }
+    },
   );
 
 export default app;
