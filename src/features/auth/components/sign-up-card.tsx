@@ -45,10 +45,10 @@ export const SignUpCard = () => {
   };
   return (
     <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
-      <CardHeader className="flexx items-center justify-center p-7 text-center">
+      <CardHeader className="flexx items-center justify-center px-4 py-8 text-center">
         <CardTitle className="text-2xl">Sign Up</CardTitle>
-        <CardDescription className="dark:text-slate-10 text-slate-900 dark:text-slate-200">
-          By signing up, you agree to our{" "}
+        <CardDescription className="dark:text-slate-10 text-[12px] text-slate-900 dark:text-slate-200">
+          By signing up, you agree to our <br />
           <Link href="/privacy">
             <span className="text-gray-400 underline underline-offset-2">
               Privacy Policy
@@ -62,12 +62,12 @@ export const SignUpCard = () => {
           </Link>
         </CardDescription>
       </CardHeader>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
-      <CardContent className="p-7">
+      <CardContent className="p-1">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mx-auto w-3/4 space-y-4"
+          >
             <FormField
               name="name"
               control={form.control}
@@ -155,14 +155,11 @@ export const SignUpCard = () => {
           Login with Github
         </Button>
       </CardContent>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
-      <CardContent className="flex items-center justify-center p-7">
+      <CardContent className="flex items-center justify-center p-4 text-sm">
         <p>
           already have an account?
           <Link href="/sign-in">
-            <span className="text-gray-700 underline-offset-2 hover:underline dark:text-gray-400">
+            <span className="text-[#71c1ff] hover:underline hover:underline-offset-2">
               &nbsp;Sign In
             </span>
           </Link>

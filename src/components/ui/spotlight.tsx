@@ -3,15 +3,15 @@ import { cn } from "@/lib/utils";
 
 type SpotlightProps = {
   className?: string;
-  fill?: string;
+  fill?: "#FFF" | "#000000" | "#FF0000" | "#00FF00" | "#0172cf";
 };
 
-export const Spotlight = ({ className, fill }: SpotlightProps) => {
+export const Spotlight = ({ className, fill = "#0172cf" }: SpotlightProps) => {
   return (
     <svg
       className={cn(
         "pointer-events-none absolute z-10 h-[169%] w-[138%] animate-spotlight opacity-0 lg:w-[90%]",
-        className
+        className,
       )}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 3787 2842"
@@ -24,7 +24,7 @@ export const Spotlight = ({ className, fill }: SpotlightProps) => {
           rx="1924.71"
           ry="273.501"
           transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)"
-          fill={fill || "white"}
+          fill={fill}
           fillOpacity="0.21"
         ></ellipse>
       </g>
