@@ -74,8 +74,8 @@ const app = new Hono()
   .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
     const { userId, secret } = c.req.valid("json");
     console.log(userId, secret);
-    const { account } = await createSessionClient();
     try {
+      const { account } = await createSessionClient();
       await account.updateVerification(userId, secret);
       return c.json({
         success: true,
