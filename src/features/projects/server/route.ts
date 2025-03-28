@@ -156,6 +156,32 @@ const app = new Hono()
         },
       );
 
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
+
+      const owner = await octokit.rest.users.getAuthenticated();
+
+      try {
+        const issues = await octokit.rest.issues.listForRepo({
+          owner: owner.data.login,
+          repo: repoName,
+        });
+        console.log("issues", issues);
+        issues.data.map(async (issue: any) => {
+          await databases.createDocument(DATABASE_ID, TASKS_ID, ID.unique(), {
+            title: issue.title,
+            description: issue.body,
+            projectId: project.$id,
+            assigneeId: member.$id,
+            status: TaskStatus.TODO,
+            dueDate: issue.created_at,
+          });
+        });
+      } catch (error) {
+        console.error("Failed to fetch issues:", error);
+        return c.json({ error: "Failed to fetch issues" });
+      }
       return c.json({ data: project });
     },
   )
