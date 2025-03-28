@@ -28,7 +28,7 @@ export function Navbar({ className }: { className?: string }) {
           <Button
             asChild
             variant="outline"
-            className="font-semibold text-[#75c1ff] hover:text-[#75c1ff]/90"
+            className="font-semibold text-[#75c1ff] hover:text-[#75c1ff]/80"
           >
             <Link href={isSignIn ? "/sign-up" : "/sign-in"}>
               {isSignIn ? "SignUp" : "SignIn"}

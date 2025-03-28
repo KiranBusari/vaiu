@@ -26,7 +26,7 @@ const Hero = () => {
           </div>
           <div className="mt-8">
             <Link href={"/sign-in"}>
-              <Button className="rounded-full px-8 py-6 text-base font-bold text-[#ffffff]/90 hover:text-[#75c1ff] dark:text-[#75c1ff]">
+              <Button className="rounded-full px-8 py-6 text-base font-bold text-white/90 hover:text-[#75c1ff] dark:text-[#75c1ff] dark:hover:text-black/80">
                 Get Started
               </Button>
             </Link>

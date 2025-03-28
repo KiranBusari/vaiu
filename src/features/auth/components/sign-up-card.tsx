@@ -62,7 +62,7 @@ export const SignUpCard = () => {
           </Link>
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-1">
+      <CardContent className="px-4">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
