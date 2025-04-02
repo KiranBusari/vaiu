@@ -163,18 +163,40 @@ const app = new Hono()
       const owner = await octokit.rest.users.getAuthenticated();
 
       try {
-        const issues = await octokit.rest.issues.listForRepo({
+        const { data } = await octokit.rest.issues.listForRepo({
           owner: owner.data.login,
           repo: repoName,
         });
-        console.log("issues", issues);
-        issues.data.map(async (issue: any) => {
+
+        console.log("issues", data);
+
+        const status = TaskStatus.TODO;
+
+        const highestPositionTask = await databases.listDocuments(
+          DATABASE_ID,
+          TASKS_ID,
+          [
+            Query.equal("status", status),
+            Query.equal("workspaceId", workspaceId),
+            Query.orderAsc("position"),
+            Query.limit(1),
+          ],
+        );
+
+        const newPosition =
+          highestPositionTask.documents.length > 0
+            ? highestPositionTask.documents[0].position + 1000
+            : 1000;
+
+        data.map(async (issue) => {
           await databases.createDocument(DATABASE_ID, TASKS_ID, ID.unique(), {
-            title: issue.title,
+            name: issue.title,
             description: issue.body,
+            workspaceId,
             projectId: project.$id,
-            assigneeId: member.$id,
-            status: TaskStatus.TODO,
+            assigneeId: issue?.assignee?.login,
+            status,
+            position: newPosition,
             dueDate: issue.created_at,
           });
         });

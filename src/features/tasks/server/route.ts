@@ -151,17 +151,44 @@ const app = new Hono()
       const projectIds = tasks.documents.map((task) => task.projectId);
       const assigneeIds = tasks.documents.map((task) => task.assigneeId);
 
-      const projects = await databases.listDocuments<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectIds.length > 0 ? [Query.contains("$id", projectIds)] : [],
-      );
+      /* TODO: Need to be checked and verified the correct way to update the issues storing in the projects */
+      // const projects = await databases.listDocuments<Project>(
+      //   DATABASE_ID,
+      //   PROJECTS_ID,
+      //   projectIds.length > 0 ? [Query.contains("$id", projectIds)] : [],
+      // );
 
-      const members = await databases.listDocuments(
-        DATABASE_ID,
-        MEMBERS_ID,
-        assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : [],
-      );
+      // const members = await databases.listDocuments(
+      //   DATABASE_ID,
+      //   MEMBERS_ID,
+      //   assigneeIds.length > 0 ? [Query.contains("$id", assigneeIds)] : [],
+      // );
+
+      let allProjects: any[] = [];
+      if (projectIds.length > 0) {
+        const projectPromises = projectIds.map((id) =>
+          databases.getDocument<Project>(DATABASE_ID, PROJECTS_ID, id),
+        );
+        allProjects = await Promise.all(
+          projectPromises.map((p) => p.catch(() => null)),
+        );
+      }
+      const projects = {
+        documents: allProjects.filter(Boolean),
+      };
+
+      let allMembers: any[] = [];
+      if (assigneeIds.length > 0) {
+        const memberPromises = assigneeIds.map((id) =>
+          databases.getDocument(DATABASE_ID, MEMBERS_ID, id),
+        );
+        allMembers = await Promise.all(
+          memberPromises.map((p) => p.catch(() => null)),
+        );
+      }
+      const members = {
+        documents: allMembers.filter(Boolean),
+      };
 
       const assignees = await Promise.all(
         members.documents.map(async (member) => {
@@ -296,7 +323,7 @@ const app = new Hono()
           owner: owner.data.login,
           repo: projects.documents[0].name,
           title: name,
-          body: "This is a test task",
+          body: "",
         });
 
         const task = await databases.createDocument<Task>(
@@ -455,18 +482,27 @@ const app = new Hono()
       const user = c.get("user");
       const { tasks } = c.req.valid("json");
 
-      const taskToUpdate = await databases.listDocuments<Task>(
-        DATABASE_ID,
-        TASKS_ID,
-        [
-          Query.contains(
-            "$id",
-            tasks.map((task) => task.$id),
-          ),
-        ],
+      // const taskToUpdate = await databases.listDocuments<Task>(
+      //   DATABASE_ID,
+      //   TASKS_ID,
+      //   [
+      //     Query.contains(
+      //       "$id",
+      //       tasks.map((task) => task.$id),
+      //     ),
+      //   ],
+      // );
+
+      const taskPromises = tasks.map((task) =>
+        databases.getDocument<Task>(DATABASE_ID, TASKS_ID, task.$id),
       );
+      const taskToUpdate = {
+        documents: (
+          await Promise.all(taskPromises.map((p) => p.catch(() => null)))
+        ).filter(Boolean),
+      };
       const workspaceIds = new Set(
-        taskToUpdate.documents.map((task) => task.workspaceId),
+        taskToUpdate.documents.map((task) => task?.workspaceId),
       );
 
       if (workspaceIds.size !== 1) {
