@@ -12,17 +12,17 @@ interface KanbanCardProps {
 
 export const KanbanCard = ({ task }: KanbanCardProps) => {
   return (
-    <div className="dark:bg-gray-900 bg-gray-100 p-2.5 mb-1.5 rounded shadow-md space-y-3">
+    <div className="mb-1.5 space-y-3 rounded bg-gray-100 p-2.5 shadow-md dark:bg-gray-900">
       <div className="flex items-start justify-between gap-x-2">
         <p className="line-clamp-2">{task.name}</p>
         <TaskActions id={task.$id} projectId={task.projectId}>
-          <MoreHorizontalIcon className="size-[18px] stroke-1 shrink-0 text-neutral-700 hover:opacity-75 transition" />
+          <MoreHorizontalIcon className="size-[18px] shrink-0 stroke-1 text-neutral-700 transition hover:opacity-75" />
         </TaskActions>
       </div>
       <DottedSeparator />
       <div className="flex items-center gap-x-1.5">
         <MemberAvatar
-          name={task.assignee.name}
+          name={task?.assignee?.name || "No Assignee"}
           fallbackClassName="text-[10px]"
         />
         <div className="dot" />

@@ -21,6 +21,7 @@ import { TaskStatus } from "../types";
 import { useBulkUpdateTasks } from "../api/use-bulk-update-tasks";
 import { DataCalander } from "./data-calander";
 import { Button } from "@/components/ui/button";
+import { FaGithub } from "react-icons/fa";
 
 interface TaskViewSwitcherProps {
   hideProjectFilter?: boolean;
@@ -52,36 +53,48 @@ export const TaskViewSwitcher = ({
         $id: string;
         status: TaskStatus;
         position: number;
-      }[]
+      }[],
     ) => {
       bulkUpdate({
         json: { tasks },
       });
     },
-    []
+    [],
   );
   return (
     <Tabs
       defaultValue={view}
       onValueChange={setView}
-      className="flex-1 w-full border rounded-lg"
+      className="w-full flex-1 rounded-lg border"
     >
-      <div className="h-full flex flex-col overflow-auto p-4">
-        <div className="flex flex-col gap-y-2 lg:flex-row justify-between ">
-          <p className="text-center flex items-center">Issues</p>
-          <Button
-            size={"default"}
-            onClick={open}
-            className="w-full lg:w-auto bg-slate-200 text-black hover:bg-slate-400"
-          >
-            <PlusIcon className="size-4" />
-            New
-          </Button>
+      <div className="flex h-full flex-col overflow-auto p-4">
+        <div className="flex flex-col justify-between gap-y-2 lg:flex-row">
+          <p className="flex items-center text-center text-xl font-bold">
+            Issues
+          </p>
+          <div className="flex items-center space-x-4">
+            <Button
+              size={"sm"}
+              onClick={() => {}}
+              className="w-full bg-slate-200 text-black hover:bg-slate-400 lg:w-auto"
+            >
+              <FaGithub className="size-4" />
+              Fetch Issues
+            </Button>
+            <Button
+              size={"sm"}
+              onClick={open}
+              className="w-full bg-slate-200 text-black hover:bg-slate-400 lg:w-auto"
+            >
+              <PlusIcon className="size-4" />
+              New
+            </Button>
+          </div>
         </div>
-        <div className="flex lg:flex-row gap-y-2 mt-4 items-center justify-start w-full">
+        <div className="mt-4 flex w-full items-center justify-start gap-y-2 lg:flex-row">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
               value="table"
             >
               Table
@@ -89,7 +102,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
               value="kanban"
             >
               Kanban
@@ -97,7 +110,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full lg:w-auto bg-slate-200 dark:bg-gray-800 dark:text-gray-200"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
               value="calendar"
             >
               Calendar
@@ -108,7 +121,7 @@ export const TaskViewSwitcher = ({
         <DataFilters hideProjectFilter={hideProjectFilter} />
         <DottedSeparator className="my-4" />
         {tasksLoading ? (
-          <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
+          <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">
             <Loader className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : (

@@ -82,15 +82,19 @@ export const columns: ColumnDef<Task>[] = [
       );
     },
     cell: ({ row }) => {
-      const assignee = row.original.assignee;
+      const assignee = row.original.assignee || row.original.assigneeId;
+      console.log("assignee", assignee);
+
       return (
         <div className="flex items-center gap-x-2 font-medium">
           <MemberAvatar
             fallbackClassName="text-xs"
             className="size-6"
-            name={assignee.name}
+            name={assignee?.name || assignee || "No Assignee"}
           />
-          <p className="line-clamp-1">{assignee.name}</p>
+          <p className="line-clamp-1">
+            {assignee?.name || assignee || "No Assignee"}
+          </p>
         </div>
       );
     },

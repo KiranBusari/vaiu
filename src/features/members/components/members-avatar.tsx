@@ -8,24 +8,24 @@ interface MemberAvatarProps {
 }
 
 export const MemberAvatar = ({
-  name,
+  name = "None",
   className,
   fallbackClassName,
 }: MemberAvatarProps) => {
   return (
     <Avatar
       className={cn(
-        "size-5 transition border border-gray-300 dark:border-gray-700 rounded-full",
-        className
+        "size-5 rounded-full border border-gray-300 transition dark:border-gray-700",
+        className,
       )}
     >
       <AvatarFallback
         className={cn(
-          "bg-slate-200 dark:bg-gray-800 font-medium text-gray-500 dark:text-gray-300 flex items-center justify-center",
-          fallbackClassName
+          "flex items-center justify-center bg-slate-200 font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-300",
+          fallbackClassName,
         )}
       >
-        {name.charAt(0).toUpperCase()}
+        {name?.charAt(0)?.toUpperCase()}
       </AvatarFallback>
     </Avatar>
   );
