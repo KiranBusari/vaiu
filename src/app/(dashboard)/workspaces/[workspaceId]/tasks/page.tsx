@@ -1,5 +1,5 @@
 import { getCurrent } from "@/features/auth/queries";
-import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
+import { TaskViewSwitcher } from "@/features/issues/components/task-view-switcher";
 import { redirect } from "next/navigation";
 
 const TasksPage = async () => {
@@ -7,7 +7,7 @@ const TasksPage = async () => {
   if (!current) redirect("/sign-in");
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <TaskViewSwitcher />
     </div>
   );

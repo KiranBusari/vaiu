@@ -10,7 +10,7 @@ import {
   IMAGES_BUCKET_ID,
   PR_ID,
   PROJECTS_ID,
-  TASKS_ID,
+  ISSUES_ID,
 } from "@/config";
 
 import {
@@ -22,7 +22,7 @@ import {
 } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
-import { TaskStatus } from "@/features/tasks/types";
+import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
 
 const extractRepoName = (githubUrl: string): string => {
@@ -170,11 +170,11 @@ const app = new Hono()
 
         console.log("issues", data);
 
-        const status = TaskStatus.TODO;
+        const status = IssueStatus.TODO;
 
         const highestPositionTask = await databases.listDocuments(
           DATABASE_ID,
-          TASKS_ID,
+          ISSUES_ID,
           [
             Query.equal("status", status),
             Query.equal("workspaceId", workspaceId),
@@ -189,7 +189,7 @@ const app = new Hono()
             : 1000;
 
         data.map(async (issue) => {
-          await databases.createDocument(DATABASE_ID, TASKS_ID, ID.unique(), {
+          await databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
             name: issue.title,
             description: issue.body,
             workspaceId,
@@ -292,7 +292,7 @@ const app = new Hono()
 
     const thisMonthTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
@@ -301,7 +301,7 @@ const app = new Hono()
     );
     const lastMonthTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
@@ -314,7 +314,7 @@ const app = new Hono()
 
     const thisMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("assigneeId", member.$id),
@@ -324,7 +324,7 @@ const app = new Hono()
     );
     const lastMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("assigneeId", member.$id),
@@ -338,20 +338,20 @@ const app = new Hono()
 
     const thisMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.notEqual("status", TaskStatus.DONE),
+        Query.notEqual("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
     const lastMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.notEqual("status", TaskStatus.DONE),
+        Query.notEqual("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
@@ -363,20 +363,20 @@ const app = new Hono()
 
     const thisMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.equal("status", TaskStatus.DONE),
+        Query.equal("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
     const lastMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.equal("status", TaskStatus.DONE),
+        Query.equal("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
@@ -387,10 +387,10 @@ const app = new Hono()
 
     const thisMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.notEqual("status", TaskStatus.DONE),
+        Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
@@ -398,10 +398,10 @@ const app = new Hono()
     );
     const lastMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
-      TASKS_ID,
+      ISSUES_ID,
       [
         Query.equal("projectId", projectId),
-        Query.notEqual("status", TaskStatus.DONE),
+        Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),

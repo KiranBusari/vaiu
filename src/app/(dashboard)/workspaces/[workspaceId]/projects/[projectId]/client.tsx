@@ -8,12 +8,12 @@ import {
 import Link from "next/link";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
-import { TaskViewSwitcher } from "@/features/tasks/components/task-view-switcher";
+import { TaskViewSwitcher } from "@/features/issues/components/task-view-switcher";
 
 import { Button } from "@/components/ui/button";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useGetProject } from "@/features/projects/api/use-get-project";
-import { Loader }  from "@/components/page-loader";
+import { Loader } from "@/components/page-loader";
 import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
@@ -65,9 +65,9 @@ export const ProjectIdClient = () => {
           <p className="text-lg font-semibold capitalize">{project.name}</p>
         </div>
         <div className="hidden md:block">
-          <div className="space-x-4 flex items-center">
+          <div className="flex items-center space-x-4">
             <Button
-              className="bg-slate-200 hover:bg-slate-300 text-black"
+              className="bg-slate-200 text-black hover:bg-slate-300"
               onClick={handleCreatePr}
               variant={"default"}
               size={"sm"}
@@ -80,7 +80,7 @@ export const ProjectIdClient = () => {
               Add Collaborator
             </Button>
             <Button
-              className="bg-slate-200 hover:bg-slate-300 text-black"
+              className="bg-slate-200 text-black hover:bg-slate-300"
               variant={"default"}
               size="sm"
               asChild
@@ -92,17 +92,17 @@ export const ProjectIdClient = () => {
             </Button>
           </div>
         </div>
-        <div className="md:hidden block">
+        <div className="block md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size={"icon"} className="lg:hidden">
-                <EllipsisVertical className="size-2 " />
+                <EllipsisVertical className="size-2" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="p-2">
-              <div className="space-y-2 flex flex-col items-center">
+              <div className="flex flex-col items-center space-y-2">
                 <Button
-                  className="w-full bg-slate-200 hover:bg-slate-300 text-black"
+                  className="w-full bg-slate-200 text-black hover:bg-slate-300"
                   onClick={handleCreatePr}
                   variant={"default"}
                 >
@@ -114,7 +114,7 @@ export const ProjectIdClient = () => {
                   Add Collaborator
                 </Button>
                 <Button
-                  className="w-full bg-slate-200 hover:bg-slate-300 text-black"
+                  className="w-full bg-slate-200 text-black hover:bg-slate-300"
                   variant={"default"}
                   asChild
                 >

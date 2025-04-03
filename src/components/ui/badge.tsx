@@ -2,7 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { TaskStatus } from "@/features/tasks/types";
+import { IssueStatus } from "@/features/issues/types";
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
@@ -16,22 +16,22 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
-        [TaskStatus.TODO]:
+        [IssueStatus.TODO]:
           "border-transparent bg-red-400 text-primary hover:bg-red-400/80",
-        [TaskStatus.DONE]:
+        [IssueStatus.DONE]:
           "border-transparent bg-emerald-400 text-primary hover:bg-emerald-400/80",
-        [TaskStatus.BACKLOG]:
+        [IssueStatus.BACKLOG]:
           "border-transparent bg-pink-400 text-primary hover:bg-pink-400/80",
-        [TaskStatus.IN_REVIEW]:
+        [IssueStatus.IN_REVIEW]:
           "border-transparent bg-neutral-400 text-primary hover:bg-neutral-400/80",
-        [TaskStatus.IN_PROGRESS]:
+        [IssueStatus.IN_PROGRESS]:
           "border-transparent bg-yellow-400 text-primary hover:bg-yellow-400/80",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
