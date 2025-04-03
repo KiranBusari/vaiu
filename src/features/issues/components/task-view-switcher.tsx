@@ -107,7 +107,7 @@ export const TaskViewSwitcher = ({
         <div className="mt-4 flex w-full items-center justify-start gap-y-2 lg:flex-row">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="table"
             >
               Table
@@ -115,7 +115,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="kanban"
             >
               Kanban
@@ -123,7 +123,7 @@ export const TaskViewSwitcher = ({
           </TabsList>
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 lg:w-auto"
+              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="calendar"
             >
               Calendar
