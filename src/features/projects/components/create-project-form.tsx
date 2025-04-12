@@ -93,7 +93,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
           form1.reset();
           router.push(`/workspaces/${workspaceId}/projects/${data.$id}`);
         },
-      }
+      },
     );
   };
   const onSubmitEp = (values: AddExistingProjectSchema) => {
@@ -109,7 +109,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
           form2.reset();
           router.push(`/workspaces/${workspaceId}/projects/${data.$id}`);
         },
-      }
+      },
     );
   };
 
@@ -127,13 +127,13 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   };
 
   return (
-    <Tabs defaultValue="create-new-project" className="w-full py-8 px-4">
+    <Tabs defaultValue="create-new-project" className="w-full px-4 py-8">
       <TabsList className="grid grid-cols-2">
         <TabsTrigger
           className={cn(
-            "h-8 w-full lg:w-auto dark:text-gray-100",
-            "data-[state=active]:bg-slate-200 data-[state=active]:dark:bg-slate-800 data-[state=active]:text-gray-900",
-            "data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950 outline-none"
+            "h-8 w-full dark:text-gray-100 lg:w-auto",
+            "data-[state=active]:bg-slate-200 data-[state=active]:text-gray-900 data-[state=active]:dark:bg-slate-800",
+            "outline-none data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950",
           )}
           value="create-new-project"
         >
@@ -141,9 +141,9 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
         </TabsTrigger>
         <TabsTrigger
           className={cn(
-            "h-8 w-full lg:w-auto dark:text-gray-100",
-            "data-[state=active]:bg-slate-200 data-[state=active]:dark:bg-slate-800 data-[state=active]:text-gray-900",
-            "data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950 outline-none"
+            "h-8 w-full dark:text-gray-100 lg:w-auto",
+            "data-[state=active]:bg-slate-200 data-[state=active]:text-gray-900 data-[state=active]:dark:bg-slate-800",
+            "outline-none data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950",
           )}
           value="add-existing-project"
         >
@@ -196,7 +196,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                     <Info size={16} className="ml-2" />
                                   </span>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-slate-900 text-slate-100 max-w-sm flex place-content-center">
+                                <TooltipContent className="flex max-w-sm place-content-center bg-slate-900 text-slate-100">
                                   <p className="text-sm">
                                     Access token is a unique identifier that
                                     allows you to access your repo data. You can
@@ -213,7 +213,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                     Steps to generate personal access token
                                   </button>
                                 </DialogTrigger>
-                                <DialogContent className="size-[400px] sm:size-[600px] overflow-y-auto">
+                                <DialogContent className="size-[400px] overflow-y-auto sm:size-[600px]">
                                   <DialogTitle>
                                     Steps to generate personal access token from
                                     Github
@@ -321,7 +321,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                       <div className="flex flex-col gap-y-2">
                         <div className="flex items-center gap-x-5">
                           {field.value ? (
-                            <div className="size-[72px] relative rounded-md overflow-hidden">
+                            <div className="relative size-[72px] overflow-hidden rounded-md">
                               <Image
                                 fill
                                 src={
@@ -358,7 +358,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 size="sm"
                                 type="button"
                                 variant="destructive"
-                                className="w-fit mt-2"
+                                className="mt-2 w-fit"
                                 disabled={isPending}
                                 onClick={() => {
                                   field.onChange(null);
@@ -373,7 +373,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 size="sm"
                                 type="button"
                                 variant="secondary"
-                                className="w-fit mt-2"
+                                className="mt-2 w-fit"
                                 disabled={isPending}
                                 onClick={() => inputRef.current?.click()}
                               >
@@ -458,7 +458,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                     <Info size={16} className="ml-2" />
                                   </span>
                                 </TooltipTrigger>
-                                <TooltipContent className="bg-slate-900 text-slate-100 max-w-sm flex place-content-center">
+                                <TooltipContent className="flex max-w-sm place-content-center bg-slate-900 text-slate-100">
                                   <p className="text-sm">
                                     Access token is a unique identifier that
                                     allows you to access your repo data. You can
@@ -475,7 +475,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                     Steps to generate personal access token
                                   </button>
                                 </DialogTrigger>
-                                <DialogContent className="size-[400px] sm:size-[600px] overflow-y-auto">
+                                <DialogContent className="size-[400px] overflow-y-auto sm:size-[600px]">
                                   <DialogTitle>
                                     Steps to generate personal access token from
                                     Github
@@ -584,7 +584,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                         <div className="flex flex-col gap-y-2">
                           <div className="flex items-center gap-x-5">
                             {field.value ? (
-                              <div className="size-[72px] relative rounded-md overflow-hidden">
+                              <div className="relative size-[72px] overflow-hidden rounded-md">
                                 <Image
                                   fill
                                   src={
@@ -621,7 +621,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                   size="sm"
                                   type="button"
                                   variant="destructive"
-                                  className="w-fit mt-2"
+                                  className="mt-2 w-fit"
                                   disabled={isPending}
                                   onClick={() => {
                                     field.onChange(null);
@@ -636,7 +636,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                   size="sm"
                                   type="button"
                                   variant="secondary"
-                                  className="w-fit mt-2"
+                                  className="mt-2 w-fit"
                                   disabled={isPending}
                                   onClick={() => inputRef.current?.click()}
                                 >

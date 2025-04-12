@@ -71,7 +71,7 @@ export const TaskViewSwitcher = ({
         json: { issues },
       });
     },
-    [],
+    [bulkUpdate],
   );
   return (
     <Tabs
