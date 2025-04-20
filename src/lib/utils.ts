@@ -13,7 +13,7 @@ export const generateInviteCode = (length: number) => {
 
   for (let i = 0; i < length; i++) {
     inviteCode += charecters.charAt(
-      Math.floor(Math.random() * charecters.length)
+      Math.floor(Math.random() * charecters.length),
     );
   }
   return inviteCode;

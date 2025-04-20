@@ -38,7 +38,7 @@ const app = new Hono()
     const workspaces = await databases.listDocuments(
       DATABASE_ID,
       WORKSPACE_ID,
-      [Query.orderDesc("$createdAt"), Query.contains("$id", workspaceIds)]
+      [Query.orderDesc("$createdAt"), Query.contains("$id", workspaceIds)],
     );
     return c.json({ data: workspaces });
   })
@@ -60,7 +60,7 @@ const app = new Hono()
     const workspace = await databases.getDocument<Workspace>(
       DATABASE_ID,
       WORKSPACE_ID,
-      workspaceId
+      workspaceId,
     );
 
     return c.json({ data: workspace });
@@ -72,7 +72,7 @@ const app = new Hono()
     const workspace = await databases.getDocument<Workspace>(
       DATABASE_ID,
       WORKSPACE_ID,
-      workspaceId
+      workspaceId,
     );
 
     return c.json({
@@ -100,14 +100,14 @@ const app = new Hono()
           const file = await storage.createFile(
             IMAGES_BUCKET_ID,
             ID.unique(),
-            image
+            image,
           );
           const buffer: ArrayBuffer = await storage.getFilePreview(
             IMAGES_BUCKET_ID,
-            file.$id
+            file.$id,
           );
           uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-            "base64"
+            "base64",
           )}`;
         }
 
@@ -118,7 +118,7 @@ const app = new Hono()
             Query.equal("name", name),
             Query.equal("userId", user.$id),
             Query.limit(1),
-          ]
+          ],
         );
 
         if (existingWorkspace.total !== 0) {
@@ -133,7 +133,7 @@ const app = new Hono()
               userId: user.$id,
               imageUrl: uploadedImage,
               inviteCode: generateInviteCode(INVITECODE_LENGTH),
-            }
+            },
           );
 
           await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
@@ -146,7 +146,7 @@ const app = new Hono()
       } catch (error) {
         console.log(error);
       }
-    }
+    },
   )
   .patch(
     "/:workspaceId",
@@ -174,14 +174,14 @@ const app = new Hono()
         const file = await storage.createFile(
           IMAGES_BUCKET_ID,
           ID.unique(),
-          image
+          image,
         );
         const buffer: ArrayBuffer = await storage.getFilePreview(
           IMAGES_BUCKET_ID,
-          file.$id
+          file.$id,
         );
         uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-          "base64"
+          "base64",
         )}`;
       } else {
         uploadedImage = image;
@@ -193,11 +193,11 @@ const app = new Hono()
         {
           name,
           imageUrl: uploadedImage,
-        }
+        },
       );
 
       return c.json({ data: updatedWorkspace });
-    }
+    },
   )
   .delete("/:workspaceId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -233,7 +233,7 @@ const app = new Hono()
       workspaceId,
       {
         inviteCode: generateInviteCode(INVITECODE_LENGTH),
-      }
+      },
     );
     return c.json({ data: workspace });
   })
@@ -260,7 +260,7 @@ const app = new Hono()
       const workspace = await databases.getDocument<Workspace>(
         DATABASE_ID,
         WORKSPACE_ID,
-        workspaceId
+        workspaceId,
       );
 
       if (workspace.inviteCode !== code) {
@@ -273,7 +273,7 @@ const app = new Hono()
         role: MemberRole.MEMBER,
       });
       return c.json({ data: workspace });
-    }
+    },
   )
   .get("/:workspaceId/analytics", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
@@ -302,7 +302,7 @@ const app = new Hono()
         Query.equal("workspaceId", workspaceId),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -311,7 +311,7 @@ const app = new Hono()
         Query.equal("workspaceId", workspaceId),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const taskCount = thisMonthTasks.total;
@@ -325,7 +325,7 @@ const app = new Hono()
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -335,7 +335,7 @@ const app = new Hono()
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const assignedTaskCount = thisMonthAssignedTasks.total;
@@ -349,7 +349,7 @@ const app = new Hono()
         Query.notEqual("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -359,7 +359,7 @@ const app = new Hono()
         Query.notEqual("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const incompleteTaskCount = thisMonthIncompleteTasks.total;
@@ -374,7 +374,7 @@ const app = new Hono()
         Query.equal("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -384,7 +384,7 @@ const app = new Hono()
         Query.equal("status", TaskStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const completedTaskCount = thisMonthCompletedTasks.total;
@@ -399,7 +399,7 @@ const app = new Hono()
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
-      ]
+      ],
     );
     const lastMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -410,7 +410,7 @@ const app = new Hono()
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ]
+      ],
     );
 
     const overdueTaskCount = thisMonthOverDueTasks.total;
