@@ -2,7 +2,7 @@
 
 import { CalendarIcon, PlusIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
-import { Task } from "@/features/tasks/types";
+import { Issue } from "@/features/issues/types";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Member } from "@/features/members/types";
@@ -12,13 +12,13 @@ import { PageError } from "@/components/page-error";
 import { Loader } from "@/components/page-loader";
 import { Card, CardContent } from "@/components/ui/card";
 import { DottedSeparator } from "@/components/dotted-separator";
-import { useGetTasks } from "@/features/tasks/api/use-get-tasks";
+import { useGetIssues } from "@/features/issues/api/use-get-tasks";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
-import { useCreateTaskModal } from "@/features/tasks/hooks/use-create-task-modal";
+import { useCreateTaskModal } from "@/features/issues/hooks/use-create-task-modal";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
 import { useGetWorkspaceAnalytics } from "@/features/workspaces/api/use-get-workspace-analytics";
 
@@ -26,7 +26,7 @@ export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
   const { data: analytics, isLoading: analyticsLoading } =
     useGetWorkspaceAnalytics({ workspaceId });
-  const { data: tasks, isLoading: tasksLoading } = useGetTasks({
+  const { data: tasks, isLoading: tasksLoading } = useGetIssues({
     workspaceId,
   });
   const { data: projects, isLoading: projectsLoading } = useGetProjects({
@@ -44,9 +44,9 @@ export const WorkspaceIdClient = () => {
   if (!analytics || !tasks || !projects || !members)
     return <PageError message="Failed to load workspace data" />;
   return (
-    <div className="h-full flex flex-col space-y-4">
+    <div className="flex h-full flex-col space-y-4">
       <Analytics data={analytics} />
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <TaskList data={tasks.documents} total={tasks.total} />
         <ProjectList data={projects.documents} total={projects.total} />
         <MembersList data={members.documents} total={members.total} />
@@ -56,7 +56,7 @@ export const WorkspaceIdClient = () => {
 };
 
 interface TaskListProps {
-  data: Task[];
+  data: Issue[];
   total: number;
 }
 export const TaskList = ({ data, total }: TaskListProps) => {
@@ -64,8 +64,8 @@ export const TaskList = ({ data, total }: TaskListProps) => {
   const workspaceId = useWorkspaceId();
 
   return (
-    <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-slate-200 dark:bg-gray-800 border rounded-lg p-4">
+    <div className="col-span-1 flex flex-col gap-y-4">
+      <div className="rounded-lg border bg-slate-200 p-4 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Issues ({total})</p>
           <Button variant="secondary" size="icon" onClick={createTask}>
@@ -74,19 +74,19 @@ export const TaskList = ({ data, total }: TaskListProps) => {
         </div>
         <DottedSeparator className="my-4" />
         <ul className="flex flex-col gap-y-4">
-          {data.map((task) => (
-            <li key={task.$id}>
-              <Link href={`/workspaces/${workspaceId}/tasks/${task.$id}`}>
-                <Card className="bg-slate-50 dark:bg-gray-900 shadow-none rounded-lg hover:opacity-75 transition">
+          {data.map((issue) => (
+            <li key={issue.$id}>
+              <Link href={`/workspaces/${workspaceId}/issues/${issue.$id}`}>
+                <Card className="rounded-lg bg-slate-50 shadow-none transition hover:opacity-75 dark:bg-gray-900">
                   <CardContent className="p-4">
-                    <p className="text-lg font-medium truncate">{task.name}</p>
+                    <p className="truncate text-lg font-medium">{issue.name}</p>
                     <div className="flex items-center gap-x-2">
-                      <p>{task.project?.name}</p>
+                      <p>{issue.project?.name}</p>
                       <div className="dot" />
-                      <div className="text-sm text-muted-foreground flex items-center">
-                        <CalendarIcon className="size-3 mr-1" />
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <CalendarIcon className="mr-1 size-3" />
                         <span className="truncate">
-                          {formatDistanceToNow(new Date(task.dueDate))}
+                          {formatDistanceToNow(new Date(issue.dueDate))}
                         </span>
                       </div>
                     </div>
@@ -95,16 +95,16 @@ export const TaskList = ({ data, total }: TaskListProps) => {
               </Link>
             </li>
           ))}
-          <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
             No issues found
           </li>
         </ul>
         <Button
           variant="outline"
-          className="mt-4 w-full bg-slate-100 dark:bg-gray-900 transition-all duration-300 ease-in-out"
+          className="mt-4 w-full bg-slate-100 transition-all duration-300 ease-in-out dark:bg-gray-900"
           asChild
         >
-          <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
+          <Link href={`/workspaces/${workspaceId}/issues`}>Show All</Link>
         </Button>
       </div>
     </div>
@@ -120,8 +120,8 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
   const workspaceId = useWorkspaceId();
 
   return (
-    <div className="flex flex-col gap-y-4 col-span-1">
-      <div className="bg-slate-200 dark:bg-gray-800 border rounded-lg p-4">
+    <div className="col-span-1 flex flex-col gap-y-4">
+      <div className="rounded-lg border bg-slate-200 p-4 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Projects ({total})</p>
           <Button variant="secondary" size="icon" onClick={createProject}>
@@ -129,19 +129,19 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {data.map((project) => (
             <li key={project.$id}>
               <Link href={`/workspaces/${workspaceId}/projects/${project.$id}`}>
-                <Card className="bg-slate-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg hover:opacity-75 transition">
-                  <CardContent className="p-4 flex items-center gap-x-2.5">
+                <Card className="rounded-lg border border-gray-200 bg-slate-50 shadow-none transition hover:opacity-75 dark:border-gray-700 dark:bg-gray-900">
+                  <CardContent className="flex items-center gap-x-2.5 p-4">
                     <ProjectAvatar
                       className="size-12"
                       fallbackClassName="text-lg"
                       name={project.name}
                       image={project.imageUrl}
                     />
-                    <p className="text-lg font-medium truncate">
+                    <p className="truncate text-lg font-medium">
                       {project.name}
                     </p>
                   </CardContent>
@@ -149,7 +149,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
               </Link>
             </li>
           ))}
-          <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
             No projects found
           </li>
         </ul>
@@ -166,8 +166,8 @@ export const MembersList = ({ data, total }: MembersListProps) => {
   const workspaceId = useWorkspaceId();
 
   return (
-    <div className="flex flex-col gap-y-4 col-span-1 container">
-      <div className="bg-slate-200 dark:bg-gray-800 border rounded-lg p-4">
+    <div className="container col-span-1 flex flex-col gap-y-4">
+      <div className="rounded-lg border bg-slate-200 p-4 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Members ({total})</p>
           <Button asChild variant="secondary" size="icon">
@@ -177,16 +177,16 @@ export const MembersList = ({ data, total }: MembersListProps) => {
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 place-items-center">
+        <ul className="grid grid-cols-1 place-items-center gap-2 md:grid-cols-2">
           {data && data.length > 0 ? (
             <>
               {data.map((member) => (
-                <li key={member.$id} className="flex gap-4 w-fit">
-                  <Card className="bg-slate-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-none rounded-lg overflow-hidden">
-                    <CardContent className="p-2 flex-col flex items-center gap-x-2">
+                <li key={member.$id} className="flex w-fit gap-4">
+                  <Card className="overflow-hidden rounded-lg border border-gray-200 bg-slate-50 shadow-none dark:border-gray-700 dark:bg-gray-900">
+                    <CardContent className="flex flex-col items-center gap-x-2 p-2">
                       <MemberAvatar className="size-12" name={member.name} />
                       <div className="flex flex-col items-center overflow-hidden p-2">
-                        <p className="text-lg font-medium line-clamp-1 max-w-36">
+                        <p className="line-clamp-1 max-w-36 text-lg font-medium">
                           {member.name}
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -199,7 +199,7 @@ export const MembersList = ({ data, total }: MembersListProps) => {
               ))}
             </>
           ) : (
-            <li className="text-sm text-muted-foreground text-center hidden first-of-type:block">
+            <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
               No members found
             </li>
           )}

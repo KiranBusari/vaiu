@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/rpc";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface VerifyUserInput {
   userId: string;
@@ -13,6 +14,7 @@ interface VerifyUserResponse {
 }
 
 export const useVerifyUser = () => {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const mutation = useMutation<
@@ -31,6 +33,7 @@ export const useVerifyUser = () => {
       return response.json();
     },
     onSuccess: (data) => {
+      router.refresh();
       toast.success(data.message || "Verification completed successfully");
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },

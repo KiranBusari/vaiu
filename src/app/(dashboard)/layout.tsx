@@ -3,15 +3,15 @@ import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspace-modal";
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal";
-import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
-import { EditTaskModal } from "@/features/tasks/components/edit-task-modal";
+import { CreateTaskModal } from "@/features/issues/components/create-task-modal";
+import { EditTaskModal } from "@/features/issues/components/edit-task-modal";
 import { AddCollaboratorToProjectModal } from "@/features/projects/components/add-collaborator-to-project-modal";
 import { CreateRoomModal } from "@/features/channels/components/create-channel-modal";
 import { CreatePrModal } from "@/features/projects/components/create-pr-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="min-h-screen dark:bg-gray-950 bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
       <AddCollaboratorToProjectModal />
       <CreateWorkspaceModal />
       <CreateProjectModal />
@@ -20,13 +20,13 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
       <CreatePrModal />
       <EditTaskModal />
       <div className="flex h-full w-full">
-        <div className="fixed left-0 top-0 hidden lg:block lg:w-[264px] h-full overflow-y-auto">
+        <div className="fixed left-0 top-0 hidden h-full overflow-y-auto lg:block lg:w-[264px]">
           <Sidebar />
         </div>
-        <div className="lg:pl-[264px] w-full">
-          <div className="mx-auto max-w-screen-2xl h-full">
+        <div className="w-full lg:pl-[264px]">
+          <div className="mx-auto h-full max-w-screen-2xl">
             <Navbar />
-            <main className="h-full py-8 px-6 flex flex-col">{children}</main>
+            <main className="flex h-full flex-col px-6 py-8">{children}</main>
           </div>
         </div>
       </div>

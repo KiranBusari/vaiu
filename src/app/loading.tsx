@@ -2,7 +2,7 @@
 import { LoaderPinwheelIcon } from "lucide-react";
 const LoadingPage = () => {
   return (
-    <div className="h-screen flex items-center justify-center flex-col">
+    <div className="flex h-screen flex-col items-center justify-center">
       <LoaderPinwheelIcon className="size-6 animate-spin text-muted-foreground" />
     </div>
   );
