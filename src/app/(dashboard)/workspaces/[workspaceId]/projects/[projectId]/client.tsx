@@ -1,9 +1,9 @@
 "use client";
 import {
-  Pencil,
   UserPlus2,
   GitPullRequestCreateArrowIcon,
   EllipsisVertical,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -86,8 +86,8 @@ export const ProjectIdClient = () => {
               asChild
             >
               <Link href={href}>
-                <Pencil className="size-4" />
-                Edit Project
+                <Settings className="size-4" />
+                Settings
               </Link>
             </Button>
           </div>
@@ -119,8 +119,8 @@ export const ProjectIdClient = () => {
                   asChild
                 >
                   <Link href={href}>
-                    <Pencil className="size-4" />
-                    Edit Project
+                    <Settings className="size-4" />
+                    Settings
                   </Link>
                 </Button>
               </div>
