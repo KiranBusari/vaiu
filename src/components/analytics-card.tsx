@@ -21,10 +21,10 @@ export const AnalyticsCard = ({
   const Icon = variant === "up" ? FaCaretUp : FaCaretDown;
 
   return (
-    <Card className="shadow-none border-none w-full bg-slate-200 dark:bg-gray-900">
+    <Card className="w-full border-none bg-slate-200 shadow-none dark:bg-neutral-700">
       <CardHeader>
         <div className="flex items-center gap-x-1">
-          <CardDescription className="flex items-center gap-x-2 font-medium overflow-hidden">
+          <CardDescription className="flex items-center gap-x-2 overflow-hidden font-medium">
             <span className="truncate text-base">{title}</span>
           </CardDescription>
           <div className="flex items-center gap-x-1">
@@ -32,7 +32,7 @@ export const AnalyticsCard = ({
             <span
               className={cn(
                 "truncate text-base font-medium",
-                increaseValueColor
+                increaseValueColor,
               )}
             >
               {increasedValue}
