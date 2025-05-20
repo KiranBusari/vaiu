@@ -7,6 +7,7 @@ import {
   UploadIcon,
   Copy,
   CheckIcon,
+  UploadIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -32,6 +33,8 @@ import {
 import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaGithub } from "react-icons/fa";
+import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
+import { useMemo } from "react";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -55,6 +58,12 @@ export const ProjectIdClient = () => {
     if (!project) return "";
     return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
   }, [project]);
+
+  const { openPr } = useCreatePrModal();
+  const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
+  const { openFileUploader } = useFileUploadModal();
+
+  const isLoading = projectsLoading || analyticsLoading;
 
   const handleCreatePr = async () => {
     try {
@@ -219,6 +228,14 @@ export const ProjectIdClient = () => {
                 </Button>
                 <Button
                   className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
+                  onClick={handleFileUpload}
+                  variant="default"
+                >
+                  <UploadIcon className="mr-2 size-4" />
+                  Upload Readme
+                </Button>
+                <Button
+                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
                   onClick={handleCreatePr}
                   variant="default"
                 >
@@ -231,10 +248,6 @@ export const ProjectIdClient = () => {
                   onClick={openCollaboratorModal}
                 >
                   <UserPlus2 className="mr-2 size-4" />
-                  Subscribe
-                </Button>
-                <Button className="w-full" variant={"outline"} onClick={open}>
-                  <UserPlus2 className="size-4" />
                   Add Collaborator
                 </Button>
                 <Button
