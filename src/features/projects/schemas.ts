@@ -55,12 +55,7 @@ export const addExistingProjectSchema = z.object({
 });
 
 export const fileUploadSchema = z.object({
-  file: z
-    .union([
-      z.instanceof(File),
-      z.string().transform((value) => (value === "" ? undefined : value)),
-    ])
-    .optional(),
+  file: z.instanceof(File).nullable(),
 });
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;

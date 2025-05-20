@@ -8,6 +8,7 @@ import { EditTaskModal } from "@/features/issues/components/edit-task-modal";
 import { AddCollaboratorToProjectModal } from "@/features/projects/components/add-collaborator-to-project-modal";
 import { CreateRoomModal } from "@/features/channels/components/create-channel-modal";
 import { CreatePrModal } from "@/features/projects/components/create-pr-modal";
+import { FileUploaderModal } from "@/features/projects/components/file-uploader-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
@@ -19,6 +20,7 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
       <CreateTaskModal />
       <CreatePrModal />
       <EditTaskModal />
+      <FileUploaderModal />
       <div className="flex h-full w-full">
         <div className="fixed left-0 top-0 hidden h-full overflow-y-auto lg:block lg:w-[264px]">
           <Sidebar />

@@ -25,6 +25,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
+import { useMemo } from "react";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -34,9 +36,11 @@ export const ProjectIdClient = () => {
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
 
-  // Move hook calls before their usage to follow React rules of hooks
   const { openPr } = useCreatePrModal();
-  const { open } = useAddCollaboratorToProjectModal();
+  const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
+  const { openFileUploader } = useFileUploadModal();
+
+  const isLoading = projectsLoading || analyticsLoading;
 
   const handleCreatePr = async () => {
     try {
@@ -51,12 +55,23 @@ export const ProjectIdClient = () => {
     }
   };
 
-  const isLoading = projectsLoading || analyticsLoading;
+  const handleFileUpload = async () => {
+    try {
+      await openFileUploader();
+    } catch (error) {
+      console.error("Error opening file uploader:", error);
+      toast.error("Failed to open file uploader");
+    }
+  };
+
+  // Memoize the settings URL to prevent recalculation on each render
+  const settingsUrl = useMemo(() => {
+    if (!project) return "";
+    return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
+  }, [project]);
 
   if (isLoading) return <Loader />;
   if (!project) return <PageError message="Project not found" />;
-
-  const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -69,14 +84,15 @@ export const ProjectIdClient = () => {
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
         </div>
-        {/* Desktop view */}
+
+        {/* Desktop actions */}
         <div className="hidden md:block">
           <div className="flex items-center space-x-4">
             <Button
               className="bg-slate-200 text-black hover:bg-slate-300"
-              onClick={handleCreatePr}
-              variant={"default"}
-              size={"sm"}
+              onClick={handleFileUpload}
+              variant="default"
+              size="sm"
             >
               <UploadIcon className="mr-1 size-4" />
               Upload Readme
@@ -84,34 +100,35 @@ export const ProjectIdClient = () => {
             <Button
               className="bg-slate-200 text-black hover:bg-slate-300"
               onClick={handleCreatePr}
-              variant={"default"}
-              size={"sm"}
+              variant="default"
+              size="sm"
             >
-              <GitPullRequestCreateArrowIcon className="size-4" />
+              <GitPullRequestCreateArrowIcon className="mr-1 size-4" />
               Create Pull Request
             </Button>
-            <Button variant={"outline"} size={"sm"} onClick={open}>
-              <UserPlus2 className="size-4" />
+            <Button variant="outline" size="sm" onClick={openCollaboratorModal}>
+              <UserPlus2 className="mr-1 size-4" />
               Add Collaborator
             </Button>
             <Button
               className="bg-slate-200 text-black hover:bg-slate-300"
-              variant={"default"}
+              variant="default"
               size="sm"
               asChild
             >
-              <Link href={href}>
-                <Settings className="size-4" />
+              <Link href={settingsUrl}>
+                <Settings className="mr-1 size-4" />
                 Settings
               </Link>
             </Button>
           </div>
         </div>
-        {/* Mobile view */}
+
+        {/* Mobile actions */}
         <div className="block md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size={"icon"}>
+              <Button variant="outline" size="icon">
                 <EllipsisVertical className="size-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -119,37 +136,36 @@ export const ProjectIdClient = () => {
             <DropdownMenuContent align="end" className="w-52 p-2">
               <div className="flex flex-col items-stretch space-y-2">
                 <Button
-                  className="bg-slate-200 text-black hover:bg-slate-300"
-                  onClick={handleCreatePr}
-                  variant={"default"}
-                  size={"sm"}
+                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
+                  onClick={handleFileUpload}
+                  variant="default"
                 >
-                  <UploadIcon className="mr-1 size-4" />
+                  <UploadIcon className="mr-2 size-4" />
                   Upload Readme
                 </Button>
                 <Button
                   className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
                   onClick={handleCreatePr}
-                  variant={"default"}
+                  variant="default"
                 >
-                  <GitPullRequestCreateArrowIcon className="size-4" />
+                  <GitPullRequestCreateArrowIcon className="mr-2 size-4" />
                   Create Pull Request
                 </Button>
                 <Button
                   className="w-full justify-start"
-                  variant={"outline"}
-                  onClick={open}
+                  variant="outline"
+                  onClick={openCollaboratorModal}
                 >
-                  <UserPlus2 className="size-4" />
+                  <UserPlus2 className="mr-2 size-4" />
                   Add Collaborator
                 </Button>
                 <Button
                   className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  variant={"default"}
+                  variant="default"
                   asChild
                 >
-                  <Link href={href}>
-                    <Settings className="size-4" />
+                  <Link href={settingsUrl}>
+                    <Settings className="mr-2 size-4" />
                     Settings
                   </Link>
                 </Button>
@@ -158,6 +174,7 @@ export const ProjectIdClient = () => {
           </DropdownMenu>
         </div>
       </div>
+
       {analytics && <Analytics data={analytics} />}
       <TaskViewSwitcher hideProjectFilter />
     </div>

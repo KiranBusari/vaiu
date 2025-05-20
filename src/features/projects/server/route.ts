@@ -663,11 +663,11 @@ const app = new Hono()
   .post(
     "/upload-file",
     sessionMiddleware,
-    zValidator("json", fileUploadSchema),
+    zValidator("form", fileUploadSchema),
     async (c) => {
       const storage = c.get("storage");
-      const { file } = c.req.valid("json");
-
+      const { file } = c.req.valid("form");
+      console.log("File", file);
       if (!file) {
         return c.json({ error: "File is required" }, 400);
       }

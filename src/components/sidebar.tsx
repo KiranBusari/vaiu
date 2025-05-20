@@ -13,7 +13,7 @@ import { Logo2 } from "./Logo2";
 export const Sidebar = () => {
   const workspaceId = useWorkspaceId();
   return (
-    <aside className="h-full bg-slate-200 dark:bg-slate-950 p-4 w-full border">
+    <aside className="h-full w-full border bg-slate-200 p-4 dark:bg-slate-950">
       <div className="flex items-center justify-center">
         <Link href={`/workspaces/${workspaceId}`}>
           <Logo className="dark:hidden" />

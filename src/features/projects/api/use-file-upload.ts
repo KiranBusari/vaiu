@@ -15,9 +15,9 @@ type RequestType = InferRequestType<
 export const useFileUpload = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
+    mutationFn: async ({ form }) => {
       const response = await client.api.v1.projects["upload-file"].$post({
-        json,
+        form,
       });
 
       if (!response.ok) throw new Error("Failed to upload file");

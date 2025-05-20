@@ -60,12 +60,12 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
           form.reset();
           router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
         },
-      }
+      },
     );
   };
 
   return (
-    <Card className="size-full border-none shadow-none dark:bg-slate-800 bg-white">
+    <Card className="size-full border-none bg-white shadow-none dark:bg-slate-800">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Create a pull request

@@ -1,17 +1,17 @@
 import { useQueryState, parseAsBoolean } from "nuqs";
 
-export const useCreatePrModal = () => {
+export const useFileUploadModal = () => {
   const [isOpen, setIsOpen] = useQueryState(
-    "create-pr",
+    "file-uploader",
     parseAsBoolean.withDefault(false).withOptions({ clearOnDefault: true }),
   );
 
-  const openPr = () => setIsOpen(true);
-  const closePr = () => setIsOpen(false);
+  const openFileUploader = () => setIsOpen(true);
+  const closeFileUploader = () => setIsOpen(false);
   return {
     isOpen,
-    openPr,
-    closePr,
+    openFileUploader,
+    closeFileUploader,
     setIsOpen,
   };
 };
