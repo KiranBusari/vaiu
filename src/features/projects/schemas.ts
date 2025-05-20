@@ -54,6 +54,15 @@ export const addExistingProjectSchema = z.object({
     .optional(),
 });
 
+export const fileUploadSchema = z.object({
+  file: z
+    .union([
+      z.instanceof(File),
+      z.string().transform((value) => (value === "" ? undefined : value)),
+    ])
+    .optional(),
+});
+
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;
 export type UpdateProjectSchema = z.infer<typeof updateProjectSchema>;
 export type AddCollaboratorToProjectSchema = z.infer<
@@ -64,3 +73,4 @@ export type RemoveCollaboratorFromProjectSchema = z.infer<
 >;
 export type CreatePrSchema = z.infer<typeof createPrSchema>;
 export type AddExistingProjectSchema = z.infer<typeof addExistingProjectSchema>;
+export type FileUploadSchema = z.infer<typeof fileUploadSchema>;

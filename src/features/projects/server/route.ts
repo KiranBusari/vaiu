@@ -19,6 +19,7 @@ import {
   updateProjectSchema,
   createPrSchema,
   addExistingProjectSchema,
+  fileUploadSchema,
 } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
@@ -657,6 +658,32 @@ const app = new Hono()
         console.error("Failed to create PR:", error);
         return c.json({ error: "Failed to create PR" }, 500);
       }
+    },
+  )
+  .post(
+    "/upload-file",
+    sessionMiddleware,
+    zValidator("json", fileUploadSchema),
+    async (c) => {
+      const storage = c.get("storage");
+      const { file } = c.req.valid("json");
+
+      if (!file) {
+        return c.json({ error: "File is required" }, 400);
+      }
+
+      let uploadedFile;
+      if (file instanceof File) {
+        uploadedFile = await storage.createFile(
+          IMAGES_BUCKET_ID,
+          ID.unique(),
+          file,
+        );
+      } else {
+        return c.json({ error: "Invalid file type" }, 400);
+      }
+
+      return c.json({ data: uploadedFile });
     },
   );
 
