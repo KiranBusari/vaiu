@@ -5,6 +5,8 @@ import { useFileUpload } from "../api/use-file-upload";
 import { useForm } from "react-hook-form";
 import { fileUploadSchema } from "../schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useProjectId } from "../hooks/use-projectId";
+import ReactMarkdown from "react-markdown";
 
 const FileUploader = ({
   onCancel,
@@ -20,11 +22,13 @@ const FileUploader = ({
     content?: string;
     url?: string;
   } | null>(null);
+  const projectId = useProjectId();
 
-  const uploadForm = useForm<{ file: File | null }>({
+  const uploadForm = useForm<{ file: File | null; projectId: string }>({
     resolver: zodResolver(fileUploadSchema),
     defaultValues: {
       file: null,
+      projectId: "",
     },
   });
 
@@ -33,7 +37,6 @@ const FileUploader = ({
       const selectedFile = files[0];
       uploadForm.setValue("file", selectedFile);
 
-      // Create a preview with file metadata
       const previewData = {
         name: selectedFile.name,
         type: selectedFile.type,
@@ -88,7 +91,7 @@ const FileUploader = ({
       if (onUpload) {
         await onUpload([file]);
       } else {
-        mutate({ form: { file } });
+        mutate({ form: { file, projectId } });
       }
 
       setError(null);
@@ -158,7 +161,6 @@ const FileUploader = ({
             </div>
           </div>
 
-          {/* Content Preview with improved layout */}
           <div className="p-4">
             {preview.url && preview.type.includes("pdf") && (
               <div className="overflow-hidden rounded-md border border-gray-200">
@@ -173,7 +175,8 @@ const FileUploader = ({
             {preview.content && (
               <div className="max-h-96 overflow-auto rounded-md border border-gray-200 bg-gray-50">
                 <div className="whitespace-pre-wrap p-4 font-mono text-sm leading-relaxed text-gray-800">
-                  {preview.content}
+                  <ReactMarkdown>{preview.content}</ReactMarkdown>
+                  {/* {preview.content} */}
                 </div>
               </div>
             )}

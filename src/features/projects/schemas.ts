@@ -56,6 +56,7 @@ export const addExistingProjectSchema = z.object({
 
 export const fileUploadSchema = z.object({
   file: z.instanceof(File).nullable(),
+  projectId: z.string(),
 });
 
 export type CreateProjectSchema = z.infer<typeof createProjectSchema>;

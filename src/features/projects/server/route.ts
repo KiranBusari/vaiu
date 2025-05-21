@@ -666,24 +666,70 @@ const app = new Hono()
     zValidator("form", fileUploadSchema),
     async (c) => {
       const storage = c.get("storage");
-      const { file } = c.req.valid("form");
-      console.log("File", file);
+      const databases = c.get("databases");
+      const { file, projectId } = c.req.valid("form");
+
       if (!file) {
         return c.json({ error: "File is required" }, 400);
       }
 
+      try {
+        const project = await databases.getDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId,
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        return c.json({ error: "Project not found" }, 404);
+      }
+
       let uploadedFile;
+
       if (file instanceof File) {
         uploadedFile = await storage.createFile(
           IMAGES_BUCKET_ID,
           ID.unique(),
           file,
         );
+
+        if (
+          file.name.toLowerCase().endsWith(".md") ||
+          file.name.toLowerCase().endsWith(".txt")
+        ) {
+          try {
+            const fileBuffer = await storage.getFileDownload(
+              IMAGES_BUCKET_ID,
+              uploadedFile.$id,
+            );
+            uploadedFile = `data:text/plain;base64,${Buffer.from(
+              fileBuffer,
+            ).toString("base64")}`;
+
+            await databases.updateDocument(
+              DATABASE_ID,
+              PROJECTS_ID,
+              projectId,
+              {
+                readme: uploadedFile,
+              },
+            );
+          } catch (error) {
+            console.error("Error processing README file:", error);
+          }
+        }
       } else {
         return c.json({ error: "Invalid file type" }, 400);
       }
-
-      return c.json({ data: uploadedFile });
+      return c.json({
+        data: {
+          file: uploadedFile,
+        },
+      });
     },
   );
 
