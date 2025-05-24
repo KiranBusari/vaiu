@@ -8,6 +8,8 @@ import {
   Copy,
   CheckIcon,
   UploadIcon,
+  Copy,
+  CheckIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -34,7 +36,7 @@ import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaGithub } from "react-icons/fa";
 import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
-import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -59,11 +61,19 @@ export const ProjectIdClient = () => {
     return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
   }, [project]);
 
+  const [readmeContent, setReadmeContent] = useState<string | null>(null);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
+
   const { openPr } = useCreatePrModal();
   const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
   const { openFileUploader } = useFileUploadModal();
 
   const isLoading = projectsLoading || analyticsLoading;
+
+  const settingsUrl = useMemo(() => {
+    if (!project) return "";
+    return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
+  }, [project]);
 
   const handleCreatePr = async () => {
     try {
@@ -157,15 +167,6 @@ export const ProjectIdClient = () => {
             className="size-8"
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
-          <a
-            href={`https://github.com/your-org/${project.name}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-1 text-gray-500 hover:text-white"
-            title="View on GitHub"
-          >
-            <FaGithub className="size-5" />
-          </a>
         </div>
 
         {/* Desktop actions */}
