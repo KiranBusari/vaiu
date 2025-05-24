@@ -77,7 +77,7 @@ export const ProjectIdClient = () => {
   const handleFileUpload = async () => {
     try {
       const result = await openFileUploader();
-      if (result && result.success) {
+      if (result && result.get("success") === "true") {
         toast.success("README uploaded successfully");
       }
     } catch (error) {
@@ -196,7 +196,7 @@ export const ProjectIdClient = () => {
       {/* Readme Display */}
       {isLoading ? (
         <div className="mt-4">
-          <Loader size="sm" />
+          <Loader />
         </div>
       ) : readmeContent ? (
         <Card className="mt-4">
