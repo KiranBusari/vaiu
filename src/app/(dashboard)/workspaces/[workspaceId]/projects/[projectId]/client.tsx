@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useState, useEffect, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { TaskViewSwitcher } from "@/features/issues/components/task-view-switcher";
@@ -26,21 +28,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
-import { useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
   const { data: project, isLoading: projectsLoading } = useGetProject({
     projectId,
   });
+  console.log("Project data:", project);
+
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
+
+  const [readmeContent, setReadmeContent] = useState<string | null>(null);
 
   const { openPr } = useCreatePrModal();
   const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
   const { openFileUploader } = useFileUploadModal();
 
   const isLoading = projectsLoading || analyticsLoading;
+
+  const settingsUrl = useMemo(() => {
+    if (!project) return "";
+    return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
+  }, [project]);
+
+  useEffect(() => {
+    if (project && project.readme) {
+      setReadmeContent(project.readme);
+    } else {
+      setReadmeContent(null);
+    }
+  }, [project]);
 
   const handleCreatePr = async () => {
     try {
@@ -57,18 +76,15 @@ export const ProjectIdClient = () => {
 
   const handleFileUpload = async () => {
     try {
-      await openFileUploader();
+      const result = await openFileUploader();
+      if (result && result.success) {
+        toast.success("README uploaded successfully");
+      }
     } catch (error) {
       console.error("Error opening file uploader:", error);
       toast.error("Failed to open file uploader");
     }
   };
-
-  // Memoize the settings URL to prevent recalculation on each render
-  const settingsUrl = useMemo(() => {
-    if (!project) return "";
-    return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
-  }, [project]);
 
   if (isLoading) return <Loader />;
   if (!project) return <PageError message="Project not found" />;
@@ -176,6 +192,29 @@ export const ProjectIdClient = () => {
       </div>
 
       {analytics && <Analytics data={analytics} />}
+
+      {/* Readme Display */}
+      {isLoading ? (
+        <div className="mt-4">
+          <Loader size="sm" />
+        </div>
+      ) : readmeContent ? (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>README</CardTitle>
+          </CardHeader>
+          <CardContent className="prose dark:prose-invert max-w-none">
+            <ReactMarkdown>{readmeContent}</ReactMarkdown>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mt-4 p-6 text-center">
+          <p className="text-muted-foreground">
+            No README file found. Upload one to display project information.
+          </p>
+        </Card>
+      )}
+
       <TaskViewSwitcher hideProjectFilter />
     </div>
   );
