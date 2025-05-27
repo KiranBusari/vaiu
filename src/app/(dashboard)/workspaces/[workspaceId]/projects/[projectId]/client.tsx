@@ -55,14 +55,6 @@ export const ProjectIdClient = () => {
     return `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
   }, [project]);
 
-  useEffect(() => {
-    if (project && project.readme) {
-      setReadmeContent(project.readme);
-    } else {
-      setReadmeContent(null);
-    }
-  }, [project]);
-
   const handleCreatePr = async () => {
     try {
       await openPr();
@@ -89,6 +81,20 @@ export const ProjectIdClient = () => {
   };
 
   const scrollPositionRef = useRef(0);
+
+  // Process README content to handle any inconsistencies
+  const processReadmeContent = (content: string | null) => {
+    if (!content) return null;
+
+    // Remove any duplicate heading markers that might cause rendering issues
+    const processedContent = content
+      .replace(/#{3,}/g, "### ") // Normalize headings with more than 3 #'s
+      .replace(/\n#{1,2}\s*$/gm, "\n") // Remove empty h1 and h2 headings at end of lines
+      .replace(/^#{1,2}\s*$/gm, "") // Remove standalone h1 and h2 headers
+      .trim();
+
+    return processedContent;
+  };
 
   const handleCopyText = (text: string, event?: React.MouseEvent) => {
     if (event) {
@@ -119,6 +125,14 @@ export const ProjectIdClient = () => {
       toast.error("Failed to copy to clipboard");
     }
   };
+
+  useEffect(() => {
+    if (project && project.readme) {
+      setReadmeContent(processReadmeContent(project.readme));
+    } else {
+      setReadmeContent(null);
+    }
+  }, [project]);
 
   if (isLoading) return <Loader />;
   if (!project) return <PageError message="Project not found" />;
@@ -253,25 +267,25 @@ export const ProjectIdClient = () => {
               {copiedText === readmeContent ? "Copied" : "Copy"}
             </Button>
           </CardHeader>
-          <CardContent className="prose prose-sm sm:prose-base dark:prose-invert max-w-7xl place-content-center overflow-hidden p-6 font-sans">
+          <CardContent className="prose prose-sm sm:prose-base dark:prose-invert max-w-none overflow-hidden p-6 font-sans">
             <div className="markdown-container text-base">
               <ReactMarkdown
                 components={{
                   h1: ({ ...props }) => (
-                    <h1
-                      className="mb-4 font-sans text-2xl font-bold"
+                    <h2
+                      className="mb-4 font-sans text-xl font-bold"
                       {...props}
                     />
                   ),
                   h2: ({ ...props }) => (
-                    <h2
-                      className="mb-3 mt-6 font-sans text-xl font-bold"
+                    <h3
+                      className="mb-3 mt-6 font-sans text-lg font-bold"
                       {...props}
                     />
                   ),
                   h3: ({ ...props }) => (
-                    <h3
-                      className="mb-2 mt-5 font-sans text-lg font-semibold"
+                    <h4
+                      className="mb-2 mt-5 font-sans text-base font-semibold"
                       {...props}
                     />
                   ),
@@ -299,7 +313,17 @@ export const ProjectIdClient = () => {
                       {...props}
                     />
                   ),
-                  code: ({ inline, className, children, ...props }) => {
+                  code: ({
+                    inline,
+                    className,
+                    children,
+                    ...props
+                  }: React.ComponentPropsWithoutRef<"code"> & {
+                    inline?: boolean;
+                    className?: string;
+                  }) => {
+                    if (!children) return null;
+
                     const match = /language-(\w+)/.exec(className || "");
                     const codeText = String(children).replace(/\n$/, "");
 
@@ -319,9 +343,12 @@ export const ProjectIdClient = () => {
                               : "CODE"}
                           </span>
                           <button
-                            type="button" // Add type="button" to prevent form submission
-                            onMouseDown={(e) => e.preventDefault()} // Prevent focus issues
-                            onClick={(e) => handleCopyText(codeText, e)}
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyText(codeText, e);
+                            }}
                             className="text-gray-500 hover:text-gray-700 focus:outline-none dark:text-gray-400 dark:hover:text-gray-300"
                             aria-label="Copy code"
                           >
@@ -344,16 +371,23 @@ export const ProjectIdClient = () => {
                     );
                   },
                   pre: ({ children }) => <>{children}</>,
-                  a: ({ ...props }) => (
+                  a: ({ href, ...props }) => (
                     <a
                       className="font-sans text-blue-600 hover:underline dark:text-blue-400"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={href}
+                      target={href?.startsWith("http") ? "_blank" : undefined}
+                      rel={
+                        href?.startsWith("http")
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
                       {...props}
                     />
                   ),
-                  img: ({ ...props }) => (
+                  img: ({ src, alt, ...props }) => (
                     <img
+                      src={src}
+                      alt={alt || ""}
                       className="my-4 h-auto max-w-full rounded"
                       loading="lazy"
                       {...props}
@@ -383,8 +417,9 @@ export const ProjectIdClient = () => {
                     <td className="px-4 py-3 font-sans text-sm" {...props} />
                   ),
                 }}
+                remarkPlugins={[]}
               >
-                {readmeContent}
+                {readmeContent || ""}
               </ReactMarkdown>
             </div>
           </CardContent>
