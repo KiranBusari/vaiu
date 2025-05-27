@@ -329,13 +329,13 @@ export const ProjectIdClient = () => {
 
                     return inline ? (
                       <code
-                        className="rounded bg-gray-100 px-1 py-0.5 font-mono text-sm dark:bg-gray-800"
+                        className="max-w-7xl rounded bg-gray-100 px-1 py-0.5 font-mono text-sm dark:bg-gray-800"
                         {...props}
                       >
                         {children}
                       </code>
                     ) : (
-                      <div className="relative my-3 overflow-hidden rounded-md">
+                      <div className="relative my-3 max-w-4xl overflow-hidden rounded-md">
                         <div className="flex items-center justify-between bg-gray-200 px-3 py-1 text-xs font-semibold dark:bg-gray-700">
                           <span>
                             {match && match[1]
