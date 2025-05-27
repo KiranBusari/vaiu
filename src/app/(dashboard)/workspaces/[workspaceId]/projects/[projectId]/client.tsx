@@ -5,10 +5,12 @@ import {
   EllipsisVertical,
   Settings,
   UploadIcon,
+  Copy,
+  CheckIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
@@ -35,12 +37,12 @@ export const ProjectIdClient = () => {
   const { data: project, isLoading: projectsLoading } = useGetProject({
     projectId,
   });
-  console.log("Project data:", project);
 
   const { data: analytics, isLoading: analyticsLoading } =
     useGetProjectAnalytics({ projectId });
 
   const [readmeContent, setReadmeContent] = useState<string | null>(null);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const { openPr } = useCreatePrModal();
   const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
@@ -83,6 +85,38 @@ export const ProjectIdClient = () => {
     } catch (error) {
       console.error("Error opening file uploader:", error);
       toast.error("Failed to open file uploader");
+    }
+  };
+
+  const scrollPositionRef = useRef(0);
+
+  const handleCopyText = (text: string, event?: React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      // Store current scroll position
+      scrollPositionRef.current = window.scrollY;
+    }
+
+    // Use the clipboard API with try/catch for better error handling
+    try {
+      navigator.clipboard.writeText(text);
+      setCopiedText(text);
+
+      // Use requestAnimationFrame for smoother scroll restoration
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: "auto", // Use 'auto' instead of smooth to prevent visible scrolling
+        });
+      });
+
+      setTimeout(() => {
+        setCopiedText(null);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      toast.error("Failed to copy to clipboard");
     }
   };
 
@@ -202,18 +236,173 @@ export const ProjectIdClient = () => {
         </div>
       ) : readmeContent ? (
         <Card className="mt-4">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between border-b">
             <CardTitle>README</CardTitle>
+            {/* Update the README copy button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => handleCopyText(readmeContent, e)}
+              className="h-8 px-2 text-muted-foreground"
+            >
+              {copiedText === readmeContent ? (
+                <CheckIcon className="mr-2 size-4 text-green-500" />
+              ) : (
+                <Copy className="mr-2 size-4" />
+              )}
+              {copiedText === readmeContent ? "Copied" : "Copy"}
+            </Button>
           </CardHeader>
-          <CardContent className="prose dark:prose-invert max-w-none">
-            <ReactMarkdown>{readmeContent}</ReactMarkdown>
+          <CardContent className="prose prose-sm sm:prose-base dark:prose-invert max-w-7xl place-content-center overflow-hidden p-6 font-sans">
+            <div className="markdown-container text-base">
+              <ReactMarkdown
+                components={{
+                  h1: ({ ...props }) => (
+                    <h1
+                      className="mb-4 font-sans text-2xl font-bold"
+                      {...props}
+                    />
+                  ),
+                  h2: ({ ...props }) => (
+                    <h2
+                      className="mb-3 mt-6 font-sans text-xl font-bold"
+                      {...props}
+                    />
+                  ),
+                  h3: ({ ...props }) => (
+                    <h3
+                      className="mb-2 mt-5 font-sans text-lg font-semibold"
+                      {...props}
+                    />
+                  ),
+                  p: ({ ...props }) => (
+                    <p
+                      className="my-3 font-sans text-base leading-relaxed"
+                      {...props}
+                    />
+                  ),
+                  ul: ({ ...props }) => (
+                    <ul className="my-3 list-disc pl-6 font-sans" {...props} />
+                  ),
+                  ol: ({ ...props }) => (
+                    <ol
+                      className="my-3 list-decimal pl-6 font-sans"
+                      {...props}
+                    />
+                  ),
+                  li: ({ ...props }) => (
+                    <li className="mb-1 font-sans" {...props} />
+                  ),
+                  blockquote: ({ ...props }) => (
+                    <blockquote
+                      className="my-3 border-l-4 border-gray-300 py-1 pl-4 font-sans italic dark:border-gray-700"
+                      {...props}
+                    />
+                  ),
+                  code: ({ inline, className, children, ...props }) => {
+                    const match = /language-(\w+)/.exec(className || "");
+                    const codeText = String(children).replace(/\n$/, "");
+
+                    return inline ? (
+                      <code
+                        className="rounded bg-gray-100 px-1 py-0.5 font-mono text-sm dark:bg-gray-800"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    ) : (
+                      <div className="relative my-3 overflow-hidden rounded-md">
+                        <div className="flex items-center justify-between bg-gray-200 px-3 py-1 text-xs font-semibold dark:bg-gray-700">
+                          <span>
+                            {match && match[1]
+                              ? match[1].toUpperCase()
+                              : "CODE"}
+                          </span>
+                          <button
+                            type="button" // Add type="button" to prevent form submission
+                            onMouseDown={(e) => e.preventDefault()} // Prevent focus issues
+                            onClick={(e) => handleCopyText(codeText, e)}
+                            className="text-gray-500 hover:text-gray-700 focus:outline-none dark:text-gray-400 dark:hover:text-gray-300"
+                            aria-label="Copy code"
+                          >
+                            {copiedText === codeText ? (
+                              <CheckIcon className="size-3.5 text-green-500" />
+                            ) : (
+                              <Copy className="size-3.5" />
+                            )}
+                          </button>
+                        </div>
+                        <pre className="m-0 overflow-x-auto bg-gray-100 p-3 dark:bg-gray-800">
+                          <code
+                            className={`language-${match ? match[1] : ""} font-mono text-sm`}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        </pre>
+                      </div>
+                    );
+                  },
+                  pre: ({ children }) => <>{children}</>,
+                  a: ({ ...props }) => (
+                    <a
+                      className="font-sans text-blue-600 hover:underline dark:text-blue-400"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      {...props}
+                    />
+                  ),
+                  img: ({ ...props }) => (
+                    <img
+                      className="my-4 h-auto max-w-full rounded"
+                      loading="lazy"
+                      {...props}
+                    />
+                  ),
+                  table: ({ ...props }) => (
+                    <div className="my-3 overflow-x-auto">
+                      <table
+                        className="min-w-full divide-y divide-gray-200 font-sans dark:divide-gray-700"
+                        {...props}
+                      />
+                    </div>
+                  ),
+                  thead: ({ ...props }) => (
+                    <thead
+                      className="bg-gray-50 font-sans dark:bg-gray-800"
+                      {...props}
+                    />
+                  ),
+                  th: ({ ...props }) => (
+                    <th
+                      className="px-4 py-3 text-left font-sans text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                      {...props}
+                    />
+                  ),
+                  td: ({ ...props }) => (
+                    <td className="px-4 py-3 font-sans text-sm" {...props} />
+                  ),
+                }}
+              >
+                {readmeContent}
+              </ReactMarkdown>
+            </div>
           </CardContent>
         </Card>
       ) : (
         <Card className="mt-4 p-6 text-center">
-          <p className="text-muted-foreground">
+          <p className="font-sans text-muted-foreground">
             No README file found. Upload one to display project information.
           </p>
+          <Button
+            onClick={handleFileUpload}
+            variant="outline"
+            size="sm"
+            className="mt-3"
+          >
+            <UploadIcon className="mr-2 size-4" />
+            Upload README
+          </Button>
         </Card>
       )}
     </div>
