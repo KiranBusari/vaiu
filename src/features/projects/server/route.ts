@@ -702,22 +702,31 @@ const app = new Hono()
           file.name.toLowerCase().endsWith(".txt")
         ) {
           try {
+            // Get the file content as a buffer
             const fileBuffer = await storage.getFileDownload(
               IMAGES_BUCKET_ID,
               uploadedFile.$id,
             );
-            uploadedFile = `data:text/plain;base64,${Buffer.from(
-              fileBuffer,
-            ).toString("base64")}`;
 
+            // Convert buffer to string to get the actual text content
+            const fileContent = Buffer.from(fileBuffer).toString("utf-8");
+
+            // Update the project with the actual README content
             await databases.updateDocument(
               DATABASE_ID,
               PROJECTS_ID,
               projectId,
               {
-                readme: uploadedFile,
+                readme: fileContent,
               },
             );
+
+            return c.json({
+              data: {
+                file: uploadedFile,
+                readmeContent: fileContent,
+              },
+            });
           } catch (error) {
             console.error("Error processing README file:", error);
           }

@@ -193,6 +193,8 @@ export const ProjectIdClient = () => {
 
       {analytics && <Analytics data={analytics} />}
 
+      <TaskViewSwitcher hideProjectFilter />
+
       {/* Readme Display */}
       {isLoading ? (
         <div className="mt-4">
@@ -214,8 +216,6 @@ export const ProjectIdClient = () => {
           </p>
         </Card>
       )}
-
-      <TaskViewSwitcher hideProjectFilter />
     </div>
   );
 };
