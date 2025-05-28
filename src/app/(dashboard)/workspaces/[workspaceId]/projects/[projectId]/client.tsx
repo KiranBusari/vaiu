@@ -25,8 +25,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 export const ProjectIdClient = () => {
+  const router = useRouter();
   const projectId = useProjectId();
   const { data: project, isLoading: projectsLoading } = useGetProject({
     projectId,
@@ -42,6 +44,11 @@ export const ProjectIdClient = () => {
       toast.error("You have to push to the specified branch first.");
     }
   };
+
+  const handlePayment = async () => {
+    router.push(`localhost:3000/paymentPage`);
+  }
+
   const { openPr } = useCreatePrModal();
 
   const { open } = useAddCollaboratorToProjectModal();
@@ -109,9 +116,13 @@ export const ProjectIdClient = () => {
                   <GitPullRequestCreateArrowIcon className="size-4" />
                   Create Pull Request
                 </Button>
-                <Button className="w-full" variant={"outline"} onClick={open}>
+                <Button className="w-full" variant={"outline"} onClick={handlePayment}>
                   <UserPlus2 className="size-4" />
                   Add Collaborator
+                </Button>
+                <Button className="w-full" variant={"outline"} onClick={open}>
+                  <UserPlus2 className="size-4" />
+                  Subscribe
                 </Button>
                 <Button
                   className="w-full bg-slate-200 text-black hover:bg-slate-300"
