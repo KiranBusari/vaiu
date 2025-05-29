@@ -46,6 +46,9 @@ const app = new Hono()
       ISSUES_ID,
       issueId,
     );
+
+    // console.log("Issues from DB:", issuesFromDb);
+
     const member = await getMember({
       databases,
       workspaceId: issuesFromDb.workspaceId,
@@ -82,9 +85,10 @@ const app = new Hono()
       owner: owner.data.login,
       repo: existingProject.name,
     });
+    // console.log("Issues from Git:", issuesFromGit);
 
     const currentIssue = issuesFromGit.data.find(
-      (issue) => issue.title === issuesFromDb.names,
+      (issue) => issue.title === issuesFromDb.name,
     );
 
     if (!currentIssue) {
