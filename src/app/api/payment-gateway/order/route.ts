@@ -2,14 +2,14 @@ import axios from "axios";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-let salt_key = "96434309-7796-489d-8924-ab56988a6076";
-let merchant_id = "PGTESTPAYUAT86";
+const salt_key = process.env.SALT_KEY;
+const merchant_id = process.env.MERCHANT_ID;
 
 export async function POST(req: NextRequest) {
   try {
-    let reqData = await req.json();
+    const reqData = await req.json();
 
-    let merchantTransactionId = reqData.transactionId;
+    const merchantTransactionId = reqData.transactionId;
 
     const data = {
       merchantId: merchant_id,
@@ -52,11 +52,12 @@ export async function POST(req: NextRequest) {
     console.log(response.data);
 
     return NextResponse.json(response.data);
-  } catch (error: any) {
+  } catch (error) {
+    const err = error as Error;
     console.log(error);
 
     return NextResponse.json(
-      { error: "Payment initiation failed", details: error.message },
+      { error: "Payment initiation failed", details: err.message },
       { status: 500 }
     );
   }

@@ -2,8 +2,8 @@ import crypto from "crypto";
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
-let saltKey = "96434309-7796-489d-8924-ab56988a6076";
-let merchantId = "PGTESTPAYUAT86";
+const saltKey = process.env.SALT_KEY;
+const merchantId = process.env.MERCHANT_ID;
 
 export async function POST(req: NextRequest) {
     try {
@@ -39,10 +39,12 @@ export async function POST(req: NextRequest) {
                 status: 301,
             });
         }
-    } catch (error: any) {
+    } catch (error) {
+        const err = error as Error;
         console.error(error);
+
         return NextResponse.json(
-            { error: "Payment check failed", details: error.message },
+            { error: "Payment check failed", details: err.message },
             { status: 500 }
         );
     }

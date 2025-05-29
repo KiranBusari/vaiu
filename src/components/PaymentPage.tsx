@@ -9,7 +9,7 @@ export default function PaymentPage() {
     const [amount, setAmount] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handlePayment = async (e: any) => {
+    const handlePayment = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
@@ -20,8 +20,6 @@ export default function PaymentPage() {
             MUID: "MUID" + Date.now(),
             transactionId: "T" + Date.now(),
         };
-
-        console.log("data received: " + data);
 
         try {
             await axios
