@@ -92,7 +92,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Enter branch name"
+                        placeholder="Enter title"
                         className="border border-slate-50"
                       />
                     </FormControl>
