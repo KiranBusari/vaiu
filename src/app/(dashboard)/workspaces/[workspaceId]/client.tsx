@@ -76,7 +76,9 @@ export const TaskList = ({ data, total }: TaskListProps) => {
         <ul className="flex flex-col gap-y-4">
           {data.map((issue) => (
             <li key={issue.$id}>
-              <Link href={`/workspaces/${workspaceId}/issues/${issue.$id}`}>
+              <Link
+                href={`/workspaces/${workspaceId}/projects/${issue.projectId}/tasks/${issue.$id}`}
+              >
                 <Card className="rounded-lg bg-slate-50 shadow-none transition hover:opacity-75 dark:bg-gray-900">
                   <CardContent className="p-4">
                     <p className="truncate text-lg font-medium">{issue.name}</p>
