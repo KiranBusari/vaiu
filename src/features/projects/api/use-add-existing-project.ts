@@ -19,16 +19,20 @@ export const useAddExistingProject = () => {
       const response = await client.api.v1.projects[
         "add-existing-project"
       ].$post({ form });
-
-      if (!response.ok) throw new Error("Failed to create project");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: () => {
       toast.success("Project created successfully");
       queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
-    onError: () => {
-      toast.error("Failed to create project");
+    onError: (e) => {
+      toast.error(e.message || "Failed to create project");
     },
   });
 

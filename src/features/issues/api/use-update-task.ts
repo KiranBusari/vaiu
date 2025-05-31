@@ -24,7 +24,12 @@ export const useUpdateTask = () => {
         json,
         param,
       });
-      if (!response.ok) throw new Error("Failed to update Issue");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -34,7 +39,7 @@ export const useUpdateTask = () => {
     },
 
     // TODO: Fix Toast Error
-    onError: (error: unknown) => {
+    onError: (error: unknowne) => {
       if (
         error &&
         typeof error === "object" &&
@@ -48,7 +53,7 @@ export const useUpdateTask = () => {
           toast.error("Only Admin can move issue to Done");
         });
       } else {
-        toast.error("Failed to update issue");
+        toast.error(e.message || "Failed to update issue");
       }
     },
   });

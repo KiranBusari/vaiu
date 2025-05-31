@@ -30,8 +30,8 @@ export const useJoinWorkspace = () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to join workspace");
+    onError: (e) => {
+      toast.error(e.message || "Failed to join workspace");
     },
   });
 

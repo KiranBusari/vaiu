@@ -20,8 +20,12 @@ export const useFetchIssues = () => {
         json,
       });
 
-      if (!response.ok) throw new Error("Failed to fetch issues");
-
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return (await response.json()) as ResponseType;
     },
     onSuccess: () => {
@@ -29,8 +33,8 @@ export const useFetchIssues = () => {
 
       queryClient.invalidateQueries({ queryKey: ["issues"] });
     },
-    onError: () => {
-      toast.error("Failed to fetch issues");
+    onError: (e) => {
+      toast.error(e.message || "Failed to fetch issues");
     },
   });
   return mutation;
