@@ -19,7 +19,12 @@ export const useDeleteTask = () => {
       const response = await client.api.v1.issues[":issueId"].$delete({
         param,
       });
-      if (!response.ok) throw new Error("Failed to create Issue");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to delete issue",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -27,8 +32,8 @@ export const useDeleteTask = () => {
       queryClient.invalidateQueries({ queryKey: ["issues"] });
       queryClient.invalidateQueries({ queryKey: ["issue", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to delete issue");
+    onError: (e) => {
+      toast.error(e.message || "Failed to delete issue");
     },
   });
 

@@ -8,14 +8,19 @@ export const useForgotPassword = () => {
       const response = await client.api.v1.auth["forgot-password"].$post({
         json: values,
       });
-      if (!response.ok) throw new Error("Failed to send recovery email");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return response.json();
     },
     onSuccess: () => {
       toast.success("Recovery email sent successfully");
     },
-    onError: () => {
-      toast.error("Failed to send recovery email");
+    onError: (error) => {
+      toast.error(error.message || "Failed to send recovery email");
     },
   });
 };

@@ -12,7 +12,10 @@ export const useGetProjects = ({ workspaceId }: useGetProjectsProps) => {
         query: { workspaceId },
       });
       if (!response.ok) {
-        throw new Error("Failed to get projects");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
       }
       const { data } = await response.json();
       return data;

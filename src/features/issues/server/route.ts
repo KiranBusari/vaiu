@@ -72,7 +72,7 @@ const app = new Hono()
     }
 
     if (existingProject.projectAdmin !== member.$id) {
-      return c.json({ error: "Unauthorized" }, 401);
+      return c.json({ error: "Unauthorized to delete issue" }, 401);
     }
 
     const octokit = new Octokit({

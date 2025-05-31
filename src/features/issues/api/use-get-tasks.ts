@@ -40,7 +40,10 @@ export const useGetIssues = ({
         },
       });
       if (!response.ok) {
-        throw new Error("Failed to get issues");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
       }
       const { data } = await response.json();
       // console.log("Data", data);

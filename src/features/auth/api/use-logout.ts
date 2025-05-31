@@ -15,7 +15,12 @@ export const useLogout = () => {
   const mutation = useMutation<ResponseType, Error>({
     mutationFn: async () => {
       const response = await client.api.v1.auth.logout.$post();
-      if (!response.ok) throw new Error("Failed to logout");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: () => {
@@ -24,8 +29,8 @@ export const useLogout = () => {
       queryClient.invalidateQueries({ queryKey: ["current"] });
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
     },
-    onError: () => {
-      toast.error("Failed to logout");
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 

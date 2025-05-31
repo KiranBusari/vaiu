@@ -19,16 +19,20 @@ export const useBulkUpdateTasks = () => {
       const response = await client.api.v1.issues["bulk-update"].$post({
         json,
       });
-
-      if (!response.ok) throw new Error("Failed to bulk-update issue");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: () => {
       toast.success("Tasks updated successfully");
       queryClient.invalidateQueries({ queryKey: ["issues"] });
     },
-    onError: () => {
-      toast.error("Failed to update issues");
+    onError: (e) => {
+      toast.error(e.message || "Failed to update issues");
     },
   });
   return mutation;

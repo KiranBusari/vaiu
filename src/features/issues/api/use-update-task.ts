@@ -20,7 +20,12 @@ export const useUpdateTask = () => {
         json,
         param,
       });
-      if (!response.ok) throw new Error("Failed to update Issue");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -28,8 +33,8 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["issues"] });
       queryClient.invalidateQueries({ queryKey: ["issue", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to update issue");
+    onError: (e) => {
+      toast.error(e.message || "Failed to update issue");
     },
   });
 
