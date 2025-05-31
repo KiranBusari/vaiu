@@ -6,7 +6,7 @@ import React from "react";
 
 const ErrorPage = () => {
   return (
-    <div className="h-screen flex items-center justify-center flex-col gap-y-4">
+    <div className="flex h-screen flex-col items-center justify-center gap-y-4">
       <AlertTriangle className="size-6 text-muted-foreground" />
       <p className="text-sm text-muted-foreground">Something went wrong</p>
       <Button variant="secondary" size="sm">
