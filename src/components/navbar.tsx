@@ -5,6 +5,7 @@ import { UserButton } from "@/features/auth/components/user-button";
 
 import { MobileSidebar } from "./mobile-sidebar";
 import { ModeToggle } from "./ui/ModeToggle";
+import { SidebarTrigger } from "./ui/sidebar";
 
 const pathnameMap = {
   tasks: {
@@ -27,8 +28,9 @@ export const Navbar = () => {
 
   const { description, title } = pathnameMap[pathnameKey] || defaultMap;
   return (
-    <nav className="pt-4 px-6 flex items-center justify-between">
-      <div className="flex-col hidden lg:flex">
+    <nav className="flex items-center justify-between px-6 pt-4">
+      <SidebarTrigger />
+      <div className="hidden flex-col lg:flex">
         <h1 className="text-2xl font-bold">{title}</h1>
         <p className="text-muted-foreground">{description}</p>
       </div>

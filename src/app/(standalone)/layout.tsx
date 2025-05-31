@@ -9,12 +9,12 @@ const StandaloneLayout = async ({ children }: PropsWithChildren) => {
   return (
     <main className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="mx-auto max-w-screen-2xl p-4">
-        <nav className="flex justify-between items-center h-[73px]">
+        <nav className="flex h-[73px] items-center justify-between">
           <Link href="/">
             <Logo className="dark:hidden" />
             <Logo2 className="hidden dark:block" />
           </Link>
-          <div className="flex items-center gap-x-4 justify-center">
+          <div className="flex items-center justify-center gap-x-4">
             <UserButton />
             <ModeToggle />
           </div>
