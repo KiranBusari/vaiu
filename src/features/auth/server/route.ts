@@ -27,26 +27,100 @@ const app = new Hono()
     try {
       const { email, password } = c.req.valid("json");
 
-      const { account } = await createAdminClient();
-      const session = await account.createEmailPasswordSession(email, password);
-      setCookie(c, AUTH_COOKIE, session.secret, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30,
-      });
+      if (!email || !password) {
+        return c.json({ error: "Email and password are required" }, 400);
+      }
 
-      return c.json({ success: true });
-    } catch (error) {
-      return c.json({ error });
+      if (password.trim().length < 6) {
+        return c.json(
+          { error: "Password must be at least 6 characters long" },
+          400,
+        );
+      }
+
+      if (!email.includes("@")) {
+        return c.json({ error: "Invalid email address" }, 400);
+      }
+
+      const { account } = await createAdminClient();
+
+      try {
+        const session = await account.createEmailPasswordSession(
+          email,
+          password,
+        );
+        setCookie(c, AUTH_COOKIE, session.secret, {
+          path: "/",
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          maxAge: 60 * 60 * 24 * 30,
+        });
+
+        return c.json({ success: true });
+      } catch (authError: unknown) {
+        const error = authError as {
+          code?: number;
+          type?: string;
+          message?: string;
+        };
+        if (error.code === 401) {
+          return c.json({ error: "Invalid email or password" }, 401);
+        }
+        if (error.code === 404) {
+          return c.json({ error: "User not found" }, 404);
+        }
+        if (error.code === 429) {
+          return c.json(
+            { error: "Too many login attempts. Please try again later" },
+            429,
+          );
+        }
+        if (error.type === "user_blocked") {
+          return c.json({ error: "Account is temporarily blocked" }, 403);
+        }
+        if (error.type === "user_email_not_whitelisted") {
+          return c.json({ error: "Email is not authorized" }, 403);
+        }
+
+        // Log the error for debugging while returning a generic message
+        console.error("Login error:", error);
+        return c.json({ error: error.message || "Authentication failed" }, 400);
+      }
+    } catch (error: unknown) {
+      console.error("Unexpected login error:", error);
+      return c.json(
+        { error: "An unexpected error occurred during login" },
+        500,
+      );
     }
   })
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { name, email, password } = c.req.valid("json");
       // console.log(name, email, password);
-
+      if (!name || !email || !password) {
+        return c.json({ error: "Name, email and password are required" }, 400);
+      }
+      if (password.trim().length < 6) {
+        return c.json(
+          { error: "Password must be at least 6 characters long" },
+          400,
+        );
+      }
+      if (!email.includes("@")) {
+        return c.json({ error: "Invalid email address" }, 400);
+      }
+      const { account: adminAccount } = await createAdminClient();
+      try {
+        await adminAccount.get();
+        return c.json({ error: "Email already registered" }, 400);
+      } catch (error: unknown) {
+        const appwriteError = error as { code?: number };
+        if (appwriteError.code !== 404) {
+          return c.json({ error: "Failed to check email" }, 500);
+        }
+      }
       const { account } = await createAdminClient();
 
       await account.create(ID.unique(), email, password, name);

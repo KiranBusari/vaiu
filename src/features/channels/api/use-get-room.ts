@@ -12,7 +12,10 @@ export const useGetRoom = ({ roomId }: useGetRoomProps) => {
         param: { roomId },
       });
       if (!response.ok) {
-        throw new Error("Failed to get room");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
       }
       const { data } = await response.json();
 

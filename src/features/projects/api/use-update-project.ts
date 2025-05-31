@@ -21,7 +21,12 @@ export const useUpdateProject = () => {
         param,
       });
 
-      if (!response.ok) throw new Error("Failed to update project");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -29,8 +34,8 @@ export const useUpdateProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to update project");
+    onError: (e) => {
+      toast.error(e.message || "Failed to update project");
     },
   });
 

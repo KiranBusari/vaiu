@@ -26,8 +26,10 @@ export const useVerifyUser = () => {
       const response = await client.api.v1.auth["verify-user"].$post({ json });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to verify user");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? String(errorData.error) : "Failed to login",
+        );
       }
 
       return response.json();

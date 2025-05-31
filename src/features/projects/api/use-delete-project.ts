@@ -19,8 +19,13 @@ export const useDeleteProject = () => {
       const response = await client.api.v1.projects[":projectId"].$delete({
         param,
       });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
 
-      if (!response.ok) throw new Error("Failed to delete project");
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -28,8 +33,8 @@ export const useDeleteProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to delete project");
+    onError: (e) => {
+      toast.error(e.message || "Failed to delete project");
     },
   });
 

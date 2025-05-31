@@ -19,8 +19,12 @@ export const useDeleteProject = () => {
       const response = await client.api.v1.rooms[":roomId"].$delete({
         param,
       });
-
-      if (!response.ok) throw new Error("Failed to delete room");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -28,8 +32,8 @@ export const useDeleteProject = () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
       queryClient.invalidateQueries({ queryKey: ["room", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to delete room");
+    onError: (e) => {
+      toast.error(e.message || "Failed to delete room");
     },
   });
 
