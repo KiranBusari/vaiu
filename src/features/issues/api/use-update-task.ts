@@ -34,7 +34,7 @@ export const useUpdateTask = () => {
     },
 
     // TODO: Fix Toast Error
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (
         error &&
         typeof error === "object" &&
