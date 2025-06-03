@@ -4,8 +4,8 @@ import { AnalyticsCard } from "./analytics-card";
 
 export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
   return (
-    <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg">
-      <div className="flex w-full flex-row space-x-4">
+    <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg border">
+      <div className="flex w-full flex-row">
         <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Total Issues"
@@ -15,6 +15,7 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
           />
         </div>
         <div className="flex flex-1 items-center">
+        <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Assigned Issues"
             value={data.assignedTaskCount}
@@ -22,6 +23,7 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             increasedValue={data.assignedTaskDiff}
           />
         </div>
+        <div className="flex flex-1 items-center">
         <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Completed Issues"
@@ -31,6 +33,7 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
           />
         </div>
         <div className="flex flex-1 items-center">
+        <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="OverDue Issues"
             value={data.overdueTaskCount}
@@ -38,6 +41,7 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             increasedValue={data.overdueTaskDiff}
           />
         </div>
+        <div className="flex flex-1 items-center">
         <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Incomplete Issues"
