@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import { FaGithub } from "react-icons/fa";
 
 export const ProjectIdClient = () => {
   const router = useRouter();
@@ -46,7 +47,7 @@ export const ProjectIdClient = () => {
   };
 
   const handlePayment = async () => {
-    router.push(`localhost:3000/paymentPage`);
+    router.push(`https://vaiu.in/paymentPage`);
   }
 
   const { openPr } = useCreatePrModal();
@@ -70,6 +71,15 @@ export const ProjectIdClient = () => {
             className="size-8"
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
+          <a
+            href={`https://github.com/your-org/${project.name}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 text-gray-500 hover:text-white"
+            title="View on GitHub"
+          >
+            <FaGithub className="size-5" />
+          </a>
         </div>
         <div className="hidden md:block">
           <div className="flex items-center space-x-4">
@@ -118,11 +128,11 @@ export const ProjectIdClient = () => {
                 </Button>
                 <Button className="w-full" variant={"outline"} onClick={handlePayment}>
                   <UserPlus2 className="size-4" />
-                  Add Collaborator
+                  Subscribe
                 </Button>
                 <Button className="w-full" variant={"outline"} onClick={open}>
                   <UserPlus2 className="size-4" />
-                  Subscribe
+                  Add Collaborator
                 </Button>
                 <Button
                   className="w-full bg-slate-200 text-black hover:bg-slate-300"
