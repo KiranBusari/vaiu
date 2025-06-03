@@ -53,13 +53,12 @@ export const Navigation = () => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const OPEN_CONTRIBUTION_WORKSPACE_ID = "683e4f3900212432e9d6";
+  const OPEN_CONTRIBUTION_WORKSPACE_ID = process.env.OPEN_CONTRIBUTION_WORKSPACE_ID || "";
 
   const { data: isOpenContributionMember, isLoading: isOpenContributionMemberLoading } = useIsMember(OPEN_CONTRIBUTION_WORKSPACE_ID);
   const { data: openContributionInfo, isLoading: openContributionInfoLoading } = useGetWorkspaceInfo({ workspaceId: OPEN_CONTRIBUTION_WORKSPACE_ID }) as { data?: { inviteCode?: string } } | any;
 
   const isLoading = isOpenContributionMemberLoading || openContributionInfoLoading;
-
 
   const handleContributeClick = () => {
 

@@ -29,7 +29,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -555,6 +555,56 @@ const app = new Hono()
       });
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      for (const update of issues) {
+        const existing = issueToUpdate.documents.find(
+          (i) => i && i.$id === update.$id,
+        );
+        if (!existing) {
+          continue;
+        }
+
+        const isMovingToDone = update.status === "DONE" && existing.status !== "DONE";
+        if (isMovingToDone && member.role !== "ADMIN") {
+          return c.json({ error: "Only Admin can move issue to Done" }, 403);
+        }
+
+        if (isMovingToDone && member.role === "ADMIN") {
+          const project = await databases.getDocument<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            existing.projectId,
+          );
+
+          const octokit = new Octokit({
+            auth: project.accessToken,
+          });
+
+          const owner = await octokit.rest.users.getAuthenticated();
+
+          const issuesFromGit = await octokit.rest.issues.listForRepo({
+            owner: owner.data.login,
+            repo: project.name,
+          });
+
+          const currentIssue = issuesFromGit.data.find(
+            (issue) => issue.title === existing.name,
+          );
+
+          if (!currentIssue) {
+            return c.json({ error: "Issue not found" }, 404);
+          }
+
+          if (currentIssue) {
+            await octokit.rest.issues.update({
+              owner: owner.data.login,
+              repo: project.name,
+              issue_number: currentIssue.number,
+              state: "closed",
+            });
+          }
+        }
       }
 
       const updatedTasks = await Promise.all(

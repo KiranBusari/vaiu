@@ -28,8 +28,16 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["issues"] });
       queryClient.invalidateQueries({ queryKey: ["issue", data.$id] });
     },
-    onError: () => {
-      toast.error("Failed to update issue");
+    onError: (error: any) => {
+      if (error?.status === 403) {
+        error.json().then((body: any) => {
+          toast.error(body?.error || "Only Admin can move issue from In Review to Done");
+        }).catch(() => {
+          toast.error("Only Admin can move issue from In Review to Done");
+        });
+      } else {
+        toast.error("Failed to update issue");
+      }
     },
   });
 
