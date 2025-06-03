@@ -17,9 +17,12 @@ import {
   SidebarGroupContent,
 } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
+import { RiAddCircleFill } from "react-icons/ri";
+import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
 
 export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
+  const { open } = useCreateWorkspaceModal();
   return (
     <Sidebar collapsible="icon" side="left" variant="floating">
       <SidebarContent>
@@ -35,7 +38,15 @@ export const SidebarComponent = () => {
         </SidebarGroup>
         <Separator className="bg-slate-700" />
         <SidebarGroup>
-          <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            <div className="mb-4 flex w-full items-center justify-between">
+              Workspaces
+              <RiAddCircleFill
+                onClick={open}
+                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
+              />
+            </div>
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <WorkspaceSwitcher />
           </SidebarGroupContent>
