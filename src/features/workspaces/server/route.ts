@@ -80,6 +80,7 @@ const app = new Hono()
         $id: workspace.$id,
         name: workspace.name,
         imageUrl: workspace.imageUrl,
+        inviteCode: workspace.inviteCode,
       },
     });
   })
@@ -430,5 +431,24 @@ const app = new Hono()
         overdueTaskDiff,
       },
     });
+  })
+  .get("/:workspaceId/isworkspacemember", sessionMiddleware, async (c) => {
+    const user = c.get("user");
+    const databases = c.get("databases");
+    const { workspaceId } = c.req.param();
+
+    const member = await getMember({
+      databases,
+      workspaceId,
+      userId: user.$id,
+    });
+
+    return c.json({
+      data: {
+        isMember: !!member,
+        member: member,
+      },
+    });
   });
+
 export default app;

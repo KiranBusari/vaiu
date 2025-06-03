@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FaGithub } from "react-icons/fa";
 
 export const ProjectIdClient = () => {
   const projectId = useProjectId();
@@ -147,6 +148,15 @@ export const ProjectIdClient = () => {
             className="size-8"
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
+          <a
+            href={`https://github.com/your-org/${project.name}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-1 text-gray-500 hover:text-white"
+            title="View on GitHub"
+          >
+            <FaGithub className="size-5" />
+          </a>
         </div>
 
         {/* Desktop actions */}
@@ -221,6 +231,10 @@ export const ProjectIdClient = () => {
                   onClick={openCollaboratorModal}
                 >
                   <UserPlus2 className="mr-2 size-4" />
+                  Subscribe
+                </Button>
+                <Button className="w-full" variant={"outline"} onClick={open}>
+                  <UserPlus2 className="size-4" />
                   Add Collaborator
                 </Button>
                 <Button
