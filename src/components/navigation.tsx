@@ -18,7 +18,7 @@ import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace
 const navItems = [
   {
     label: "Home",
-    href: "",
+    href: "/",
     icon: GoHome,
     aciveIcon: GoHomeFill,
   },
@@ -31,8 +31,8 @@ const navItems = [
   {
     label: "Settings",
     href: "/settings",
-    icon: Settings,
-    aciveIcon: Settings,
+    icon: RiSettings2Line,
+    aciveIcon: RiSettings2Fill,
   },
   {
     label: "Members",
@@ -107,7 +107,7 @@ export const Navigation = () => {
           <Link key={href} href={absoluteHref}>
             <div
               className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-md font-medium hover:text-primary transition text-slate-600 dark:text-slate-200 hover:bg-slate-100 hover:dark:bg-slate-700/50 m-0.5",
+                "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
                 "bg-slate-50 dark:bg-slate-800 shadow-sm hover:opacity-100 text-primary"
               )}
