@@ -10,7 +10,7 @@ import { CreatePrModal } from "@/features/projects/components/create-pr-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="min-h-full bg-gray-100 dark:bg-gray-950">
+    <div className="min-h-full">
       <AddCollaboratorToProjectModal />
       <CreateWorkspaceModal />
       <CreateProjectModal />
@@ -20,7 +20,7 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
       <EditTaskModal />
       <div className="flex h-full w-full flex-col">
         <Navbar />
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1 overflow-auto p-5">{children}</div>
       </div>
     </div>
   );
