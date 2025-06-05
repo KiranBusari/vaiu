@@ -4,8 +4,8 @@ import { AnalyticsCard } from "./analytics-card";
 
 export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
   return (
-    <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg border">
-      <div className="flex w-full flex-row">
+    <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg">
+      <div className="flex w-full flex-row space-x-4">
         <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Total Issues"
