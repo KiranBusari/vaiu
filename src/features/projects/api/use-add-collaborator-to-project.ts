@@ -19,15 +19,20 @@ export const useAddCollaboratorToProject = () => {
       const response = await client.api.v1.projects[":projectId"][
         "addCollaborator"
       ].$post({ json, param: { projectId: json.projectId } });
-      if (!response.ok) throw new Error("Failed to add collaborator");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return (await response.json()) as ResponseType;
     },
     onSuccess: () => {
       toast.success("Collaborator added successfully");
       queryClient.invalidateQueries({ queryKey: ["collaborators"] });
     },
-    onError: () => {
-      toast.error("Failed to add collaborator");
+    onError: (e) => {
+      toast.error(e.message || "Failed to add collaborator");
     },
   });
 

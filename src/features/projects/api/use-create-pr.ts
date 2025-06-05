@@ -22,16 +22,20 @@ export const useCreatePr = () => {
         param,
         form,
       });
-
-      if (!response.ok) throw new Error("Failed to create PR");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: () => {
       toast.success("PR created successfully");
       queryClient.invalidateQueries({ queryKey: ["submit-pull-request"] });
     },
-    onError: () => {
-      toast.error("Failed to create PR");
+    onError: (e) => {
+      toast.error(e.message || "Failed to create PR");
     },
   });
 

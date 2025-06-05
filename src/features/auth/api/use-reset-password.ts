@@ -12,15 +12,20 @@ export const useResetPassword = () => {
       const response = await client.api.v1.auth["update-password"].$post({
         json: values,
       });
-      if (!response.ok) throw new Error("Failed to reset password");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? String(errorData.error) : "Failed to login",
+        );
+      }
       return response.json();
     },
     onSuccess: () => {
       toast.success("Password reset successfully");
       router.push("/sign-in");
     },
-    onError: () => {
-      toast.error("Failed to reset password");
+    onError: (e) => {
+      toast.error(e.message || "Failed to reset password");
     },
   });
 };

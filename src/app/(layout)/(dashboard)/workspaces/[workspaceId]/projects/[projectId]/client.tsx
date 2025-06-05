@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
+import { headers } from "next/headers";
 
 export const ProjectIdClient = () => {
   const router = useRouter();
@@ -45,10 +46,14 @@ export const ProjectIdClient = () => {
       toast.error("You have to push to the specified branch first.");
     }
   };
-
-  const handlePayment = async () => {
-    router.push(`https://vaiu.in/paymentPage`);
+  const origin = headers().get("origin") ?? "";
+  if (!origin) {
+    toast.error("Origin header is not available.");
+    return null;
   }
+  const handlePayment = async () => {
+    router.push(`${origin}/paymentPage`);
+  };
 
   const { openPr } = useCreatePrModal();
 
@@ -60,7 +65,7 @@ export const ProjectIdClient = () => {
   if (!project) return <PageError message="Project not found" />;
 
   const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
-  // const canvasHref = `/workspaces/${project.workspaceId}/projects/${project.$id}/canvas/${project.canvasId}`;
+
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between">
@@ -126,7 +131,11 @@ export const ProjectIdClient = () => {
                   <GitPullRequestCreateArrowIcon className="size-4" />
                   Create Pull Request
                 </Button>
-                <Button className="w-full" variant={"outline"} onClick={handlePayment}>
+                <Button
+                  className="w-full"
+                  variant={"outline"}
+                  onClick={handlePayment}
+                >
                   <UserPlus2 className="size-4" />
                   Subscribe
                 </Button>

@@ -24,7 +24,12 @@ export const useUpdateTask = () => {
         json,
         param,
       });
-      if (!response.ok) throw new Error("Failed to update Issue");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          "error" in errorData ? errorData.error : "Failed to login",
+        );
+      }
       return await response.json();
     },
     onSuccess: ({ data }) => {
@@ -42,11 +47,14 @@ export const useUpdateTask = () => {
         (error as Response).status === 403 &&
         typeof (error as Response).json === "function"
       ) {
-        (error as Response).json().then((body: ErrorResponse) => {
-          toast.error(body?.error || "Only Admin can move issue to Done");
-        }).catch(() => {
-          toast.error("Only Admin can move issue to Done");
-        });
+        (error as Response)
+          .json()
+          .then((body: ErrorResponse) => {
+            toast.error(body?.error || "Only Admin can move issue to Done");
+          })
+          .catch(() => {
+            toast.error("Only Admin can move issue to Done");
+          });
       } else {
         toast.error("Failed to update issue");
       }
