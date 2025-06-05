@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Settings, UsersIcon } from "lucide-react";
 import {
   GoCheckCircle,
   GoCheckCircleFill,
@@ -11,11 +10,13 @@ import {
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
+import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
+import { FaUsers, FaUsersCog } from "react-icons/fa";
 
 const router = [
   {
     label: "Home",
-    href: "",
+    href: "/",
     icon: GoHome,
     aciveIcon: GoHomeFill,
   },
@@ -28,14 +29,14 @@ const router = [
   {
     label: "Settings",
     href: "/settings",
-    icon: Settings,
-    aciveIcon: Settings,
+    icon: RiSettings2Line,
+    aciveIcon: RiSettings2Fill,
   },
   {
     label: "Members",
     href: "/members",
-    icon: UsersIcon,
-    aciveIcon: UsersIcon,
+    icon: FaUsersCog,
+    aciveIcon: FaUsers,
   },
 ];
 export const Navigation = () => {
@@ -51,9 +52,9 @@ export const Navigation = () => {
           <Link key={href} href={absoluteHref}>
             <div
               className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-md font-medium hover:text-primary transition text-slate-600 dark:text-slate-200 hover:bg-slate-100 hover:dark:bg-slate-700/50 m-0.5",
+                "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                  "bg-slate-50 dark:bg-slate-800 shadow-sm hover:opacity-100 text-primary"
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
               )}
             >
               <Icon className="size-5" />
