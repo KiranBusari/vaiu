@@ -31,7 +31,7 @@ export const Navbar = () => {
   return (
     <nav className="flex items-center justify-between p-4">
       <div className="flex items-center gap-x-4">
-        <SidebarTrigger />
+        <SidebarTrigger aria-label="Toggle sidebar" />
         <div className="hidden flex-col lg:flex">
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="text-muted-foreground">{description}</p>
