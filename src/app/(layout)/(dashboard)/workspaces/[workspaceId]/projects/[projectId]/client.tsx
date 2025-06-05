@@ -47,7 +47,7 @@ export const ProjectIdClient = () => {
 
   const handlePayment = async () => {
     router.push(`localhost:3000/paymentPage`);
-  }
+  };
 
   const { openPr } = useCreatePrModal();
 
@@ -59,7 +59,7 @@ export const ProjectIdClient = () => {
   if (!project) return <PageError message="Project not found" />;
 
   const href = `/workspaces/${project.workspaceId}/projects/${project.$id}/settings`;
-  // const canvasHref = `/workspaces/${project.workspaceId}/projects/${project.$id}/canvas/${project.canvasId}`;
+
   return (
     <div className="flex flex-col gap-y-4">
       <div className="flex items-center justify-between">
@@ -116,7 +116,11 @@ export const ProjectIdClient = () => {
                   <GitPullRequestCreateArrowIcon className="size-4" />
                   Create Pull Request
                 </Button>
-                <Button className="w-full" variant={"outline"} onClick={handlePayment}>
+                <Button
+                  className="w-full"
+                  variant={"outline"}
+                  onClick={handlePayment}
+                >
                   <UserPlus2 className="size-4" />
                   Add Collaborator
                 </Button>
