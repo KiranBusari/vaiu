@@ -1,7 +1,6 @@
 "use client";
 
 import { Navigation } from "./navigation";
-import { DottedSeparator } from "./dotted-separator";
 import { WorkspaceSwitcher } from "./workspace-switcher";
 import Rooms from "./Rooms";
 import { Logo } from "./Logo";
@@ -9,25 +8,58 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import Link from "next/link";
 import { ProjectSwitcher } from "./project-switcher";
 import { Logo2 } from "./Logo2";
+import {
+  SidebarContent,
+  Sidebar,
+  SidebarHeader,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+} from "./ui/sidebar";
+import { Separator } from "./ui/separator";
+import { RiAddCircleFill } from "react-icons/ri";
+import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
 
-export const Sidebar = () => {
+export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
+  const { open } = useCreateWorkspaceModal();
   return (
-    <aside className="h-full bg-slate-200 dark:bg-slate-950 p-4 w-full border">
-      <div className="flex items-center justify-center">
-        <Link href={`/workspaces/${workspaceId}`}>
-          <Logo className="dark:hidden" />
-          <Logo2 className="hidden dark:block" />
-        </Link>
-      </div>
-      <DottedSeparator className="my-4" />
-      <WorkspaceSwitcher />
-      <DottedSeparator className="my-4" />
-      <Navigation />
-      <DottedSeparator className="my-4" />
-      <ProjectSwitcher />
-      <DottedSeparator className="my-4" />
-      <Rooms />
-    </aside>
+    <Sidebar collapsible="offcanvas" side="left" variant="floating">
+      <SidebarContent className="p-2">
+        <SidebarGroup>
+          <SidebarHeader>
+            <div className="flex items-center justify-center">
+              <Link href={`/workspaces/${workspaceId}`}>
+                <Logo className="dark:hidden" />
+                <Logo2 className="hidden dark:block" />
+              </Link>
+            </div>
+          </SidebarHeader>
+        </SidebarGroup>
+        <Separator className="bg-slate-700" />
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="mb-4 flex w-full items-center justify-between">
+              Workspaces
+              <RiAddCircleFill
+                onClick={open}
+                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
+              />
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <WorkspaceSwitcher />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <Navigation />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <ProjectSwitcher />
+        <Rooms />
+      </SidebarContent>
+    </Sidebar>
   );
 };
