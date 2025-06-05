@@ -14,6 +14,8 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useIsMember } from "@/features/workspaces/api/use-is-member";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
+import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
+import { FaUsers, FaUsersCog } from "react-icons/fa";
 
 const navItems = [
   {
@@ -37,8 +39,8 @@ const navItems = [
   {
     label: "Members",
     href: "/members",
-    icon: UsersIcon,
-    aciveIcon: UsersIcon,
+    icon: FaUsersCog,
+    aciveIcon: FaUsers,
   },
   {
     label: "Contributions",
