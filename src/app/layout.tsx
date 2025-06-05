@@ -9,8 +9,6 @@ import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarComponent } from "@/components/sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,16 +35,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <TooltipProvider>
-              <QueryProvider>
-                <Toaster richColors theme="system" />
-                <Analytics />
-                <SidebarComponent />
-                {children}
-              </QueryProvider>
-            </TooltipProvider>
-          </SidebarProvider>
+          <TooltipProvider>
+            <QueryProvider>
+              <Toaster richColors theme="system" />
+              <Analytics />
+              {children}
+            </QueryProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

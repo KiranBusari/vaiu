@@ -25,7 +25,7 @@ export const SidebarComponent = () => {
   const { open } = useCreateWorkspaceModal();
   return (
     <Sidebar collapsible="icon" side="left" variant="floating">
-      <SidebarContent>
+      <SidebarContent className="p-2">
         <SidebarGroup>
           <SidebarHeader>
             <div className="flex items-center justify-center">
