@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Code2, Settings, UsersIcon, Loader2 } from "lucide-react";
+import { Code2, Loader2 } from "lucide-react";
 import {
   GoCheckCircle,
   GoCheckCircleFill,
@@ -60,24 +60,35 @@ export const Navigation = () => {
   // TODO: Remove this
   const OPEN_CONTRIBUTION_WORKSPACE_ID = "683e4f3900212432e9d6";
 
-  const { data: isOpenContributionMember, isLoading: isOpenContributionMemberLoading } = useIsMember(OPEN_CONTRIBUTION_WORKSPACE_ID);
-  const { data: openContributionInfo, isLoading: openContributionInfoLoading } = useGetWorkspaceInfo({ workspaceId: OPEN_CONTRIBUTION_WORKSPACE_ID });
+  const {
+    data: isOpenContributionMember,
+    isLoading: isOpenContributionMemberLoading,
+  } = useIsMember(OPEN_CONTRIBUTION_WORKSPACE_ID);
+  const { data: openContributionInfo, isLoading: openContributionInfoLoading } =
+    useGetWorkspaceInfo({ workspaceId: OPEN_CONTRIBUTION_WORKSPACE_ID });
 
-  const isLoading = isOpenContributionMemberLoading || openContributionInfoLoading;
+  const isLoading =
+    isOpenContributionMemberLoading || openContributionInfoLoading;
 
   const handleContributeClick = () => {
-
     if (isOpenContributionMember) {
-      router.push(`http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`);
+      router.push(
+        `http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
+      );
     } else if (openContributionInfo?.inviteCode) {
-      router.push(`http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`);
+      router.push(
+        `http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`,
+      );
     }
   };
 
   return (
     <ul className="flex flex-col">
       {navItems.map(({ aciveIcon, href, icon, label, dynamicRedirect }) => {
-        const absoluteHref = label === "Contributions" ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}` : `/workspaces/${workspaceId}${href ?? ""}`;
+        const absoluteHref =
+          label === "Contributions"
+            ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
+            : `/workspaces/${workspaceId}${href ?? ""}`;
         const isActive = pathname === absoluteHref;
         const Icon = isActive ? aciveIcon : icon;
 
@@ -89,10 +100,10 @@ export const Navigation = () => {
               onClick={handleContributeClick}
               disabled={isLoading}
               className={cn(
-                "flex items-center gap-2.5 p-2.5 rounded-md font-medium w-full text-left hover:text-primary transition text-slate-600 dark:text-slate-200 hover:bg-slate-100 hover:dark:bg-slate-700/50 m-0.5",
+                "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                "bg-slate-50 dark:bg-slate-800 shadow-sm hover:opacity-100 text-primary",
-                isLoading && "opacity-60 cursor-not-allowed"
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                isLoading && "cursor-not-allowed opacity-60",
               )}
             >
               {isLoading ? (
@@ -111,11 +122,7 @@ export const Navigation = () => {
               className={cn(
                 "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-<<<<<<< HEAD
-                "bg-slate-50 dark:bg-slate-800 shadow-sm hover:opacity-100 text-primary"
-=======
                   "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
->>>>>>> main
               )}
             >
               <Icon className="size-5" />
