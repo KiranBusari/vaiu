@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { FaGithub } from "react-icons/fa";
-import { headers } from "next/headers";
 
 export const ProjectIdClient = () => {
   const router = useRouter();
@@ -46,13 +45,8 @@ export const ProjectIdClient = () => {
       toast.error("You have to push to the specified branch first.");
     }
   };
-  const origin = headers().get("origin") ?? "";
-  if (!origin) {
-    toast.error("Origin header is not available.");
-    return null;
-  }
   const handlePayment = async () => {
-    router.push(`${origin}/paymentPage`);
+    router.push(`${process.env.NEXT_PUBLIC_APP_URL}/paymentPage`);
   };
 
   const { openPr } = useCreatePrModal();
