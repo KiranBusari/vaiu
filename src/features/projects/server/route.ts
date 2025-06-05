@@ -19,6 +19,7 @@ import {
   updateProjectSchema,
   createPrSchema,
   addExistingProjectSchema,
+  fileUploadSchema,
 } from "../schemas";
 import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
@@ -657,6 +658,87 @@ const app = new Hono()
         console.error("Failed to create PR:", error);
         return c.json({ error: "Failed to create PR" }, 500);
       }
+    },
+  )
+  .post(
+    "/upload-file",
+    sessionMiddleware,
+    zValidator("form", fileUploadSchema),
+    async (c) => {
+      const storage = c.get("storage");
+      const databases = c.get("databases");
+      const { file, projectId } = c.req.valid("form");
+
+      if (!file) {
+        return c.json({ error: "File is required" }, 400);
+      }
+
+      try {
+        const project = await databases.getDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId,
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+        return c.json({ error: "Project not found" }, 404);
+      }
+
+      let uploadedFile;
+
+      if (file instanceof File) {
+        uploadedFile = await storage.createFile(
+          IMAGES_BUCKET_ID,
+          ID.unique(),
+          file,
+        );
+
+        if (
+          file.name.toLowerCase().endsWith(".md") ||
+          file.name.toLowerCase().endsWith(".txt")
+        ) {
+          try {
+            // Get the file content as a buffer
+            const fileBuffer = await storage.getFileDownload(
+              IMAGES_BUCKET_ID,
+              uploadedFile.$id,
+            );
+
+            // Convert buffer to string to get the actual text content
+            const fileContent = Buffer.from(fileBuffer).toString("utf-8");
+
+            // Update the project with the actual README content
+            await databases.updateDocument(
+              DATABASE_ID,
+              PROJECTS_ID,
+              projectId,
+              {
+                readme: fileContent,
+              },
+            );
+
+            return c.json({
+              data: {
+                file: uploadedFile,
+                readmeContent: fileContent,
+              },
+            });
+          } catch (error) {
+            console.error("Error processing README file:", error);
+          }
+        }
+      } else {
+        return c.json({ error: "Invalid file type" }, 400);
+      }
+      return c.json({
+        data: {
+          file: uploadedFile,
+        },
+      });
     },
   );
 

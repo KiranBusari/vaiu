@@ -1,7 +1,6 @@
 import { ProjectAnalyticsResponseType } from "@/features/projects/api/use-get-project-analytics";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { AnalyticsCard } from "./analytics-card";
-import { DottedSeparator } from "./dotted-separator";
 
 export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
   return (
@@ -14,7 +13,6 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             variant={data.taskDiff > 0 ? "up" : "down"}
             increasedValue={data.taskDiff}
           />
-          <DottedSeparator direction="vertical" />
         </div>
         <div className="flex flex-1 items-center">
           <AnalyticsCard
@@ -23,7 +21,6 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             variant={data.assignedTaskDiff > 0 ? "up" : "down"}
             increasedValue={data.assignedTaskDiff}
           />
-          <DottedSeparator direction="vertical" />
         </div>
         <div className="flex flex-1 items-center">
           <AnalyticsCard
@@ -32,7 +29,6 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             variant={data.completeTaskDiff > 0 ? "up" : "down"}
             increasedValue={data.completeTaskDiff}
           />
-          <DottedSeparator direction="vertical" />
         </div>
         <div className="flex flex-1 items-center">
           <AnalyticsCard
@@ -41,7 +37,6 @@ export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
             variant={data.overdueTaskDiff > 0 ? "up" : "down"}
             increasedValue={data.overdueTaskDiff}
           />
-          <DottedSeparator direction="vertical" />
         </div>
         <div className="flex flex-1 items-center">
           <AnalyticsCard

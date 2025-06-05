@@ -26,9 +26,13 @@ export const useUpdateTask = () => {
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
-        );
+        const errorMessage =
+          "error" in errorData ? errorData.error : "Failed to update issue";
+
+        // Create error with status information
+        const error = new Error(errorMessage) as Error & { status: number };
+        error.status = response.status;
+        throw error;
       }
       return await response.json();
     },
