@@ -15,8 +15,6 @@ import {
 import { IssueStatus } from "../types";
 import { useTaskFilter } from "../hooks/use-task-filter";
 import { DatePicker } from "@/components/date-picker";
-import { useGetIssues } from "../api/use-get-tasks";
-import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 interface DataFiltersProps {
   hideProjectFilter?: boolean;
@@ -24,7 +22,6 @@ interface DataFiltersProps {
 
 export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
   const workspaceId = useWorkspaceId();
-  const paramProjectId = useProjectId();
   const { data: projects, isLoading: projectsLoading } = useGetProjects({
     workspaceId,
   });
@@ -32,20 +29,11 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
     workspaceId,
   });
 
-  const { data: issues, isLoading: issuesLoading } = useGetIssues({
-    workspaceId,
-    projectId: paramProjectId,
-  });
-  const isLoading = projectsLoading || membersLoading || issuesLoading;
+  const isLoading = projectsLoading || membersLoading;
 
   const projectOptions = projects?.documents.map((project) => ({
     value: project.$id,
     label: project.name,
-  }));
-
-  const assignessFromGitOptions = issues?.documents.map((issue) => ({
-    value: issue.$id,
-    label: issue.assigneeId,
   }));
 
   const memberOptions = members?.documents.map((member) => ({
@@ -53,9 +41,7 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
     label: member.name,
   }));
 
-  const assigneeOptions = (memberOptions || []).concat(
-    assignessFromGitOptions || [],
-  );
+  const assigneeOptions = memberOptions || [];
 
   const [{ status, dueDate, assigneeId, projectId }, setFilters] =
     useTaskFilter();
