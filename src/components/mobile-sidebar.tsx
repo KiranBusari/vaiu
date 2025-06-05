@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import {  SidebarComponent } from "./sidebar";
+import { SidebarComponent } from "./sidebar";
 
 export const MobileSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);

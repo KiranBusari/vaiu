@@ -1,6 +1,5 @@
 import { PropsWithChildren } from "react";
 import { Navbar } from "@/components/navbar";
-// import { SidebarComponent } from "@/components/sidebar";
 import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspace-modal";
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal";
 import { CreateTaskModal } from "@/features/issues/components/create-task-modal";
@@ -11,7 +10,7 @@ import { CreatePrModal } from "@/features/projects/components/create-pr-modal";
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
+    <div className="min-h-full bg-gray-100 dark:bg-gray-950">
       <AddCollaboratorToProjectModal />
       <CreateWorkspaceModal />
       <CreateProjectModal />
@@ -19,13 +18,9 @@ const DashboardLayout = ({ children }: PropsWithChildren) => {
       <CreateTaskModal />
       <CreatePrModal />
       <EditTaskModal />
-      <div className="flex h-full w-full">
-        <div className="w-full">
-          <div className="mx-auto h-screen">
-            <Navbar />
-            {children}
-          </div>
-        </div>
+      <div className="flex h-full w-full flex-col">
+        <Navbar />
+        <div className="flex-1 overflow-auto">{children}</div>
       </div>
     </div>
   );
