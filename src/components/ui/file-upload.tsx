@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import React, { useRef, useState } from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { IconUpload } from "@tabler/icons-react";
 import { useDropzone } from "react-dropzone";
 
