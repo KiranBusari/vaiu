@@ -98,7 +98,8 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { name, email, password } = c.req.valid("json");
-      // console.log(name, email, password);
+      console.log(name, email, password);
+      
       if (!name || !email || !password) {
         return c.json({ error: "Name, email and password are required" }, 400);
       }
@@ -111,31 +112,47 @@ const app = new Hono()
       if (!email.includes("@")) {
         return c.json({ error: "Invalid email address" }, 400);
       }
-      const { account: adminAccount } = await createAdminClient();
-      try {
-        await adminAccount.get();
-        return c.json({ error: "Email already registered" }, 400);
-      } catch (error: unknown) {
-        const appwriteError = error as { code?: number };
-        if (appwriteError.code !== 404) {
-          return c.json({ error: "Failed to check email" }, 500);
-        }
-      }
+      
       const { account } = await createAdminClient();
 
-      await account.create(ID.unique(), email, password, name);
-      const session = await account.createEmailPasswordSession(email, password);
+      try {
+        // Try to create the user directly - Appwrite will throw an error if email already exists
+        await account.create(ID.unique(), email, password, name);
+        const session = await account.createEmailPasswordSession(email, password);
 
-      setCookie(c, AUTH_COOKIE, session.secret, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30,
-      });
-      return c.json({ success: true });
-    } catch (error) {
-      return c.json({ error });
+        setCookie(c, AUTH_COOKIE, session.secret, {
+          path: "/",
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          maxAge: 60 * 60 * 24 * 30,
+        });
+        
+        return c.json({ success: true });
+      } catch (error: unknown) {
+        const appwriteError = error as { 
+          code?: number; 
+          type?: string; 
+          message?: string 
+        };
+        
+        // Handle specific Appwrite errors
+        if (appwriteError.code === 409 || appwriteError.type === "user_already_exists") {
+          return c.json({ error: "Email already registered" }, 409);
+        }
+        
+        if (appwriteError.code === 400) {
+          return c.json({ error: "Invalid user data provided" }, 400);
+        }
+        
+        console.error("Registration error:", appwriteError);
+        return c.json({ 
+          error: appwriteError.message || "Failed to create account" 
+        }, 500);
+      }
+    } catch (error: unknown) {
+      console.error("Unexpected registration error:", error);
+      return c.json({ error: "An unexpected error occurred during registration" }, 500);
     }
   })
   .post("/verify", async (c) => {
