@@ -73,11 +73,11 @@ export const Navigation = () => {
   const handleContributeClick = () => {
     if (isOpenContributionMember) {
       router.push(
-        `http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
+        `http://${process.env.NEXT_PUBLIC_APP_URL}/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
       );
     } else if (openContributionInfo?.inviteCode) {
       router.push(
-        `http://localhost:3000/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`,
+        `http://${process.env.NEXT_PUBLIC_APP_URL}/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`,
       );
     }
   };
