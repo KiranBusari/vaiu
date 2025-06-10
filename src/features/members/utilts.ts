@@ -17,3 +17,24 @@ export const getMember = async ({
   ]);
   return members.documents[0];
 };
+
+interface GetProjectMemberProps {
+  databases: Databases;
+  workspaceId: string;
+  projectId: string;
+  userId: string;
+}
+
+export const getProjectMember = async ({
+  databases,
+  userId,
+  workspaceId,
+  projectId,
+}: GetProjectMemberProps) => {
+  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+    Query.equal("workspaceId", workspaceId),
+    Query.equal("projectId", projectId),
+    Query.equal("userId", userId),
+  ]);
+  return members.documents[0];
+};

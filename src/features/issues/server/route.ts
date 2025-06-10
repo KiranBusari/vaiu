@@ -283,7 +283,7 @@ const app = new Hono()
       try {
         const databases = c.get("databases");
         const user = c.get("user");
-        const { name, status, dueDate, projectId, assigneeId, workspaceId } =
+        const { name, description, status, dueDate, projectId, assigneeId, workspaceId } =
           c.req.valid("json");
 
         const projects = await databases.listDocuments(
@@ -353,7 +353,7 @@ const app = new Hono()
           owner: owner.data.login,
           repo: projects.documents[0].name,
           title: name,
-          body: "",
+          body: description || "",
         });
 
         const issue = await databases.createDocument<Issue>(
@@ -362,6 +362,7 @@ const app = new Hono()
           ID.unique(),
           {
             name,
+            description,
             status,
             dueDate,
             workspaceId,

@@ -9,6 +9,7 @@ import {
   MEMBERS_ID,
   ISSUES_ID,
   WORKSPACE_ID,
+  PROJECTS_ID,
 } from "@/config";
 
 import {
@@ -18,10 +19,11 @@ import {
 } from "../schemas";
 import { MemberRole } from "@/features/members/types";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
-import { getMember } from "@/features/members/utilts";
+import { getMember, getProjectMember } from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
+import { Project } from "@/features/projects/types";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -449,6 +451,48 @@ const app = new Hono()
         member: member,
       },
     });
-  });
+  })
+  .post(
+    "/:workspaceId/projects/:projectId/join",
+    sessionMiddleware,
+    zValidator("json", inviteCodeSchema),
+    async (c) => {
+      const { workspaceId } = c.req.param();
+      const { projectId } = c.req.param();
+      const { code } = c.req.valid("json");
+
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const member = await getProjectMember({
+        databases,
+        workspaceId,
+        projectId,
+        userId: user.$id,
+      });
+
+      if (member) {
+        return c.json({ error: "Already a member of this project" }, 400);
+      }
+
+    const project = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      if (project.inviteCode !== code) {
+        return c.json({ error: "Invalid invite code" }, 400);
+      }
+
+      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+        workspaceId,
+        projectId,
+        userId: user.$id,
+        role: MemberRole.MEMBER,
+      });
+      return c.json({ data: project });
+    },
+  )
 
 export default app;

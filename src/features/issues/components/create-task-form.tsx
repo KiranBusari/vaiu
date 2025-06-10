@@ -100,6 +100,19 @@ export const CreateTaskForm = ({
               />
               <FormField
                 control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Issue Description</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Enter Description" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="dueDate"
                 render={({ field }) => (
                   <FormItem>
