@@ -740,6 +740,27 @@ const app = new Hono()
         },
       });
     },
-  );
+  )
+  .get("/:projectId/info", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { projectId } = c.req.param();
+
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId,
+    );
+
+    return c.json({
+      data: {
+        $id: project.$id,
+        name: project.name,
+        imageUrl: project.imageUrl,
+        projectAdmin: project.projectAdmin,
+        inviteCode: project.inviteCode,
+        workspaceId: project.workspaceId,
+      },
+    });
+  })
 
 export default app;

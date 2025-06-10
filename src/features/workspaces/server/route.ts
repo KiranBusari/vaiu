@@ -475,7 +475,7 @@ const app = new Hono()
         return c.json({ error: "Already a member of this project" }, 400);
       }
 
-    const project = await databases.getDocument<Project>(
+      const project = await databases.getDocument<Project>(
         DATABASE_ID,
         PROJECTS_ID,
         projectId,
@@ -494,5 +494,32 @@ const app = new Hono()
       return c.json({ data: project });
     },
   )
+  .post("/:workspaceId/projects/:projectId/reset-invite-code", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
+    const { workspaceId } = c.req.param();
+    const { projectId } = c.req.param();
+
+    const member = await getProjectMember({
+      databases,
+      workspaceId,
+      projectId,
+      userId: user.$id,
+    });
+
+    if (!member || member.role !== MemberRole.ADMIN) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+    
+    const project = await databases.updateDocument(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId,
+      {
+        inviteCode: generateInviteCode(INVITECODE_LENGTH),
+      },
+    );
+    return c.json({ data: project });
+  })
 
 export default app;
