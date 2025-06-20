@@ -453,7 +453,7 @@ const app = new Hono()
     });
   })
   .post(
-    "/:workspaceId/projects/:projectId/join",
+    "/:workspaceId/projects/:projectId/join", 
     sessionMiddleware,
     zValidator("json", inviteCodeSchema),
     async (c) => {

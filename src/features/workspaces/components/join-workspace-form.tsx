@@ -39,7 +39,7 @@ export const JoinWorkspaceForm = ({
       },
       {
         onSuccess: ({ data }) => {
-          router.push(`/workspaces/${data.$id}/projects/${data.projectId}`);
+          router.push(`/workspaces/${data.workspaceId}/projects/${data.$id}`);
         },
       }
     );

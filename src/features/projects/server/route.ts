@@ -11,6 +11,7 @@ import {
   PR_ID,
   PROJECTS_ID,
   ISSUES_ID,
+  MEMBERS_ID,
 } from "@/config";
 
 import {
@@ -28,6 +29,7 @@ import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
 import { MemberRole } from "@/features/members/types";
 import { ProjectAvatar } from "../components/project-avatar";
+import { ro } from "date-fns/locale";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
@@ -113,6 +115,18 @@ const app = new Hono()
             workspaceId,
             projectAdmin: member.$id,
             inviteCode: generateInviteCode(INVITECODE_LENGTH),
+          },
+        );
+
+        await databases.createDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          ID.unique(),
+          {
+            userId: user.$id,
+            workspaceId: workspaceId,
+            projectId: project.$id,
+            role: MemberRole.ADMIN,
           },
         );
 
@@ -221,26 +235,69 @@ const app = new Hono()
         return c.json({ error: "Missing workspaceId" }, 400);
       }
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
-
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const projects = await databases.listDocuments<Project>(
+      const memberDocuments = await databases.listDocuments(
         DATABASE_ID,
-        PROJECTS_ID,
+        MEMBERS_ID,
         [
           Query.equal("workspaceId", workspaceId),
-          Query.orderDesc("$createdAt"),
+          Query.equal("userId", user.$id),
         ],
       );
 
-      return c.json({ data: projects });
+      if (memberDocuments.documents.length === 0) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const projectIds = memberDocuments.documents.map(
+        (member) => member.projectId,
+      )
+
+      if (projectIds.length === 0) {
+        return c.json({ data: { documents: [], total: 0 } });
+      }
+
+      // const member = await getMember({
+      //   databases,
+      //   workspaceId,
+      //   userId: user.$id,
+      // });
+
+      // if (!member) {
+      //   return c.json({ error: "Unauthorized" }, 401);
+      // }
+
+      // const projects = await databases.listDocuments<Project>(
+      //   DATABASE_ID,
+      //   PROJECTS_ID,
+      //   [
+      //     Query.equal("workspaceId", workspaceId),
+      //     Query.contains("$id", projectIds),
+      //     Query.orderDesc("$createdAt"),
+      //   ],
+      // );
+
+      const projectPromises = projectIds.map(id =>
+        databases.getDocument<Project>(DATABASE_ID, PROJECTS_ID, id).catch(error => {
+          console.log(`Failed to fetch project with ID ${id}: ${error.message}`);
+          return null;
+        })
+      )
+
+      try {
+        const projectResults = await Promise.all(projectPromises);
+
+        const validProjects = projectResults.filter(project => project !== null);
+
+        return c.json({
+          data: {
+            documents: validProjects,
+            total: projectResults.length
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        return c.json({ error: "Failed to fetch projects" }, 500);
+      }
     },
   )
   .get("/:projectId", sessionMiddleware, async (c) => {
