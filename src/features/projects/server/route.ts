@@ -25,6 +25,9 @@ import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
+import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
+import { MemberRole } from "@/features/members/types";
+import { ProjectAvatar } from "../components/project-avatar";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
@@ -109,6 +112,7 @@ const app = new Hono()
             accessToken,
             workspaceId,
             projectAdmin: member.$id,
+            inviteCode: generateInviteCode(INVITECODE_LENGTH),
           },
         );
 
@@ -154,6 +158,7 @@ const app = new Hono()
           workspaceId,
           projectAdmin: member.$id,
           accessToken,
+          inviteCode: generateInviteCode(INVITECODE_LENGTH),
         },
       );
 
@@ -761,6 +766,38 @@ const app = new Hono()
         workspaceId: project.workspaceId,
       },
     });
+  })
+  .post("/:workspaceId/projects/:projectId/reset-invite-code", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const user = c.get("user");
+    const { workspaceId } = c.req.param();
+    const { projectId } = c.req.param();
+
+    const member = await getMember({
+      databases,
+      workspaceId,
+      userId: user.$id,
+    });
+
+    const existingProject = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId,
+    );
+
+    if (!member || member.role !== MemberRole.ADMIN && existingProject.projectAdmin !== member.$id) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const project = await databases.updateDocument(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId,
+      {
+        inviteCode: generateInviteCode(INVITECODE_LENGTH),
+      },
+    );
+    return c.json({ data: project });
   })
 
 export default app;

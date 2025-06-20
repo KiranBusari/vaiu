@@ -70,3 +70,5 @@ export type RemoveCollaboratorFromProjectSchema = z.infer<
 export type CreatePrSchema = z.infer<typeof createPrSchema>;
 export type AddExistingProjectSchema = z.infer<typeof addExistingProjectSchema>;
 export type FileUploadSchema = z.infer<typeof fileUploadSchema>;
+
+export const inviteCodeSchema = z.object({ code: z.string() });

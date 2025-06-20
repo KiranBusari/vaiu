@@ -51,7 +51,9 @@ export const EditProjectForm = ({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/projects/${initialValues.projectId}/join/${initialValues.inviteCode}`
+  console.log("initialValues", initialValues);
+  
+  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}/join/${initialValues.inviteCode}`
 
   const { mutate: resetInviteCode, isPending: resetingInviteCode } =
     useResetInviteCode();
