@@ -28,7 +28,7 @@ import { useUpdateProject } from "../api/use-update-project";
 import { type Project } from "../types";
 import { useDeleteProject } from "../api/use-delete-project";
 import { toast } from "sonner";
-import { useResetInviteCode } from "@/features/workspaces/api/use-reset-invite-code";
+import { useResetInviteCode } from "@/features/projects/api/use-reset-invite-code";
 interface EditProjectFormProps {
   onCancel?: () => void;
   initialValues: Project;
@@ -52,7 +52,7 @@ export const EditProjectForm = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   console.log("initialValues", initialValues);
-  
+
   const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}/join/${initialValues.inviteCode}`
 
   const { mutate: resetInviteCode, isPending: resetingInviteCode } =
@@ -108,7 +108,7 @@ export const EditProjectForm = ({
     const ok = await confirmReset();
     if (!ok) return;
     resetInviteCode({
-      param: { workspaceId: initialValues.$id },
+      param: { workspaceId: initialValues.workspaceId, projectId: initialValues.$id },
     });
   };
 

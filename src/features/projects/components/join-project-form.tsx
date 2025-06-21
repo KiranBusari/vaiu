@@ -12,9 +12,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { useJoinProject } from "../api/use-join-project";
+import { useJoinProject } from "@/features/workspaces/api/use-join-project";
 
-interface JoinWorkspaceFormProps {
+interface JoinProjectFormProps {
   initialValues: {
     name: string;
   };
@@ -22,12 +22,12 @@ interface JoinWorkspaceFormProps {
   workspaceId: string;
   projectId: string;
 }
-export const JoinWorkspaceForm = ({
+export const JoinProjectForm = ({
   initialValues,
   code: inviteCode,
   workspaceId,
   projectId,
-}: JoinWorkspaceFormProps) => {
+}: JoinProjectFormProps) => {
   const router = useRouter();
   const { mutate, isPending } = useJoinProject();
 
