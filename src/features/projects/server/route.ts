@@ -28,8 +28,6 @@ import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
 import { MemberRole } from "@/features/members/types";
-import { ProjectAvatar } from "../components/project-avatar";
-import { ro } from "date-fns/locale";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
