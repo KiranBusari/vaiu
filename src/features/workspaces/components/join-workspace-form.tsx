@@ -39,7 +39,7 @@ export const JoinWorkspaceForm = ({
         onSuccess: ({ data }) => {
           router.push(`/workspaces/${data.$id}`);
         },
-      }
+      },
     );
   };
 
@@ -56,7 +56,7 @@ export const JoinWorkspaceForm = ({
         <DottedSeparator />
       </div>
       <CardContent className="p-7">
-        <div className="flex flex-col gap-2 lg:flex-row items-center justify-between">
+        <div className="flex flex-col items-center justify-between gap-2 lg:flex-row">
           <Button
             className="w-full lg:w-fit"
             disabled={isPending}

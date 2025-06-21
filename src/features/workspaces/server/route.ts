@@ -315,6 +315,11 @@ const app = new Hono()
       ],
     );
 
+    const totalTasks = await databases.listDocuments(DATABASE_ID, ISSUES_ID, [
+      Query.equal("workspaceId", workspaceId),
+    ]);
+    // console.log("Total tasks:", totalTasks.total);
+    const totalTaskCount = totalTasks.total;
     const taskCount = thisMonthTasks.total;
     const taskDiff = taskCount - lastMonthTasks.total;
 
@@ -419,6 +424,7 @@ const app = new Hono()
 
     return c.json({
       data: {
+        totalTaskCount,
         taskCount,
         taskDiff,
         assignedTaskCount,

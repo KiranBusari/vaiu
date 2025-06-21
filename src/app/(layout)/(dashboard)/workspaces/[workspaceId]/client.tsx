@@ -11,7 +11,6 @@ import { Project } from "@/features/projects/types";
 import { PageError } from "@/components/page-error";
 import { Loader } from "@/components/page-loader";
 import { Card, CardContent } from "@/components/ui/card";
-import { DottedSeparator } from "@/components/dotted-separator";
 import { useGetIssues } from "@/features/issues/api/use-get-tasks";
 import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
@@ -21,6 +20,13 @@ import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { useCreateTaskModal } from "@/features/issues/hooks/use-create-task-modal";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
 import { useGetWorkspaceAnalytics } from "@/features/workspaces/api/use-get-workspace-analytics";
+import { cn } from "@/lib/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Separator } from "@/components/ui/separator";
 
 export const WorkspaceIdClient = () => {
   const workspaceId = useWorkspaceId();
@@ -48,8 +54,14 @@ export const WorkspaceIdClient = () => {
       <Analytics data={analytics} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <TaskList data={tasks.documents} total={tasks.total} />
-        <ProjectList data={projects.documents} total={projects.total} />
-        <MembersList data={members.documents} total={members.total} />
+        <div>
+          <ProjectList data={projects.documents} total={projects.total} />
+          <MembersList
+            className="mt-4"
+            data={members.documents}
+            total={members.total}
+          />
+        </div>
       </div>
     </div>
   );
@@ -72,7 +84,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
             <PlusIcon className="size-4 text-gray-400" />
           </Button>
         </div>
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4 bg-gray-400" />
         <ul className="flex flex-col gap-y-4">
           {data.map((issue) => (
             <li key={issue.$id}>
@@ -130,7 +142,7 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
             <PlusIcon className="size-4 text-neutral-400" />
           </Button>
         </div>
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4 bg-gray-400" />
         <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {data.map((project) => (
             <li key={project.$id}>
@@ -163,12 +175,15 @@ export const ProjectList = ({ data, total }: ProjectListProps) => {
 interface MembersListProps {
   data: Member[];
   total: number;
+  className?: string;
 }
-export const MembersList = ({ data, total }: MembersListProps) => {
+export const MembersList = ({ data, total, className }: MembersListProps) => {
   const workspaceId = useWorkspaceId();
 
   return (
-    <div className="container col-span-1 flex flex-col gap-y-4">
+    <div
+      className={cn("container col-span-1 flex flex-col gap-y-4", className)}
+    >
       <div className="rounded-lg border bg-slate-200 p-4 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <p className="text-lg font-semibold">Members ({total})</p>
@@ -178,15 +193,17 @@ export const MembersList = ({ data, total }: MembersListProps) => {
             </Link>
           </Button>
         </div>
-        <DottedSeparator className="my-4" />
-        <ul className="grid grid-cols-1 place-items-center gap-2 md:grid-cols-2">
+        <Separator className="my-4 bg-gray-400" />
+        <ul className="flex -space-x-4">
           {data && data.length > 0 ? (
             <>
               {data.map((member) => (
                 <li key={member.$id} className="flex w-fit gap-4">
-                  <Card className="overflow-hidden rounded-lg border border-gray-200 bg-slate-50 shadow-none dark:border-gray-700 dark:bg-gray-900">
-                    <CardContent className="flex flex-col items-center gap-x-2 p-2">
+                  <HoverCard>
+                    <HoverCardTrigger>
                       <MemberAvatar className="size-12" name={member.name} />
+                    </HoverCardTrigger>
+                    <HoverCardContent>
                       <div className="flex flex-col items-center overflow-hidden p-2">
                         <p className="line-clamp-1 max-w-36 text-lg font-medium">
                           {member.name}
@@ -195,8 +212,8 @@ export const MembersList = ({ data, total }: MembersListProps) => {
                           {member.email}
                         </p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </HoverCardContent>
+                  </HoverCard>
                 </li>
               ))}
             </>

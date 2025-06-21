@@ -105,7 +105,11 @@ export const CreateTaskForm = ({
                   <FormItem>
                     <FormLabel>Due Date</FormLabel>
                     <FormControl>
-                      <DatePicker {...field} />
+                      <DatePicker
+                        placeholder="Select due date"
+                        className="text-muted-foreground"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,7 +127,10 @@ export const CreateTaskForm = ({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select an assignee" />
+                          <SelectValue
+                            className="text-muted-foreground"
+                            placeholder="Select an assignee"
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <FormMessage />
@@ -157,7 +164,10 @@ export const CreateTaskForm = ({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue
+                            className="text-muted-foreground"
+                            placeholder="Select status"
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <FormMessage />
@@ -188,7 +198,10 @@ export const CreateTaskForm = ({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a project" />
+                          <SelectValue
+                            className="text-muted-foreground"
+                            placeholder="Select a project"
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <FormMessage />

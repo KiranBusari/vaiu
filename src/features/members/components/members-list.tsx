@@ -28,7 +28,7 @@ export const MembersList = () => {
   const [ConfirmDialog, confirm] = useConfirm(
     "Remove Member",
     "This member will be removed from the workspace",
-    "destructive"
+    "destructive",
   );
 
   const { data } = useGetMembers({ workspaceId });
@@ -49,16 +49,16 @@ export const MembersList = () => {
         onSuccess: () => {
           window.location.reload();
         },
-      }
+      },
     );
   };
   return (
     <Card className="size-full border-none shadow-none">
       <ConfirmDialog />
-      <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
+      <CardHeader className="flex flex-row items-center gap-x-4 space-y-0 p-7">
         <Button asChild variant="secondary" size="sm">
           <Link href={`/workspaces/${workspaceId}`}>
-            <ArrowLeft className="size-4 mr-2" />
+            <ArrowLeft className="mr-2 size-4" />
             Back
           </Link>
         </Button>

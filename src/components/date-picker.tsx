@@ -29,12 +29,12 @@ export const DatePicker = ({
           variant="outline"
           size="lg"
           className={cn(
-            "w-full justify-start text-left font-normal px-3",
-            !value && "text-muted-foreground",
-            className
+            "w-full justify-start px-3 text-left font-normal",
+            !value && "text-foreground",
+            className,
           )}
         >
-          <CalendarIcon className="size-4 mr-2" />
+          <CalendarIcon className="mr-2 size-4" />
           {value ? format(value, "PPP") : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>

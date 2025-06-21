@@ -48,5 +48,5 @@ export const sessionMiddleware = createMiddleware<AdditionalContext>(
     c.set("databases", databases);
 
     await next();
-  }
+  },
 );

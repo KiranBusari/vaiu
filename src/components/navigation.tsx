@@ -87,7 +87,24 @@ export const Navigation = () => {
           label === "Contributions"
             ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
             : `/workspaces/${workspaceId}${href ?? ""}`;
-        const isActive = pathname === absoluteHref;
+
+        // Determine if we're in the contributions workspace
+        const inContributionsWorkspace = pathname.includes(
+          `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
+        );
+
+        // Check if path is active, with special cases for Home and Contributions
+        const isActive =
+          label === "Home"
+            ? pathname === absoluteHref ||
+              pathname === `/workspaces/${workspaceId}`
+            : label === "Contributions"
+              ? inContributionsWorkspace &&
+                dynamicRedirect === true &&
+                // Don't mark Contributions as active if we're just in the contributions workspace home
+                pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}` &&
+                pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/`
+              : pathname === absoluteHref;
         const Icon = isActive ? aciveIcon : icon;
 
         if (dynamicRedirect) {

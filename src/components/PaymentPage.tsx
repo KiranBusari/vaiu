@@ -24,7 +24,7 @@ export default function PaymentPage() {
     try {
       await axios
         .post(
-          `http://${process.env.NEXT_PUBLIC_APP_URL}/api/payment-gateway/order`,
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-gateway/order`,
           data,
         )
         .then((response) => {

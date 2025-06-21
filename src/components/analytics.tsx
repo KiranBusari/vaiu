@@ -3,13 +3,21 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { AnalyticsCard } from "./analytics-card";
 
 export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
+  console.log(data);
+  if (!data) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <p className="text-gray-500">No analytics data available</p>
+      </div>
+    );
+  }
   return (
     <ScrollArea className="w-full shrink-0 whitespace-nowrap rounded-lg">
       <div className="flex w-full flex-row space-x-4">
         <div className="flex flex-1 items-center">
           <AnalyticsCard
             title="Total Issues"
-            value={data.taskCount}
+            value={data.totalTaskCount}
             variant={data.taskDiff > 0 ? "up" : "down"}
             increasedValue={data.taskDiff}
           />

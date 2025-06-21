@@ -6,11 +6,13 @@ export const useCurrent = () => {
     queryKey: ["current"],
     queryFn: async () => {
       const response = await client.api.v1.auth.current.$get();
-      console.log("Response", response);
+      // console.log("Response", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData && typeof errorData.error === "string" ? errorData.error : "Failed to login",
+          "error" in errorData && typeof errorData.error === "string"
+            ? errorData.error
+            : "Failed to login",
         );
       }
       const { data } = await response.json();

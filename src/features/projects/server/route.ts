@@ -43,6 +43,7 @@ const app = new Hono()
       const databases = c.get("databases");
       const storage = c.get("storage");
       const user = c.get("user");
+      console.log("User", user);
 
       const { name, image, workspaceId, accessToken } = c.req.valid("form");
       const octokit = new Octokit({
@@ -305,6 +306,11 @@ const app = new Hono()
       ],
     );
 
+    const totalTasks = await databases.listDocuments(DATABASE_ID, ISSUES_ID, [
+      Query.equal("projectId", projectId),
+    ]);
+
+    const totalTaskCount = totalTasks.total;
     const taskCount = thisMonthTasks.total;
     const taskDiff = taskCount - lastMonthTasks.total;
 
@@ -409,6 +415,7 @@ const app = new Hono()
 
     return c.json({
       data: {
+        totalTaskCount,
         taskCount,
         taskDiff,
         assignedTaskCount,
@@ -626,11 +633,11 @@ const app = new Hono()
         auth: project.accessToken,
       });
 
-      const owner = await octokit.rest.users.getAuthenticated();
+      // const owner = await octokit.rest.users.getAuthenticated();
 
       try {
         const createPR = await octokit.rest.pulls.create({
-          owner: owner.data.login,
+          owner: user.name,
           repo: project.name,
           title: title,
           body: description,

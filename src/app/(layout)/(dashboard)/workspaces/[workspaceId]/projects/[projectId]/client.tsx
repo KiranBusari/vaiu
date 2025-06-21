@@ -159,64 +159,17 @@ export const ProjectIdClient = () => {
           </a>
         </div>
 
-        {/* Desktop actions */}
-        <div className="hidden md:block">
-          <div className="flex items-center space-x-4">
-            <Button
-              className="bg-slate-200 text-black hover:bg-slate-300"
-              onClick={handleFileUpload}
-              variant="default"
-              size="sm"
-            >
-              <UploadIcon className="mr-1 size-4" />
-              Upload Readme
-            </Button>
-            <Button
-              className="bg-slate-200 text-black hover:bg-slate-300"
-              onClick={handleCreatePr}
-              variant="default"
-              size="sm"
-            >
-              <GitPullRequestCreateArrowIcon className="mr-1 size-4" />
-              Create Pull Request
-            </Button>
-            <Button variant="outline" size="sm" onClick={openCollaboratorModal}>
-              <UserPlus2 className="mr-1 size-4" />
-              Add Collaborator
-            </Button>
-            <Button
-              className="bg-slate-200 text-black hover:bg-slate-300"
-              variant="default"
-              size="sm"
-              asChild
-            >
-              <Link href={settingsUrl}>
-                <Settings className="mr-1 size-4" />
-                Settings
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile actions */}
-        <div className="block md:hidden">
+        <div className="mt-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="default" className="items-center">
                 <EllipsisVertical className="size-4" />
+                <p className="text-sm">Actions</p>
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52 p-2">
               <div className="flex flex-col items-stretch space-y-2">
-                <Button
-                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  onClick={handleFileUpload}
-                  variant="default"
-                >
-                  <UploadIcon className="mr-2 size-4" />
-                  Upload Readme
-                </Button>
                 <Button
                   className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
                   onClick={handleFileUpload}

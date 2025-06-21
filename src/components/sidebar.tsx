@@ -19,10 +19,14 @@ import {
 import { Separator } from "./ui/separator";
 import { RiAddCircleFill } from "react-icons/ri";
 import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
+import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
+import { useCreateRoomModal } from "@/features/channels/hooks/use-create-room-modal";
 
 export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
   const { open } = useCreateWorkspaceModal();
+  const { open: openProject } = useCreateProjectModal();
+  const { open: openRoom } = useCreateRoomModal();
   return (
     <Sidebar collapsible="offcanvas" side="left" variant="floating">
       <SidebarContent className="p-2">
@@ -51,14 +55,40 @@ export const SidebarComponent = () => {
             <WorkspaceSwitcher />
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
+        <SidebarGroup className="mt-2">
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <Navigation />
           </SidebarGroupContent>
         </SidebarGroup>
-        <ProjectSwitcher />
-        <Rooms />
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel>
+            <div className="mb-4 flex w-full items-center justify-between">
+              Projects
+              <RiAddCircleFill
+                onClick={openProject}
+                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
+              />
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <ProjectSwitcher />
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel>
+            <div className="mb-4 flex w-full items-center justify-between">
+              Rooms
+              <RiAddCircleFill
+                onClick={openRoom}
+                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
+              />
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <Rooms />
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );
