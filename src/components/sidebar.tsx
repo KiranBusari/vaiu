@@ -19,9 +19,12 @@ import {
 import { Separator } from "./ui/separator";
 import { RiAddCircleFill } from "react-icons/ri";
 import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
+import { RoomSwitcher } from "./room-switcher";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
+  const projectId = useProjectId();
   const { open } = useCreateWorkspaceModal();
   return (
     <Sidebar collapsible="offcanvas" side="left" variant="floating">
@@ -58,7 +61,10 @@ export const SidebarComponent = () => {
           </SidebarGroupContent>
         </SidebarGroup>
         <ProjectSwitcher />
-        <Rooms />
+        {workspaceId && projectId && (
+          <RoomSwitcher workspaceId={workspaceId} projectId={projectId} />
+        )}
+        {/* <Rooms /> */}
       </SidebarContent>
     </Sidebar>
   );
