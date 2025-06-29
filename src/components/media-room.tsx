@@ -20,6 +20,7 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
   audio,
 }) => {
   const [token, setToken] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const router = useRouter();
 
@@ -38,13 +39,15 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
 
         const data = await response.json();
         setToken(data.token);
+        setLoading(false);
       } catch (error) {
         console.log(error);
+        setLoading(false);
       }
     })();
   }, [chatId, user?.name]);
 
-  if (token === "") {
+  if (loading) {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
         <Loader2 className="h-7 w-7 text-zinc-500 animate-spin my-4" />
