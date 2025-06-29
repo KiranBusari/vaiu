@@ -6,6 +6,7 @@ import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Loader2 } from "lucide-react";
 import { useCurrent } from "@/features/auth/api/use-curent";
+import { useRouter } from "next/navigation";
 
 interface MediaRoomProps {
   chatId: string;
@@ -19,6 +20,8 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
   audio,
 }) => {
   const [token, setToken] = useState("");
+
+  const router = useRouter();
 
   const { data: user } = useCurrent();
 
@@ -58,6 +61,7 @@ export const MediaRoom: React.FC<MediaRoomProps> = ({
       connect={true}
       audio={audio}
       video={video}
+      onDisconnected={() => router.push("/")}
     >
       <VideoConference />
     </LiveKitRoom>
