@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, ImageIcon } from "lucide-react";
+import { ArrowLeft, CopyIcon, ImageIcon } from "lucide-react";
 
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,8 @@ import { type UpdateProjectSchema, updateProjectSchema } from "../schemas";
 import { useUpdateProject } from "../api/use-update-project";
 import { type Project } from "../types";
 import { useDeleteProject } from "../api/use-delete-project";
-
+import { toast } from "sonner";
+import { useResetInviteCode } from "@/features/projects/api/use-reset-invite-code";
 interface EditProjectFormProps {
   onCancel?: () => void;
   initialValues: Project;
@@ -49,6 +50,19 @@ export const EditProjectForm = ({
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  console.log("initialValues", initialValues);
+
+  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}/join/${initialValues.inviteCode}`
+
+  const { mutate: resetInviteCode, isPending: resetingInviteCode } =
+    useResetInviteCode();
+
+  const [ResetDialog, confirmReset] = useConfirm(
+    "Reset invite link",
+    "This will invalidate the current invite link",
+    "destructive"
+  );
 
   const form = useForm<UpdateProjectSchema>({
     resolver: zodResolver(updateProjectSchema),
@@ -90,9 +104,18 @@ export const EditProjectForm = ({
     );
   };
 
+  const handleResetInviteCode = async () => {
+    const ok = await confirmReset();
+    if (!ok) return;
+    resetInviteCode({
+      param: { workspaceId: initialValues.workspaceId, projectId: initialValues.$id },
+    });
+  };
+
   return (
     <div className="flex flex-col gap-y-4">
       <DeleteWorkspaceDialog />
+      <ResetDialog />
       <Card className="size-full border-none shadow-none">
         <CardHeader className="flex flex-row items-center gap-x-4 space-y-0">
           <Button
@@ -223,6 +246,44 @@ export const EditProjectForm = ({
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+      <Card className="size-full border-none shadow-none">
+        <CardContent className="p-7">
+          <div className="flex flex-col">
+            <h3 className="font-bold">Invite Members</h3>
+            <p className="text-sm text-muted-foreground">
+              Use the invite link to add members to your workspace
+            </p>
+            <div className="mt-4">
+              <div className="flex items-center gap-x-2">
+                <Input value={absoluteInviteLink} readOnly />
+                <Button
+                  onClick={() => {
+                    navigator.clipboard
+                      .writeText(absoluteInviteLink)
+                      .then(() =>
+                        toast.success("Invite Link Copied to clipboard")
+                      );
+                  }}
+                  variant="secondary"
+                  className="size-12"
+                >
+                  <CopyIcon className="size-5" />
+                </Button>
+              </div>
+            </div>
+            <DottedSeparator className="py-7" />
+            <Button
+              className="mt-6 w-fit ml-auto"
+              size="sm"
+              variant="destructive"
+              disabled={isPending || resetingInviteCode}
+              onClick={handleResetInviteCode}
+            >
+              Reset invite link
+            </Button>
+          </div>
         </CardContent>
       </Card>
       <Card className="size-full border-none shadow-none">

@@ -9,17 +9,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
-import { useGetProjects } from "@/features/projects/api/use-get-projects";
+// import { useGetProjects } from "@/features/projects/api/use-get-projects";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { Project } from "@/features/projects/types";
 import { cn } from "@/lib/utils";
+import { useGetSpecificProjects } from "@/features/projects/api/use-get-specific-projects";
 
 export const ProjectSwitcher = () => {
   const workspaceId = useWorkspaceId();
   const router = useRouter();
   const projectId = useProjectId();
-  const { data: projects } = useGetProjects({ workspaceId });
-
+  // const { data: projects } = useGetProjects({ workspaceId });
+  const { data: specificProjects } = useGetSpecificProjects({ workspaceId });
   const onSelect = (id: string) => {
     router.push(`/workspaces/${workspaceId}/projects/${id}`);
   };
@@ -31,21 +33,25 @@ export const ProjectSwitcher = () => {
           <SelectValue placeholder="Select a project" className="font-bold" />
         </SelectTrigger>
         <SelectContent position="popper" className="">
-          {projects?.documents.map((project) => (
-            <SelectItem
-              className={cn(
-                "m-0.5 hover:bg-slate-200 dark:hover:bg-slate-600",
-                projectId === project.$id && "bg-slate-100 dark:bg-slate-500",
-              )}
-              value={project.$id}
-              key={project.$id}
-            >
-              <div className="flex items-center justify-start gap-3 font-medium">
-                <ProjectAvatar name={project.name} image={project.imageUrl} />
-                <span className="truncate capitalize">{project.name}</span>
-              </div>
-            </SelectItem>
-          ))}
+          {specificProjects &&
+            typeof specificProjects === "object" &&
+            "documents" in specificProjects &&
+            Array.isArray(specificProjects.documents) &&
+            specificProjects.documents.map((project: Project) => (
+              <SelectItem
+                className={cn(
+                  "m-0.5 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  projectId === project.$id && "bg-slate-100 dark:bg-slate-500",
+                )}
+                value={project.$id}
+                key={project.$id}
+              >
+                <div className="flex items-center justify-start gap-3 font-medium">
+                  <ProjectAvatar name={project.name} image={project.imageUrl} />
+                  <span className="truncate capitalize">{project.name}</span>
+                </div>
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
     </div>

@@ -4,4 +4,6 @@ export type Project = Models.Document & {
   name: string;
   imageUrl: string;
   projectId: string;
+  inviteCode: string;
+  workspaceId: string;
 };

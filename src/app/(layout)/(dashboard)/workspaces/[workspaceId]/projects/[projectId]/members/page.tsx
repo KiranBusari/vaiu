@@ -1,5 +1,5 @@
 import { getCurrent } from "@/features/auth/queries";
-import { MembersList } from "@/features/members/components/members-list";
+import { ProjectMembersList } from "@/features/members/components/project-members-list";
 import { redirect } from "next/navigation";
 
 const MembersPage = async () => {
@@ -7,7 +7,7 @@ const MembersPage = async () => {
   if (!current) redirect("/sign-in");
   return (
     <div className="mx-auto w-full lg:max-w-xl">
-      <MembersList />
+      <ProjectMembersList />
     </div>
   );
 };

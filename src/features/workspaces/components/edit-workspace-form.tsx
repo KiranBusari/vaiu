@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CopyIcon, ImageIcon } from "lucide-react";
+import { ArrowLeft, ImageIcon } from "lucide-react";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,8 +26,6 @@ import { type UpdateWorkspaceSchema, updateWorkspaceSchema } from "../schemas";
 import { useUpdateWorkspace } from "../api/use-update-workspace";
 import { useDeleteWorkspace } from "../api/use-delete-workspace";
 import { type Workspace } from "../types";
-import { toast } from "sonner";
-import { useResetInviteCode } from "../api/use-reset-invite-code";
 
 interface EditWorkspaceFormProps {
   onCancel?: () => void;
@@ -46,14 +44,6 @@ export const EditWorkspaceForm = ({
   const [DeleteWorkspaceDialog, confirmDelete] = useConfirm(
     "Delte workspace",
     "Are you sure you want to delete this workspace?",
-    "destructive",
-  );
-  const { mutate: resetInviteCode, isPending: resetingInviteCode } =
-    useResetInviteCode();
-
-  const [ResetDialog, confirmReset] = useConfirm(
-    "Reset invite link",
-    "This will invalidate the current invite link",
     "destructive",
   );
 
@@ -98,19 +88,10 @@ export const EditWorkspaceForm = ({
       },
     );
   };
-  const handleResetInviteCode = async () => {
-    const ok = await confirmReset();
-    if (!ok) return;
-    resetInviteCode({
-      param: { workspaceId: initialValues.$id },
-    });
-  };
-  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/join/${initialValues.inviteCode}`;
 
   return (
     <div className="flex flex-col gap-y-4">
       <DeleteWorkspaceDialog />
-      <ResetDialog />
       <Card className="size-full border-none shadow-none">
         <CardHeader className="flex flex-row items-center gap-x-4 space-y-0">
           <Button
@@ -238,44 +219,6 @@ export const EditWorkspaceForm = ({
               </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-      <Card className="size-full border-none shadow-none">
-        <CardContent className="p-7">
-          <div className="flex flex-col">
-            <h3 className="font-bold">Invite Members</h3>
-            <p className="text-sm text-muted-foreground">
-              Use the invite link to add members to your workspace
-            </p>
-            <div className="mt-4">
-              <div className="flex items-center gap-x-2">
-                <Input value={absoluteInviteLink} readOnly />
-                <Button
-                  onClick={() => {
-                    navigator.clipboard
-                      .writeText(absoluteInviteLink)
-                      .then(() =>
-                        toast.success("Invite Link Copied to clipboard"),
-                      );
-                  }}
-                  variant="secondary"
-                  className="size-12"
-                >
-                  <CopyIcon className="size-5" />
-                </Button>
-              </div>
-            </div>
-            <DottedSeparator className="py-7" />
-            <Button
-              className="ml-auto mt-6 w-fit"
-              size="sm"
-              variant="destructive"
-              disabled={isPending || resetingInviteCode}
-              onClick={handleResetInviteCode}
-            >
-              Reset invite link
-            </Button>
-          </div>
         </CardContent>
       </Card>
       <Card className="size-full border-none shadow-none">

@@ -12,32 +12,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { useJoinWorkspace } from "../api/use-join-workspace";
+import { useJoinProject } from "@/features/workspaces/api/use-join-project";
 
-interface JoinWorkspaceFormProps {
+interface JoinProjectFormProps {
   initialValues: {
     name: string;
   };
   code: string;
   workspaceId: string;
+  projectId: string;
 }
-export const JoinWorkspaceForm = ({
+export const JoinProjectForm = ({
   initialValues,
   code: inviteCode,
   workspaceId,
-}: JoinWorkspaceFormProps) => {
+  projectId,
+}: JoinProjectFormProps) => {
   const router = useRouter();
-  const { mutate, isPending } = useJoinWorkspace();
+  const { mutate, isPending } = useJoinProject();
 
   const onSubmit = () => {
     mutate(
       {
-        param: { workspaceId },
+        param: { workspaceId, projectId },
         json: { code: inviteCode },
       },
       {
         onSuccess: ({ data }) => {
-          router.push(`/workspaces/${data.$id}`);
+          router.push(`/workspaces/${data.workspaceId}/projects/${data.$id}`);
         },
       },
     );
@@ -46,10 +48,10 @@ export const JoinWorkspaceForm = ({
   return (
     <Card className="size-full border-none shadow-none">
       <CardHeader className="p-7">
-        <CardTitle className="text-xl font-bold">Join workspace</CardTitle>
+        <CardTitle className="text-xl font-bold">Join Project</CardTitle>
         <CardDescription>
           You&apos;ve been invited to join <strong>{initialValues.name}</strong>{" "}
-          workspace
+          project
         </CardDescription>
       </CardHeader>
       <div className="px-7">
@@ -74,7 +76,7 @@ export const JoinWorkspaceForm = ({
             type="button"
             size="lg"
           >
-            Join workspace
+            Join Project
           </Button>
         </div>
       </CardContent>

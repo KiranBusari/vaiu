@@ -11,6 +11,7 @@ import {
   PR_ID,
   PROJECTS_ID,
   ISSUES_ID,
+  MEMBERS_ID,
 } from "@/config";
 
 import {
@@ -25,6 +26,8 @@ import { Project } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
+import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
+import { MemberRole } from "@/features/members/types";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
@@ -110,8 +113,23 @@ const app = new Hono()
             accessToken,
             workspaceId,
             projectAdmin: member.$id,
+            inviteCode: generateInviteCode(INVITECODE_LENGTH),
           },
         );
+
+        // await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+        //   userId: user.$id,
+        //   workspaceId,
+        //   projectId: project.$id,
+        //   role: MemberRole.ADMIN,
+        // });
+
+        // Update member's projectId array
+        const currentProjectIds = member.projectId || [];
+        await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
+          projectId: [...currentProjectIds, project.$id],
+          role: MemberRole.ADMIN,
+        });
 
         return c.json({ data: project, repo: repo.data });
       }
@@ -155,6 +173,7 @@ const app = new Hono()
           workspaceId,
           projectAdmin: member.$id,
           accessToken,
+          inviteCode: generateInviteCode(INVITECODE_LENGTH),
         },
       );
 
@@ -201,6 +220,14 @@ const app = new Hono()
           dueDate: issue.created_at,
         });
       });
+
+      // Update member's projectId array
+      const currentProjectIds = member.projectId || [];
+      await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
+        projectId: [...currentProjectIds, project.$id],
+        role: MemberRole.ADMIN,
+      });
+
       return c.json({ data: project, issues: data });
     },
   )
@@ -237,6 +264,79 @@ const app = new Hono()
       );
 
       return c.json({ data: projects });
+    },
+  )
+  .get(
+    "/get-projects",
+    sessionMiddleware,
+    zValidator("query", z.object({ workspaceId: z.string() })),
+    async (c) => {
+      const user = c.get("user");
+      const databases = c.get("databases");
+
+      const { workspaceId } = c.req.valid("query");
+      if (!workspaceId) {
+        return c.json({ error: "Missing workspaceId" }, 400);
+      }
+
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const memberDocuments = await databases.listDocuments(
+        DATABASE_ID,
+        MEMBERS_ID,
+        [
+          Query.equal("workspaceId", workspaceId),
+          Query.equal("userId", user.$id),
+        ],
+      );
+
+      if (memberDocuments.documents.length === 0) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const projectIds = memberDocuments.documents.flatMap(
+        (member) => member.projectId || [],
+      );
+
+      if (projectIds.length === 0) {
+        return c.json({ data: { documents: [], total: 0 } });
+      }
+
+      try {
+        // Since Query.contains doesn't work with $id, we'll fetch all projects for the workspace
+        // and then filter them manually
+        const projects = await databases.listDocuments<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          [
+            Query.equal("workspaceId", workspaceId),
+            Query.orderDesc("$createdAt"),
+          ],
+        );
+
+        // Filter the projects to only include those in the projectIds array
+        const validProjects = projects.documents.filter(
+          (project) => project !== null && projectIds.includes(project.$id),
+        );
+
+        return c.json({
+          data: {
+            documents: validProjects,
+            total: validProjects.length,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        return c.json({ error: "Failed to fetch projects" }, 500);
+      }
     },
   )
   .get("/:projectId", sessionMiddleware, async (c) => {
@@ -746,6 +846,67 @@ const app = new Hono()
           file: uploadedFile,
         },
       });
+    },
+  )
+  .get("/:projectId/info", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { projectId } = c.req.param();
+
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId,
+    );
+
+    return c.json({
+      data: {
+        $id: project.$id,
+        name: project.name,
+        imageUrl: project.imageUrl,
+        projectAdmin: project.projectAdmin,
+        inviteCode: project.inviteCode,
+        workspaceId: project.workspaceId,
+      },
+    });
+  })
+  .post(
+    "/:workspaceId/projects/:projectId/reset-invite-code",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { workspaceId } = c.req.param();
+      const { projectId } = c.req.param();
+
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      const existingProject = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      if (
+        !member ||
+        (member.role !== MemberRole.ADMIN &&
+          existingProject.projectAdmin !== member.$id)
+      ) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const project = await databases.updateDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+        {
+          inviteCode: generateInviteCode(INVITECODE_LENGTH),
+        },
+      );
+      return c.json({ data: project });
     },
   );
 

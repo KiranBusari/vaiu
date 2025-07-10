@@ -9,6 +9,7 @@ import {
   MEMBERS_ID,
   ISSUES_ID,
   WORKSPACE_ID,
+  PROJECTS_ID,
 } from "@/config";
 
 import {
@@ -18,10 +19,11 @@ import {
 } from "../schemas";
 import { MemberRole } from "@/features/members/types";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
-import { getMember } from "@/features/members/utilts";
+import { getMember, getProjectMember } from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
+import { Project } from "@/features/projects/types";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -47,42 +49,80 @@ const app = new Hono()
     const databases = c.get("databases");
     const { workspaceId } = c.req.param();
 
-    const member = await getMember({
-      databases,
-      workspaceId,
-      userId: user.$id,
-    });
+    try {
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
 
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      return c.json({ data: workspace });
+    } catch (error: unknown) {
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 404) {
+        return c.json({ error: "Workspace not found" }, 404);
+      }
+      console.error("Error fetching workspace:", error);
+      return c.json({ error: "Failed to fetch workspace" }, 500);
     }
-
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId,
-    );
-
-    return c.json({ data: workspace });
   })
   .get("/:workspaceId/info", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
+    const user = c.get("user");
     const { workspaceId } = c.req.param();
 
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId,
-    );
+    try {
+      // First check if user is a member of this workspace
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
 
-    return c.json({
-      data: {
-        $id: workspace.$id,
-        name: workspace.name,
-        imageUrl: workspace.imageUrl,
-        inviteCode: workspace.inviteCode,
-      },
-    });
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      return c.json({
+        data: {
+          $id: workspace.$id,
+          name: workspace.name,
+          imageUrl: workspace.imageUrl,
+          inviteCode: workspace.inviteCode,
+        },
+      });
+    } catch (error: unknown) {
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 404) {
+        return c.json({ error: "Workspace not found" }, 404);
+      }
+      console.error("Error fetching workspace info:", error);
+      return c.json({ error: "Failed to fetch workspace info" }, 500);
+    }
   })
   .post(
     "/",
@@ -238,44 +278,6 @@ const app = new Hono()
     );
     return c.json({ data: workspace });
   })
-  .post(
-    "/:workspaceId/join",
-    sessionMiddleware,
-    zValidator("json", inviteCodeSchema),
-    async (c) => {
-      const { workspaceId } = c.req.param();
-      const { code } = c.req.valid("json");
-
-      const databases = c.get("databases");
-      const user = c.get("user");
-
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
-      if (member) {
-        return c.json({ error: "Already a membber" }, 400);
-      }
-
-      const workspace = await databases.getDocument<Workspace>(
-        DATABASE_ID,
-        WORKSPACE_ID,
-        workspaceId,
-      );
-
-      if (workspace.inviteCode !== code) {
-        return c.json({ error: "Invalid invite code" }, 400);
-      }
-
-      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
-        workspaceId,
-        userId: user.$id,
-        role: MemberRole.MEMBER,
-      });
-      return c.json({ data: workspace });
-    },
-  )
   .get("/:workspaceId/analytics", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
     const user = c.get("user");
@@ -455,6 +457,79 @@ const app = new Hono()
         member: member,
       },
     });
-  });
+  })
+  .post(
+    "/:workspaceId/projects/:projectId/join",
+    sessionMiddleware,
+    zValidator("json", inviteCodeSchema),
+    async (c) => {
+      const { workspaceId } = c.req.param();
+      const { projectId } = c.req.param();
+      const { code } = c.req.valid("json");
+
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      const member = await getProjectMember({
+        databases,
+        workspaceId,
+        projectId,
+        userId: user.$id,
+      });
+
+      if (member) {
+        return c.json({ error: "Already a member of this project" }, 400);
+      }
+
+      const project = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      if (project.inviteCode !== code) {
+        return c.json({ error: "Invalid invite code" }, 400);
+      }
+
+      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+        workspaceId,
+        projectId,
+        userId: user.$id,
+        role: MemberRole.MEMBER,
+      });
+      return c.json({ data: project });
+    },
+  )
+  .post(
+    "/:workspaceId/projects/:projectId/reset-invite-code",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { workspaceId } = c.req.param();
+      const { projectId } = c.req.param();
+
+      const member = await getProjectMember({
+        databases,
+        workspaceId,
+        projectId,
+        userId: user.$id,
+      });
+
+      if (!member || member.role !== MemberRole.ADMIN) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const project = await databases.updateDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+        {
+          inviteCode: generateInviteCode(INVITECODE_LENGTH),
+        },
+      );
+      return c.json({ data: project });
+    },
+  );
 
 export default app;
