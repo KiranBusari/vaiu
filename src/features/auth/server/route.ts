@@ -98,7 +98,7 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { name, email, password } = c.req.valid("json");
-      // console.log(name, email, password);
+      console.log(name, email, password);
       if (!name || !email || !password) {
         return c.json({ error: "Name, email and password are required" }, 400);
       }
@@ -111,18 +111,24 @@ const app = new Hono()
       if (!email.includes("@")) {
         return c.json({ error: "Invalid email address" }, 400);
       }
-      const { account: adminAccount } = await createAdminClient();
+      const { users } = await createAdminClient();
+      console.log("Admin account", users);
+
       try {
-        await adminAccount.get();
-        return c.json({ error: "Email already registered" }, 400);
-      } catch (error: unknown) {
-        const appwriteError = error as { code?: number };
-        if (appwriteError.code !== 404) {
-          return c.json({ error: "Failed to check email" }, 500);
+        // Check if user with this email already exists
+        const existingUsers = await users.list([]);
+        const userExists = existingUsers.users.some(
+          (user) => user.email === email,
+        );
+        if (userExists) {
+          return c.json({ error: "Email already registered" }, 400);
         }
+      } catch (error: unknown) {
+        console.log("Error checking users:", error);
+        // Continue with registration if we can't check (better UX)
       }
       const { account } = await createAdminClient();
-
+      console.log("Account", account);
       await account.create(ID.unique(), email, password, name);
       const session = await account.createEmailPasswordSession(email, password);
 
@@ -147,7 +153,7 @@ const app = new Hono()
   })
   .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
     const { userId, secret } = c.req.valid("json");
-    // console.log(userId, secret);
+
     try {
       const { account } = await createSessionClient();
       await account.updateVerification(userId, secret);
@@ -155,12 +161,38 @@ const app = new Hono()
         success: true,
         message: "User verified successfully",
       });
-    } catch (e) {
-      console.log(e);
+    } catch (error: unknown) {
+      console.error("Verification error:", error);
+
+      // Type guard for error object
+      const err = error as { code?: number; type?: string; message?: string };
+
+      // Handle specific error cases
+      if (err.code === 401) {
+        return c.json(
+          {
+            success: false,
+            message: "Invalid verification link or token expired",
+          },
+          401,
+        );
+      }
+
+      if (err.code === 404) {
+        return c.json(
+          {
+            success: false,
+            message: "User not found",
+          },
+          404,
+        );
+      }
+
+      // Default error response
       return c.json(
         {
           success: false,
-          message: "Failed to verify user",
+          message: err.message || "Failed to verify user",
         },
         400,
       );

@@ -11,11 +11,16 @@ export const getMember = async ({
   userId,
   workspaceId,
 }: GetMemberProps) => {
-  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-    Query.equal("workspaceId", workspaceId),
-    Query.equal("userId", userId),
-  ]);
-  return members.documents[0];
+  try {
+    const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+      Query.equal("workspaceId", workspaceId),
+      Query.equal("userId", userId),
+    ]);
+    return members.documents[0];
+  } catch (error: unknown) {
+    console.error("Error fetching member:", error);
+    return null;
+  }
 };
 
 interface GetProjectMemberProps {
@@ -31,10 +36,15 @@ export const getProjectMember = async ({
   workspaceId,
   projectId,
 }: GetProjectMemberProps) => {
-  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-    Query.equal("workspaceId", workspaceId),
-    Query.equal("projectId", projectId),
-    Query.equal("userId", userId),
-  ]);
-  return members.documents[0];
+  try {
+    const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+      Query.equal("workspaceId", workspaceId),
+      Query.equal("projectId", projectId),
+      Query.equal("userId", userId),
+    ]);
+    return members.documents[0];
+  } catch (error: unknown) {
+    console.error("Error fetching project member:", error);
+    return null;
+  }
 };

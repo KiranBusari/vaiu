@@ -49,42 +49,80 @@ const app = new Hono()
     const databases = c.get("databases");
     const { workspaceId } = c.req.param();
 
-    const member = await getMember({
-      databases,
-      workspaceId,
-      userId: user.$id,
-    });
+    try {
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
 
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      return c.json({ data: workspace });
+    } catch (error: unknown) {
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 404) {
+        return c.json({ error: "Workspace not found" }, 404);
+      }
+      console.error("Error fetching workspace:", error);
+      return c.json({ error: "Failed to fetch workspace" }, 500);
     }
-
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId,
-    );
-
-    return c.json({ data: workspace });
   })
   .get("/:workspaceId/info", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
+    const user = c.get("user");
     const { workspaceId } = c.req.param();
 
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId,
-    );
+    try {
+      // First check if user is a member of this workspace
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
 
-    return c.json({
-      data: {
-        $id: workspace.$id,
-        name: workspace.name,
-        imageUrl: workspace.imageUrl,
-        inviteCode: workspace.inviteCode,
-      },
-    });
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      return c.json({
+        data: {
+          $id: workspace.$id,
+          name: workspace.name,
+          imageUrl: workspace.imageUrl,
+          inviteCode: workspace.inviteCode,
+        },
+      });
+    } catch (error: unknown) {
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 404) {
+        return c.json({ error: "Workspace not found" }, 404);
+      }
+      console.error("Error fetching workspace info:", error);
+      return c.json({ error: "Failed to fetch workspace info" }, 500);
+    }
   })
   .post(
     "/",
@@ -415,7 +453,7 @@ const app = new Hono()
     });
   })
   .post(
-    "/:workspaceId/projects/:projectId/join", 
+    "/:workspaceId/projects/:projectId/join",
     sessionMiddleware,
     zValidator("json", inviteCodeSchema),
     async (c) => {
@@ -456,32 +494,36 @@ const app = new Hono()
       return c.json({ data: project });
     },
   )
-  .post("/:workspaceId/projects/:projectId/reset-invite-code", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
-    const user = c.get("user");
-    const { workspaceId } = c.req.param();
-    const { projectId } = c.req.param();
+  .post(
+    "/:workspaceId/projects/:projectId/reset-invite-code",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { workspaceId } = c.req.param();
+      const { projectId } = c.req.param();
 
-    const member = await getProjectMember({
-      databases,
-      workspaceId,
-      projectId,
-      userId: user.$id,
-    });
+      const member = await getProjectMember({
+        databases,
+        workspaceId,
+        projectId,
+        userId: user.$id,
+      });
 
-    if (!member || member.role !== MemberRole.ADMIN) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-    
-    const project = await databases.updateDocument(
-      DATABASE_ID,
-      PROJECTS_ID,
-      projectId,
-      {
-        inviteCode: generateInviteCode(INVITECODE_LENGTH),
-      },
-    );
-    return c.json({ data: project });
-  })
+      if (!member || member.role !== MemberRole.ADMIN) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      const project = await databases.updateDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+        {
+          inviteCode: generateInviteCode(INVITECODE_LENGTH),
+        },
+      );
+      return c.json({ data: project });
+    },
+  );
 
 export default app;

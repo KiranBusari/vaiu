@@ -16,22 +16,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MemberRole } from "@/features/members/types";
-import { useGetMembers } from "@/features/members/api/use-get-members";
 import { useDeleteMember } from "@/features/members/api/use-delete-member";
 import { useUpdateMember } from "@/features/members/api/use-update-member";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
+import { useGetProjectMembers } from "../api/use-get-project-members";
 
-export const MembersList = () => {
+export const ProjectMembersList = () => {
   const workspaceId = useWorkspaceId();
+  const projectId = useProjectId();
   const [ConfirmDialog, confirm] = useConfirm(
     "Remove Member",
     "This member will be removed from the workspace",
     "destructive",
   );
 
-  const { data } = useGetMembers({ workspaceId });
+  const { data } = useGetProjectMembers({ workspaceId, projectId });
 
   const { mutate: deleteMember, isPending: deletingMember } = useDeleteMember();
   const { mutate: updateMember, isPending: updatingMember } = useUpdateMember();
@@ -57,12 +59,14 @@ export const MembersList = () => {
       <ConfirmDialog />
       <CardHeader className="flex flex-row items-center gap-x-4 space-y-0 p-7">
         <Button asChild variant="secondary" size="sm">
-          <Link href={`/workspaces/${workspaceId}`}>
+          <Link href={`/workspaces/${workspaceId}/projects/${projectId}`}>
             <ArrowLeft className="mr-2 size-4" />
             Back
           </Link>
         </Button>
-        <CardTitle className="text-xl font-bold">Members List</CardTitle>
+        <CardTitle className="text-xl font-bold">
+          Project Members List
+        </CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
