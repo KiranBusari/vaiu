@@ -77,7 +77,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
         {
           onSuccess: () => {
             form.reset();
-            router.push(`/workspaces/${workspaceId}`);
+            router.push(`/workspaces/${workspaceId}/projects/${values.projectId}`);
           },
         }
       );
@@ -134,7 +134,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                           <SelectItem
                             key={type}
                             value={type}
-                            className="capitalize"
+                            className="capitalize cursor-pointer"
                           >
                             {type.toLowerCase()}
                           </SelectItem>
@@ -166,7 +166,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                       <SelectContent>
                         {projectOptions?.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
-                            <div className="flex items-center gap-x-2">
+                            <div className="flex items-center gap-x-2 cursor-pointer">
                               <ProjectAvatar
                                 image={project.imageUrl}
                                 className="size-6"

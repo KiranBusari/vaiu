@@ -2,7 +2,7 @@
 
 import { Navigation } from "./navigation";
 import { WorkspaceSwitcher } from "./workspace-switcher";
-import Rooms from "./Rooms";
+// import Rooms from "./Rooms";
 import { Logo } from "./Logo";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import Link from "next/link";
@@ -21,9 +21,12 @@ import { RiAddCircleFill } from "react-icons/ri";
 import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
 import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
 import { useCreateRoomModal } from "@/features/channels/hooks/use-create-room-modal";
+import { RoomSwitcher } from "./room-switcher";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
+  const projectId = useProjectId();
   const { open } = useCreateWorkspaceModal();
   const { open: openProject } = useCreateProjectModal();
   const { open: openRoom } = useCreateRoomModal();
@@ -86,7 +89,10 @@ export const SidebarComponent = () => {
             </div>
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <Rooms />
+            {/* <Rooms /> */}
+            {workspaceId && projectId && (
+              <RoomSwitcher workspaceId={workspaceId} projectId={projectId} />
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
