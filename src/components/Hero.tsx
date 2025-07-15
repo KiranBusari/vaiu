@@ -1,11 +1,44 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import Github from "@/components/github";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
 
 const Hero = () => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const imageElement = imageRef.current;
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThreshold = 100;
+      if (scrollPosition > scrollThreshold) {
+        imageElement?.classList.add("scrolled");
+      } else {
+        imageElement?.classList.remove("scrolled");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const imageSrc =
+    mounted && resolvedTheme === "light"
+      ? "/onboardinglight.png"
+      : "/onboardingPage.png";
+
   return (
     <div className="relative mx-auto h-auto">
       <div

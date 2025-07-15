@@ -9,6 +9,7 @@ import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/react";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,6 +41,7 @@ export default function RootLayout({
               <Toaster richColors theme="system" />
               <Analytics />
               {children}
+              <Footer />
             </QueryProvider>
           </TooltipProvider>
         </ThemeProvider>
