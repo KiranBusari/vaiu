@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Spotlight } from "./ui/spotlight";
 import Link from "next/link";
 import { Button } from "./ui/button";
@@ -11,12 +11,7 @@ import { ArrowDown } from "lucide-react";
 
 const Hero = () => {
   const imageRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const imageElement = imageRef.current;
@@ -35,9 +30,7 @@ const Hero = () => {
   }, []);
 
   const imageSrc =
-    mounted && resolvedTheme === "light"
-      ? "/onboardinglight.png"
-      : "/onboardingPage.png";
+    resolvedTheme === "light" ? "/onboardinglight.png" : "/onboardingPage.png";
 
   return (
     <div className="relative mx-auto min-h-screen">
@@ -104,7 +97,7 @@ const Hero = () => {
             src={imageSrc}
             alt={"Onboarding Page"}
             width={1100}
-            height={100}
+            height={620}
             className="mx-auto rounded-lg drop-shadow-2xl transition-all duration-300 dark:border-2"
             priority
           />
