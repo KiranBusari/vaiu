@@ -29,7 +29,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -283,8 +283,15 @@ const app = new Hono()
       try {
         const databases = c.get("databases");
         const user = c.get("user");
-        const { name, description, status, dueDate, projectId, assigneeId, workspaceId } =
-          c.req.valid("json");
+        const {
+          name,
+          description,
+          status,
+          dueDate,
+          projectId,
+          assigneeId,
+          workspaceId,
+        } = c.req.valid("json");
 
         const projects = await databases.listDocuments(
           DATABASE_ID,
@@ -566,7 +573,8 @@ const app = new Hono()
           continue;
         }
 
-        const isMovingToDone = update.status === "DONE" && existing.status !== "DONE";
+        const isMovingToDone =
+          update.status === "DONE" && existing.status !== "DONE";
         if (isMovingToDone && member.role !== "ADMIN") {
           return c.json({ error: "Only Admin can move issue to Done" }, 403);
         }

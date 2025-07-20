@@ -100,7 +100,7 @@ export const TaskList = ({ data, total }: TaskListProps) => {
           className="mt-4 w-full bg-slate-100 transition-all duration-300 ease-in-out dark:bg-gray-900"
           asChild
         >
-          <Link href={`/workspaces/${workspaceId}/issues`}>Show All</Link>
+          <Link href={`/workspaces/${workspaceId}/tasks`}>Show All</Link>
         </Button>
       </div>
     </div>
