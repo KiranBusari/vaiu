@@ -180,6 +180,7 @@ const app = new Hono()
           await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
             userId: user.$id,
             workspaceId: workspace.$id,
+            projectId: [],
             role: MemberRole.ADMIN,
           });
           return c.json({ data: workspace });
@@ -470,14 +471,15 @@ const app = new Hono()
       const databases = c.get("databases");
       const user = c.get("user");
 
-      const member = await getProjectMember({
+      // Check if user is already a member of this project
+      const existingMember = await getProjectMember({
         databases,
         workspaceId,
         projectId,
         userId: user.$id,
       });
 
-      if (member) {
+      if (existingMember) {
         return c.json({ error: "Already a member of this project" }, 400);
       }
 
@@ -491,12 +493,36 @@ const app = new Hono()
         return c.json({ error: "Invalid invite code" }, 400);
       }
 
-      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+      // Check if user has an existing member document for this workspace
+      const workspaceMember = await getMember({
+        databases,
         workspaceId,
-        projectId,
         userId: user.$id,
-        role: MemberRole.MEMBER,
       });
+
+      if (workspaceMember) {
+        // Update existing member document to include this project
+        const currentProjectIds = workspaceMember.projectId || [];
+        if (!currentProjectIds.includes(projectId)) {
+          await databases.updateDocument(
+            DATABASE_ID,
+            MEMBERS_ID,
+            workspaceMember.$id,
+            {
+              projectId: [...currentProjectIds, projectId],
+            },
+          );
+        }
+      } else {
+        // Create new member document with projectId as array
+        await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+          workspaceId,
+          projectId: [projectId],
+          userId: user.$id,
+          role: MemberRole.MEMBER,
+        });
+      }
+
       return c.json({ data: project });
     },
   )
