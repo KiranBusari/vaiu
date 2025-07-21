@@ -293,6 +293,28 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+    // Get the projects the user is a member of
+    const userProjectIds = member.projectId || [];
+
+    // If user is not a member of any projects, return zero analytics
+    if (userProjectIds.length === 0) {
+      return c.json({
+        data: {
+          totalTaskCount: 0,
+          taskCount: 0,
+          taskDiff: 0,
+          assignedTaskCount: 0,
+          assignedTaskDiff: 0,
+          incompleteTaskCount: 0,
+          incompleteTaskDiff: 0,
+          completedTaskCount: 0,
+          completeTaskDiff: 0,
+          overdueTaskCount: 0,
+          overdueTaskDiff: 0,
+        },
+      });
+    }
+
     const now = new Date();
     const thisMonthStart = startOfMonth(now);
     const thisMonthEnd = endOfMonth(now);
@@ -304,6 +326,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
@@ -313,6 +336,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
@@ -320,6 +344,7 @@ const app = new Hono()
 
     const totalTasks = await databases.listDocuments(DATABASE_ID, ISSUES_ID, [
       Query.equal("workspaceId", workspaceId),
+      Query.contains("projectId", userProjectIds),
     ]);
     // console.log("Total tasks:", totalTasks.total);
     const totalTaskCount = totalTasks.total;
@@ -331,6 +356,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
@@ -341,6 +367,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.equal("assigneeId", member.$id),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
@@ -355,6 +382,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.notEqual("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
@@ -365,6 +393,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.notEqual("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
@@ -380,6 +409,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.equal("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
@@ -390,6 +420,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.equal("status", IssueStatus.DONE),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
         Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
@@ -404,6 +435,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
@@ -415,6 +447,7 @@ const app = new Hono()
       ISSUES_ID,
       [
         Query.equal("workspaceId", workspaceId),
+        Query.contains("projectId", userProjectIds),
         Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
         Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
@@ -520,6 +553,10 @@ const app = new Hono()
           projectId: [projectId],
           userId: user.$id,
           role: MemberRole.MEMBER,
+        });
+
+        await databases.updateDocument(DATABASE_ID, PROJECTS_ID, projectId, {
+          projectCollaborators: [user.$id],
         });
       }
 

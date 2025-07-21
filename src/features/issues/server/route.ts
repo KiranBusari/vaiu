@@ -59,6 +59,15 @@ const app = new Hono()
       return c.json({ error: "Unauthorized" }, 401);
     }
 
+    // Check if user is a member of the project that this issue belongs to
+    const userProjectIds = member.projectId || [];
+    if (!userProjectIds.includes(issuesFromDb.projectId)) {
+      return c.json(
+        { error: "Unauthorized access to this project's issue" },
+        403,
+      );
+    }
+
     const projectId = issuesFromDb.projectId;
 
     const existingProject = await databases.getDocument<Project>(
@@ -143,15 +152,36 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      // Get the projects the user is a member of
+      const userProjectIds = member.projectId || [];
+
+      // If user is not a member of any projects, return empty result
+      if (userProjectIds.length === 0) {
+        return c.json({
+          data: {
+            total: 0,
+            documents: [],
+          },
+        });
+      }
+
       const query = [
         Query.equal("workspaceId", workspaceId),
         Query.orderDesc("$createdAt"),
       ];
 
+      // Filter by projects the user is a member of
       if (projectId) {
-        // console.log("ProjectId:", projectId);
+        // Check if user is a member of the requested project
+        if (!userProjectIds.includes(projectId)) {
+          return c.json({ error: "Unauthorized access to this project" }, 403);
+        }
         query.push(Query.equal("projectId", projectId));
+      } else {
+        // Only show issues from projects the user is a member of
+        query.push(Query.contains("projectId", userProjectIds));
       }
+
       if (status) {
         // console.log("status:", status);
         query.push(Query.equal("status", status));
@@ -335,6 +365,12 @@ const app = new Hono()
           return c.json({ error: "Unauthorized" }, 401);
         }
 
+        // Check if user is a member of the project they're trying to create an issue for
+        const userProjectIds = member.projectId || [];
+        if (!userProjectIds.includes(projectId)) {
+          return c.json({ error: "Unauthorized access to this project" }, 403);
+        }
+
         if (projects.documents[0].projectAdmin !== member.$id) {
           return c.json({ error: "Only Admins can create Issues" }, 403);
         }
@@ -415,6 +451,28 @@ const app = new Hono()
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
       }
+
+      // Check if user is a member of the project that this issue belongs to
+      const userProjectIds = member.projectId || [];
+      if (!userProjectIds.includes(exisistingTask.projectId)) {
+        return c.json(
+          { error: "Unauthorized access to this project's issue" },
+          403,
+        );
+      }
+
+      // If projectId is being changed, ensure user is also a member of the new project
+      if (
+        projectId &&
+        projectId !== exisistingTask.projectId &&
+        !userProjectIds.includes(projectId)
+      ) {
+        return c.json(
+          { error: "Unauthorized access to the target project" },
+          403,
+        );
+      }
+
       const issue = await databases.updateDocument<Issue>(
         DATABASE_ID,
         ISSUES_ID,
@@ -450,6 +508,16 @@ const app = new Hono()
     if (!currentMember) {
       return c.json({ error: "Unauthorized" }, 401);
     }
+
+    // Check if user is a member of the project that this issue belongs to
+    const userProjectIds = currentMember.projectId || [];
+    if (!userProjectIds.includes(issue.projectId)) {
+      return c.json(
+        { error: "Unauthorized access to this project's issue" },
+        403,
+      );
+    }
+
     const project = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
@@ -565,6 +633,28 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      // Check if user is a member of all projects that contain the issues being updated
+      const userProjectIds = member.projectId || [];
+      const issueProjectIds = new Set(
+        issueToUpdate.documents
+          .map((issue) => issue?.projectId)
+          .filter(Boolean),
+      );
+
+      const unauthorizedProjects = Array.from(issueProjectIds).filter(
+        (projectId) => projectId && !userProjectIds.includes(projectId),
+      );
+
+      if (unauthorizedProjects.length > 0) {
+        return c.json(
+          {
+            error: "Unauthorized access to some project issues",
+            unauthorizedProjects,
+          },
+          403,
+        );
+      }
+
       for (const update of issues) {
         const existing = issueToUpdate.documents.find(
           (i) => i && i.$id === update.$id,
@@ -637,7 +727,12 @@ const app = new Hono()
       try {
         const { projectId } = c.req.valid("json");
         const databases = c.get("databases");
+        const user = c.get("user");
         console.log("ProjectId:", projectId);
+
+        if (!projectId) {
+          return c.json({ error: "Project ID is required" }, 400);
+        }
 
         if (!projectId) {
           return c.json({ error: "Project ID is required" }, 400);
@@ -649,6 +744,31 @@ const app = new Hono()
           projectId,
         );
         console.log("Project:", project);
+
+        // Check if user is a member of the workspace and project
+        const member = await getMember({
+          databases,
+          workspaceId: project.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Check if user is a member of the project
+        const userProjectIds = member.projectId || [];
+        if (!userProjectIds.includes(projectId)) {
+          return c.json({ error: "Unauthorized access to this project" }, 403);
+        }
+
+        // Only project admins can fetch issues from GitHub
+        if (project.projectAdmin !== member.$id) {
+          return c.json(
+            { error: "Only project admins can fetch issues from GitHub" },
+            403,
+          );
+        }
 
         const octokit = new Octokit({
           auth: project.accessToken,
