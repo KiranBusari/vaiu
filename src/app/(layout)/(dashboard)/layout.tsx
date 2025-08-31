@@ -11,7 +11,7 @@ import { FileUploaderModal } from "@/features/projects/components/file-uploader-
 
 const DashboardLayout = ({ children }: PropsWithChildren) => {
   return (
-    <div className="min-h-full">
+    <div className="min-h-[90vh]">
       <AddCollaboratorToProjectModal />
       <CreateWorkspaceModal />
       <CreateProjectModal />
