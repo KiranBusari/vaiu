@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 const page = async () => {
   const user = await getCurrent();
-  // console.log(user);
+  
   if (!user?.emailVerification) return <VerifyUserCard />;
   else {
     const workspaces = await getWorkspaces();

@@ -24,6 +24,7 @@ import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Project } from "@/features/projects/types";
+import { getSubscription } from "@/features/subscriptions/queries";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -136,6 +137,20 @@ const app = new Hono()
 
         const { name, image } = c.req.valid("form");
 
+        const subscription = await getSubscription();
+        const workspaces = await databases.listDocuments(
+          DATABASE_ID,
+          WORKSPACE_ID,
+          [Query.equal("userId", user.$id)]
+        );
+
+        if (workspaces.total >= subscription.workspaceLimit) {
+          return c.json(
+            { error: "Upgrade your plan to create more workspaces." },
+            403
+          );
+        }
+
         let uploadedImage: string | undefined;
         if (image instanceof File) {
           const file = await storage.createFile(
@@ -187,6 +202,7 @@ const app = new Hono()
         }
       } catch (error) {
         console.log(error);
+        return c.json({ error: "Failed to create workspace" }, 500);
       }
     },
   )

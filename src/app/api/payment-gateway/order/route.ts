@@ -16,9 +16,9 @@ export async function POST(req: NextRequest) {
       merchantTransactionId: merchantTransactionId,
       name: reqData.name,
       amount: reqData.amount * 100,
-      redirectUrl: `http://localhost:3000/api/payment-gateway/status?id=${merchantTransactionId}`,
+      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-gateway/status?id=${merchantTransactionId}`,
       redirectMode: "POST",
-      callbackUrl: `http://localhost:3000/api/payment-gateway/status?id=${merchantTransactionId}`,
+      callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment-gateway/status?id=${merchantTransactionId}`,
       mobileNumber: reqData.phone,
       paymentInstrument: {
         type: "PAY_PAGE",
