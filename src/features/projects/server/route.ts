@@ -28,6 +28,7 @@ import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
 import { MemberRole } from "@/features/members/types";
+import { getSubscription } from "@/features/subscriptions/queries";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
@@ -137,6 +138,18 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId, accessToken } = c.req.valid("form");
+
+      const subscription = await getSubscription();
+      const projects = await databases.listDocuments(DATABASE_ID, PROJECTS_ID, [
+        Query.equal("workspaceId", workspaceId),
+      ]);
+
+      if (projects.total >= subscription.projectLimit) {
+        return c.json(
+          { error: "Upgrade your plan to create more projects." },
+          403
+        );
+      }
 
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);

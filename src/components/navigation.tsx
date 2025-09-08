@@ -14,7 +14,7 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useIsMember } from "@/features/workspaces/api/use-is-member";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
-import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
+import { RiBillFill, RiBillLine, RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
 import { FaUsers, FaUsersCog } from "react-icons/fa";
 
 const navItems = [
@@ -41,6 +41,12 @@ const navItems = [
     href: "/members",
     icon: FaUsersCog,
     aciveIcon: FaUsers,
+  },
+  {
+    label: "Subscription",
+    href: "/subscription",
+    icon: RiBillLine,
+    aciveIcon: RiBillFill,
   },
   {
     label: "Contributions",
@@ -86,6 +92,8 @@ export const Navigation = () => {
         const absoluteHref =
           label === "Contributions"
             ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
+            : label === "Subscription"
+            ? href ?? ""
             : `/workspaces/${workspaceId}${href ?? ""}`;
 
         // Determine if we're in the contributions workspace
