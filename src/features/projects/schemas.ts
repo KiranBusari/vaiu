@@ -40,6 +40,8 @@ export const createPrSchema = z.object({
   title: z.string().trim().min(1, { message: "Required" }),
   description: z.string().trim().min(1, { message: "Required" }),
   branch: z.string().trim().min(1, { message: "Required" }),
+  baseBranch: z.string().trim().min(1, { message: "Required" }),
+  githubUsername: z.string().trim().min(1, { message: "Required" }),
 });
 
 export const addExistingProjectSchema = z.object({

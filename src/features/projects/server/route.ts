@@ -114,6 +114,7 @@ const app = new Hono()
             workspaceId,
             projectAdmin: member.$id,
             inviteCode: generateInviteCode(INVITECODE_LENGTH),
+            owner: repo.data.owner.login,
           },
         );
 
@@ -137,7 +138,11 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId, accessToken } = c.req.valid("form");
-
+      
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
+      
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
@@ -154,6 +159,8 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      const owner = await octokit.rest.users.getAuthenticated();
+
       const project = await databases.createDocument(
         DATABASE_ID,
         PROJECTS_ID,
@@ -164,14 +171,9 @@ const app = new Hono()
           projectAdmin: member.$id,
           accessToken,
           inviteCode: generateInviteCode(INVITECODE_LENGTH),
+          owner: owner.data.login,
         },
       );
-
-      const octokit = new Octokit({
-        auth: accessToken,
-      });
-
-      const owner = await octokit.rest.users.getAuthenticated();
 
       const { data } = await octokit.rest.issues.listForRepo({
         owner: owner.data.login,
@@ -684,17 +686,11 @@ const app = new Hono()
 
       const { projectId } = c.req.param();
 
-      const { title, description, branch } = c.req.valid("form");
+      const { title, description, branch, baseBranch, githubUsername } = c.req.valid("form");
 
-      if (!title || !description || !branch) {
-        return c.json({ error: "Description and branch are required" }, 400);
+      if (!title || !description || !branch || !baseBranch || !githubUsername) {
+        return c.json({ error: "Title, description, branch, base branch and GitHub username are required" }, 400);
       }
-
-      const existingProject = await databases.getDocument<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectId,
-      );
 
       const project = await databases.getDocument<Project>(
         DATABASE_ID,
@@ -702,9 +698,6 @@ const app = new Hono()
         projectId,
       );
 
-      if (!existingProject) {
-        return c.json({ error: "Project not found" }, 404);
-      }
       if (!project) {
         return c.json({ error: "Project not found" }, 404);
       }
@@ -723,22 +716,29 @@ const app = new Hono()
         auth: project.accessToken,
       });
 
-      // const owner = await octokit.rest.users.getAuthenticated();
-
       try {
         const createPR = await octokit.rest.pulls.create({
-          owner: user.name,
+          owner: project.owner,
           repo: project.name,
           title: title,
           body: description,
           head: branch,
-          base: "main",
+          base: baseBranch,
+        });
+
+        await octokit.rest.issues.addAssignees({
+          owner: project.owner,
+          repo: project.name,
+          issue_number: createPR.data.number,
+          assignees: [githubUsername],
         });
 
         await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
           title,
           description,
           branch,
+          baseBranch,
+          githubUsername,
           projectId,
         });
 

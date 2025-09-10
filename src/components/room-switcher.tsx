@@ -32,9 +32,11 @@ export const RoomSwitcher = ({ projectId, workspaceId }: RoomSwitcherProps) => {
   );
 
   const handleJoinRoom = (roomId: string, type: string) => {
-    router.push(
-      `/workspaces/${workspaceId}/projects/${projectId}/rooms/${roomId}?type=${type.toLowerCase()}`,
-    );
+    setTimeout(() => {
+      router.push(
+        `/workspaces/${workspaceId}/projects/${projectId}/rooms/${roomId}?type=${type.toLowerCase()}`,
+      );
+    }, 100);
   };
 
   return (

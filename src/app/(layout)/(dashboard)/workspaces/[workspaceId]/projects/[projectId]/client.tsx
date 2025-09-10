@@ -165,7 +165,7 @@ export const ProjectIdClient = () => {
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
           <a
-            href={`https://github.com/your-org/${project.name}`}
+            href={`https://github.com/${project.owner}/${project.name}`}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-1 text-gray-500 hover:text-white"
