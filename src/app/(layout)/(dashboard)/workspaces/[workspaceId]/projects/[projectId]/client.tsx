@@ -14,6 +14,8 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
 import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { PrViewSwitcher } from "@/features/pull-requests/components/pr-view-switcher";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaskViewSwitcher } from "@/features/issues/components/task-view-switcher";
 import { Button } from "@/components/ui/button";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
@@ -23,7 +25,7 @@ import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
-import { useCreatePrModal } from "@/features/projects/hooks/use-create-pr-modal";
+import { useCreatePrModal } from "@/features/pull-requests/hooks/use-create-pr-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -239,7 +241,18 @@ export const ProjectIdClient = () => {
 
       {analytics && <Analytics data={analytics} />}
 
-      <TaskViewSwitcher hideProjectFilter />
+            <Tabs defaultValue="issues" className="w-full">
+        <TabsList>
+          <TabsTrigger value="issues">Issues</TabsTrigger>
+          <TabsTrigger value="pull-requests">Pull Requests</TabsTrigger>
+        </TabsList>
+        <TabsContent value="issues">
+          <TaskViewSwitcher hideProjectFilter />
+        </TabsContent>
+        <TabsContent value="pull-requests">
+          <PrViewSwitcher />
+        </TabsContent>
+      </Tabs>
 
       {/* Readme Display */}
       {isLoading ? (

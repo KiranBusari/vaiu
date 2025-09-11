@@ -18,7 +18,6 @@ import {
   addCollaboratorToProjectSchema,
   createProjectSchema,
   updateProjectSchema,
-  createPrSchema,
   addExistingProjectSchema,
   fileUploadSchema,
 } from "../schemas";
@@ -676,87 +675,7 @@ const app = new Hono()
       }
     },
   )
-  .post(
-    "/:projectId/submit-pull-request",
-    sessionMiddleware,
-    zValidator("form", createPrSchema),
-    async (c) => {
-      const databases = c.get("databases");
-      const user = c.get("user");
-
-      const { projectId } = c.req.param();
-
-      const { title, description, branch, baseBranch, githubUsername } = c.req.valid("form");
-
-      if (!title || !description || !branch || !baseBranch || !githubUsername) {
-        return c.json({ error: "Title, description, branch, base branch and GitHub username are required" }, 400);
-      }
-
-      const project = await databases.getDocument<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectId,
-      );
-
-      if (!project) {
-        return c.json({ error: "Project not found" }, 404);
-      }
-
-      const member = await getMember({
-        databases,
-        workspaceId: project.workspaceId,
-        userId: user.$id,
-      });
-
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const octokit = new Octokit({
-        auth: project.accessToken,
-      });
-
-      try {
-        const createPR = await octokit.rest.pulls.create({
-          owner: project.owner,
-          repo: project.name,
-          title: title,
-          body: description,
-          head: branch,
-          base: baseBranch,
-        });
-
-        await octokit.rest.issues.addAssignees({
-          owner: project.owner,
-          repo: project.name,
-          issue_number: createPR.data.number,
-          assignees: [githubUsername],
-        });
-
-        await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
-          title,
-          description,
-          branch,
-          baseBranch,
-          githubUsername,
-          projectId,
-        });
-
-        return c.json(
-          {
-            success: true,
-            data: {
-              pullRequest: createPR.data,
-            },
-          },
-          200,
-        );
-      } catch (error) {
-        console.error("Failed to create PR:", error);
-        return c.json({ error: "Failed to create PR" }, 500);
-      }
-    },
-  )
+  
   .post(
     "/upload-file",
     sessionMiddleware,

@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { createPrSchema, type CreatePrSchema } from "../schemas";
 import { useCreatePr } from "../api/use-create-pr";
 import { Textarea } from "@/components/ui/textarea";
-import { useProjectId } from "../hooks/use-projectId";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 interface CreatePrProps {
   onCancel?: () => void;
