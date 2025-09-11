@@ -14,13 +14,10 @@ const app = new Hono()
   .get(
     "/",
     sessionMiddleware,
-    zValidator(
-      "query",
-      z.object({
-        workspaceId: z.string(),
-        projectId: z.string(),
-      })
-    ),
+    zValidator("query", z.object({
+      workspaceId: z.string(),
+      projectId: z.string(),
+    })),
     async (c) => {
       const databases = c.get("databases");
       const user = c.get("user");
@@ -57,7 +54,7 @@ const app = new Hono()
           state: "all",
         });
 
-        const pullRequests: PullRequest[] = prsFromGit.map((pr) => {
+        const pullRequests = prsFromGit.map((pr) => {
           let status = PrStatus.OPEN;
           if (pr.state === "closed") {
             status = pr.merged_at ? PrStatus.MERGED : PrStatus.CLOSED;
@@ -71,13 +68,8 @@ const app = new Hono()
             assignee: pr.assignee?.login,
             url: pr.html_url,
             number: pr.number,
-            // These are not from the PR object, but required by the type.
-            // I will add dummy values for now.
-            $collectionId: "",
-            $databaseId: "",
             $createdAt: pr.created_at,
             $updatedAt: pr.updated_at,
-            $permissions: [],
           };
         });
 
@@ -141,6 +133,34 @@ const app = new Hono()
       });
 
       try {
+        // Check if the user is a collaborator
+        try {
+            await octokit.rest.repos.checkCollaborator({
+                owner: project.owner,
+                repo: project.name,
+                username: githubUsername,
+            });
+        } catch (error: any) {
+            // If the user is not a collaborator, add them
+            if (error.status === 404) {
+                try {
+                    await octokit.rest.repos.addCollaborator({
+                        owner: project.owner,
+                        repo: project.name,
+                        username: githubUsername,
+                        permission: "push",
+                    });
+                } catch (addCollaboratorError) {
+                    console.error("Failed to add collaborator:", addCollaboratorError);
+                    return c.json({ error: "Failed to add user as a collaborator." }, 500);
+                }
+            } else {
+                // Handle other errors from checkCollaborator
+                console.error("Failed to check collaborator status:", error);
+                return c.json({ error: "Failed to check collaborator status." }, 500);
+            }
+        }
+
         const createPR = await octokit.rest.pulls.create({
           owner: project.owner,
           repo: project.name,
