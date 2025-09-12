@@ -1,8 +1,7 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { InferRequestType, InferResponseType } from "hono";
 import { client } from "@/lib/rpc";
 import { toast } from "sonner";
-import { AIReview, AIReviewRequest } from "../types-ai";
 
 // AI Review Mutation Types
 type AIReviewResponseType = InferResponseType<

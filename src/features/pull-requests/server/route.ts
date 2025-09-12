@@ -9,7 +9,7 @@ import { Octokit, RequestError } from "octokit";
 import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
 import { ID } from "node-appwrite";
-import { AIReview, AIReviewRequest, AIReviewStatus } from "../types-ai";
+import { AIReview } from "../types-ai";
 import { analyzeWithGemini, PRAnalysisInput } from "@/lib/ai-service";
 
 const app = new Hono()
@@ -266,11 +266,9 @@ const app = new Hono()
         });
 
         // Start AI review analysis
-        const reviewId = ID.unique();
         const aiReview = await generateAIReview({
           projectId,
           prNumber: parseInt(prNumber),
-          workspaceId: project.workspaceId,
           project,
           octokit,
         });
@@ -286,13 +284,11 @@ const app = new Hono()
 async function generateAIReview({
   projectId,
   prNumber,
-  workspaceId,
   project,
   octokit,
 }: {
   projectId: string;
   prNumber: number;
-  workspaceId: string;
   project: Project;
   octokit: Octokit;
 }): Promise<AIReview> {
@@ -338,7 +334,20 @@ async function generateAIReview({
       prUrl: pr.html_url,
       repoName: `${project.owner}/${project.name}`,
       baseBranch: pr.base.ref,
-      headBranch: pr.head.ref
+      headBranch: pr.head.ref,
+      existingReviews: reviews.map(review => ({
+        user: review.user?.login || 'Unknown',
+        state: review.state,
+        body: review.body || '',
+        submittedAt: review.submitted_at || new Date().toISOString()
+      })),
+      repoInfo: {
+        language: repo.language,
+        description: repo.description,
+        topics: repo.topics || [],
+        size: repo.size,
+        defaultBranch: repo.default_branch
+      }
     };
 
     const analysis = await analyzeWithGemini(analysisInput);

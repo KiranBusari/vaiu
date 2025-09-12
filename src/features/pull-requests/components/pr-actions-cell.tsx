@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Bot, ExternalLink, GitPullRequest, Loader2 } from "lucide-react";
+import { MoreHorizontal, Bot, ExternalLink, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -31,7 +31,6 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
     generateReview,
     isLoading,
     data: reviewData,
-    error,
     reset,
   } = useGenerateAIReview();
 

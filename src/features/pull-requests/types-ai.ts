@@ -1,5 +1,3 @@
-import { PullRequest } from "./types";
-
 export interface AIReviewRequest {
   projectId: string;
   prNumber: number;

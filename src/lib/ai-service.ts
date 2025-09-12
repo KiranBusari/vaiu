@@ -22,6 +22,19 @@ export interface PRAnalysisInput {
   repoName: string;
   baseBranch: string;
   headBranch: string;
+  existingReviews: Array<{
+    user: string;
+    state: string;
+    body: string;
+    submittedAt: string;
+  }>;
+  repoInfo: {
+    language: string | null;
+    description: string | null;
+    topics: string[];
+    size: number;
+    defaultBranch: string;
+  };
 }
 
 export async function analyzeWithGemini(input: PRAnalysisInput) {
@@ -72,16 +85,30 @@ function createAnalysisPrompt(input: PRAnalysisInput): string {
   return `
 You are a senior code reviewer with expertise in software engineering best practices, security, performance, and architecture. Analyze this GitHub Pull Request and provide a comprehensive review.
 
+## Repository Context:
+- **Repository**: ${input.repoName}
+- **Primary Language**: ${input.repoInfo.language || 'Mixed'}
+- **Description**: ${input.repoInfo.description || 'No description'}
+- **Topics**: ${input.repoInfo.topics.length > 0 ? input.repoInfo.topics.join(', ') : 'None'}
+- **Repository Size**: ${Math.round(input.repoInfo.size / 1024)}MB
+- **Default Branch**: ${input.repoInfo.defaultBranch}
+
 ## Pull Request Details:
 - **Title**: ${input.prTitle}
 - **Description**: ${input.prDescription}
-- **Repository**: ${input.repoName}
 - **Base Branch**: ${input.baseBranch}
 - **Head Branch**: ${input.headBranch}
 - **Files Changed**: ${input.files.length}
 
 ## Files and Changes:
 ${JSON.stringify(filesInfo, null, 2)}
+
+## Existing Reviews:
+${input.existingReviews.length > 0 ? 
+  input.existingReviews.map(review => 
+    `### ${review.user} (${review.state}) - ${review.submittedAt}\n${review.body || 'No comment'}`
+  ).join('\n\n') 
+  : 'No existing reviews'}
 
 Please analyze this PR and return a JSON response with the following exact structure:
 
@@ -157,11 +184,13 @@ Please analyze this PR and return a JSON response with the following exact struc
 }
 
 ## Analysis Guidelines:
-1. **Code Quality**: Look for complexity, maintainability, coding standards, naming conventions
-2. **Security**: Check for vulnerabilities, authentication issues, input validation, data exposure
-3. **Performance**: Identify potential bottlenecks, inefficient algorithms, resource usage
-4. **Architecture**: Evaluate design patterns, code organization, dependency management
-5. **Best Practices**: Consider testing, documentation, error handling
+1. **Code Quality**: Look for complexity, maintainability, coding standards, naming conventions appropriate for the repository's primary language
+2. **Security**: Check for vulnerabilities, authentication issues, input validation, data exposure relevant to the technology stack
+3. **Performance**: Identify potential bottlenecks, inefficient algorithms, resource usage considering the repository size and purpose
+4. **Architecture**: Evaluate design patterns, code organization, dependency management that align with repository topics and description
+5. **Best Practices**: Consider testing, documentation, error handling standards for the project's domain
+6. **Existing Reviews**: Build upon previous feedback, avoid repeating already identified issues, acknowledge resolved concerns
+7. **Repository Context**: Consider the project's purpose, scale, and technology choices when making recommendations
 
 ## Scoring Guidelines:
 - **9-10**: Excellent, production-ready code with best practices
