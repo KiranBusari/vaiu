@@ -8,7 +8,6 @@ import { getMember } from "@/features/members/utilts";
 import {
   DATABASE_ID,
   IMAGES_BUCKET_ID,
-  PR_ID,
   PROJECTS_ID,
   ISSUES_ID,
   MEMBERS_ID,

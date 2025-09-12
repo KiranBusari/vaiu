@@ -1,5 +1,3 @@
-
-import { client } from "@/lib/rpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Notification } from "../types";
 import { Models } from "node-appwrite";
@@ -12,7 +10,7 @@ export const useMarkAsRead = () => {
       const response = await fetch(`/api/v1/notifications/${notificationId}/mark-as-read`, {
         method: "POST",
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(

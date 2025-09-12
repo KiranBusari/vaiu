@@ -53,7 +53,7 @@ export const PrViewSwitcher = () => {
         ) : (
           <>
             <TabsContent value="table" className="mt-0">
-              <DataTable columns={columns} data={prs?.documents ?? []} />
+              <DataTable columns={columns} data={(prs?.documents ?? [])} />
             </TabsContent>
           </>
         )}

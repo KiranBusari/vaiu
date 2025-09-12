@@ -3,7 +3,7 @@ import { HTTPException } from "hono/http-exception";
 import * as crypto from "crypto";
 import { Project } from "@/features/projects/types";
 import { DATABASE_ID, PROJECTS_ID, NOTIFICATIONS_ID, MEMBERS_ID } from "@/config";
-import { Query, Databases, Client, ID } from "node-appwrite";
+import { Query, ID } from "node-appwrite";
 import { NotificationEntityType, Notification } from "../types";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { Member } from "@/features/members/types";

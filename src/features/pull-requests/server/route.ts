@@ -5,8 +5,8 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { getMember } from "@/features/members/utilts";
 import { DATABASE_ID, PROJECTS_ID, PR_ID } from "@/config";
 import { Project } from "@/features/projects/types";
-import { Octokit } from "octokit";
-import { PrStatus, PullRequest } from "../types";
+import { Octokit, RequestError } from "octokit";
+import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
 import { ID } from "node-appwrite";
 
@@ -70,6 +70,10 @@ const app = new Hono()
             number: pr.number,
             $createdAt: pr.created_at,
             $updatedAt: pr.updated_at,
+
+            $collectionId: "",
+            $databaseId: "",
+            $permissions: [],
           };
         });
 
@@ -135,30 +139,35 @@ const app = new Hono()
       try {
         // Check if the user is a collaborator
         try {
-            await octokit.rest.repos.checkCollaborator({
-                owner: project.owner,
-                repo: project.name,
-                username: githubUsername,
-            });
-        } catch (error: any) {
+          await octokit.rest.repos.checkCollaborator({
+            owner: project.owner,
+            repo: project.name,
+            username: githubUsername,
+          });
+        } catch (error) {
+          if (error instanceof RequestError) {
             // If the user is not a collaborator, add them
             if (error.status === 404) {
-                try {
-                    await octokit.rest.repos.addCollaborator({
-                        owner: project.owner,
-                        repo: project.name,
-                        username: githubUsername,
-                        permission: "push",
-                    });
-                } catch (addCollaboratorError) {
-                    console.error("Failed to add collaborator:", addCollaboratorError);
-                    return c.json({ error: "Failed to add user as a collaborator." }, 500);
-                }
+              try {
+                await octokit.rest.repos.addCollaborator({
+                  owner: project.owner,
+                  repo: project.name,
+                  username: githubUsername,
+                  permission: "push",
+                });
+              } catch (addCollaboratorError) {
+                console.error("Failed to add collaborator:", addCollaboratorError);
+                return c.json({ error: "Failed to add user as a collaborator." }, 500);
+              }
             } else {
-                // Handle other errors from checkCollaborator
-                console.error("Failed to check collaborator status:", error);
-                return c.json({ error: "Failed to check collaborator status." }, 500);
+              // Handle other errors from checkCollaborator
+              console.error("Failed to check collaborator status:", error);
+              return c.json({ error: "Failed to check collaborator status." }, 500);
             }
+          } else {
+            console.error("Unexpected error:", error);
+            return c.json({ error: "An unexpected error occurred." }, 500);
+          }
         }
 
         const createPR = await octokit.rest.pulls.create({
@@ -195,22 +204,29 @@ const app = new Hono()
           },
           200
         );
-      } catch (error: any) {
-        console.error("Failed to create PR:", error);
-        if (error.status === 422) {
-          const response = error.response?.data;
-          if (
-            response?.errors?.[0]?.message?.includes(
-              "A pull request already exists"
-            )
-          ) {
-            return c.json(
-              { error: "A pull request for this branch already exists." },
-              422
-            );
+      } catch (error) {
+        if (error instanceof RequestError) {
+          console.error("Failed to create PR:", error);
+
+          if (error.status === 422) {
+            const response = error.response?.data as { errors?: { message?: string }[] };
+            if (
+              response?.errors?.[0]?.message?.includes(
+                "A pull request already exists"
+              )
+            ) {
+              return c.json(
+                { error: "A pull request for this branch already exists." },
+                422
+              );
+            }
           }
+
+          return c.json({ error: "Failed to create PR" }, 500);
+        } else {
+          console.error("Unexpected error:", error);
+          return c.json({ error: "An unexpected error occurred." }, 500);
         }
-        return c.json({ error: "Failed to create PR" }, 500);
       }
     }
   );
