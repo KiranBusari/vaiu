@@ -9,3 +9,4 @@ export const IMAGES_BUCKET_ID =
 export const MESSAGE_ID = process.env.NEXT_PUBLIC_APPWRITE_MESSAGES_ID!;
 export const PR_ID = process.env.NEXT_PUBLIC_APPWRITE_PR_ID!;
 export const NOTIFICATIONS_ID = process.env.NEXT_PUBLIC_APPWRITE_NOTIFICATIONS_ID!;
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;

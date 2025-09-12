@@ -26,6 +26,14 @@ RepoX is a collaborative platform for managing GitHub repositories, tracking iss
 - Filter and sort issues by different criteria
 - Bulk update issue status
 
+### AI-Powered Code Review
+
+- **Smart PR Analysis**: AI-powered pull request review using Google Gemini
+- **Comprehensive Assessment**: Code quality, security, performance, and architecture analysis
+- **Actionable Insights**: Detailed suggestions and recommendations for improvements
+- **Risk Assessment**: Automatic risk level evaluation and merge recommendations
+- **Context-Aware**: Analysis considers project patterns and team conventions
+
 ### Communication
 
 - Audio and video rooms for team collaboration
@@ -40,6 +48,7 @@ RepoX is a collaborative platform for managing GitHub repositories, tracking iss
 - **Storage**: Appwrite Storage
 - **API**: Hono.js API routes
 - **GitHub Integration**: Octokit
+- **AI Integration**: Google Gemini API for intelligent code review
 - **Form Handling**: React Hook Form with Zod validation
 - **UI Components**: Radix UI primitives
 
@@ -61,9 +70,13 @@ NEXT_PUBLIC_APPWRITE_ENDPOINT=your_appwrite_endpoint
 NEXT_PUBLIC_APPWRITE_PROJECT=your_appwrite_project_id
 APPWRITE_API_KEY=your_appwrite_api_key
 GITHUB_TOKEN=your_github_personal_access_token
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-Replace `your_appwrite_endpoint`, `your_appwrite_project_id`, `your_appwrite_api_key`, and `your_github_personal_access_token` with your actual Appwrite and GitHub credentials.
+Replace the placeholder values with your actual credentials:
+- `your_appwrite_endpoint`, `your_appwrite_project_id`, `your_appwrite_api_key`: Your Appwrite configuration
+- `your_github_personal_access_token`: Your GitHub personal access token
+- `your_gemini_api_key`: Your Google AI API key for Gemini (get it from [Google AI Studio](https://aistudio.google.com/))
 
 ### Installation
 

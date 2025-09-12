@@ -9,6 +9,8 @@ import { Octokit, RequestError } from "octokit";
 import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
 import { ID } from "node-appwrite";
+import { AIReview, AIReviewRequest, AIReviewStatus } from "../types-ai";
+import { analyzeWithGemini, PRAnalysisInput } from "@/lib/ai-service";
 
 const app = new Hono()
   .get(
@@ -229,6 +231,140 @@ const app = new Hono()
         }
       }
     }
+  )
+  .post(
+    "/:projectId/ai-review/:prNumber",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, prNumber } = c.req.param();
+
+      try {
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        const member = await getMember({
+          databases,
+          workspaceId: project.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const octokit = new Octokit({
+          auth: project.accessToken,
+        });
+
+        // Start AI review analysis
+        const reviewId = ID.unique();
+        const aiReview = await generateAIReview({
+          projectId,
+          prNumber: parseInt(prNumber),
+          workspaceId: project.workspaceId,
+          project,
+          octokit,
+        });
+
+        return c.json({ success: true, review: aiReview });
+      } catch (error) {
+        console.error("AI Review failed:", error);
+        return c.json({ error: "Failed to generate AI review" }, 500);
+      }
+    }
   );
+
+async function generateAIReview({
+  projectId,
+  prNumber,
+  workspaceId,
+  project,
+  octokit,
+}: {
+  projectId: string;
+  prNumber: number;
+  workspaceId: string;
+  project: Project;
+  octokit: Octokit;
+}): Promise<AIReview> {
+  try {
+    // Fetch PR details
+    const { data: pr } = await octokit.rest.pulls.get({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Fetch PR files and changes
+    const { data: files } = await octokit.rest.pulls.listFiles({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Fetch PR reviews and comments for context
+    const { data: reviews } = await octokit.rest.pulls.listReviews({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Get repository context
+    const { data: repo } = await octokit.rest.repos.get({
+      owner: project.owner,
+      repo: project.name,
+    });
+
+    const analysisInput: PRAnalysisInput = {
+      prTitle: pr.title,
+      prDescription: pr.body || "No description provided",
+      files: files.map(file => ({
+        filename: file.filename,
+        additions: file.additions,
+        deletions: file.deletions,
+        changes: file.changes,
+        patch: file.patch,
+        status: file.status
+      })),
+      prUrl: pr.html_url,
+      repoName: `${project.owner}/${project.name}`,
+      baseBranch: pr.base.ref,
+      headBranch: pr.head.ref
+    };
+
+    const analysis = await analyzeWithGemini(analysisInput);
+
+    const aiReview: AIReview = {
+      id: ID.unique(),
+      prNumber: pr.number,
+      prTitle: pr.title,
+      prUrl: pr.html_url,
+      projectId,
+      summary: analysis.summary,
+      codeQuality: analysis.codeQuality,
+      security: analysis.security,
+      performance: analysis.performance,
+      architecture: analysis.architecture,
+      projectContext: analysis.projectContext,
+      createdAt: new Date().toISOString(),
+      analysisVersion: "1.0.0",
+    };
+
+    return aiReview;
+  } catch (error) {
+    console.error("Failed to generate AI review:", error);
+    throw error;
+  }
+}
+
 
 export default app;

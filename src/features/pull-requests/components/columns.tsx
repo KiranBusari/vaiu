@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PullRequest } from "../types";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
+import { PRActionsCell } from "./pr-actions-cell";
 
 export const columns: ColumnDef<PullRequest>[] = [
   {
@@ -107,6 +108,14 @@ export const columns: ColumnDef<PullRequest>[] = [
     cell: ({ row }) => {
       const status = row.original.status;
       return <Badge variant={status}>{snakeCaseToTitleCase(status)}</Badge>;
+    },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const pr = row.original;
+      return <PRActionsCell pr={pr} />;
     },
   },
 ];
