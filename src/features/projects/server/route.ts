@@ -374,8 +374,6 @@ const app = new Hono()
     const now = new Date();
     const thisMonthStart = startOfMonth(now);
     const thisMonthEnd = endOfMonth(now);
-    const lastMonthStart = startOfMonth(subMonths(now, 1));
-    const lastMonthEnd = endOfMonth(subMonths(now, 1));
 
     const thisMonthTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -386,23 +384,13 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthTasks = await databases.listDocuments(
-      DATABASE_ID,
-      ISSUES_ID,
-      [
-        Query.equal("projectId", projectId),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ],
-    );
 
     const totalTasks = await databases.listDocuments(DATABASE_ID, ISSUES_ID, [
       Query.equal("projectId", projectId),
     ]);
 
     const totalTaskCount = totalTasks.total;
-    const taskCount = thisMonthTasks.total;
-    const taskDiff = taskCount - lastMonthTasks.total;
+    const taskDiff = thisMonthTasks.total;
 
     const thisMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -414,19 +402,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthAssignedTasks = await databases.listDocuments(
+    const totalAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("assigneeId", member.$id),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const assignedTaskCount = thisMonthAssignedTasks.total;
-    const assignedTaskDiff = assignedTaskCount - lastMonthAssignedTasks.total;
+    const assignedTaskCount = totalAssignedTasks.total;
+    const assignedTaskDiff = thisMonthAssignedTasks.total;
 
     const thisMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -438,20 +424,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthIncompleteTasks = await databases.listDocuments(
+    const totalIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.notEqual("status", IssueStatus.DONE),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const incompleteTaskCount = thisMonthIncompleteTasks.total;
-    const incompleteTaskDiff =
-      incompleteTaskCount - lastMonthIncompleteTasks.total;
+    const incompleteTaskCount = totalIncompleteTasks.total;
+    const incompleteTaskDiff = thisMonthIncompleteTasks.total;
 
     const thisMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -463,19 +446,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthCompletedTasks = await databases.listDocuments(
+    const totalCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("status", IssueStatus.DONE),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const completedTaskCount = thisMonthCompletedTasks.total;
-    const completeTaskDiff = completedTaskCount - lastMonthCompletedTasks.total;
+    const completedTaskCount = totalCompletedTasks.total;
+    const completeTaskDiff = thisMonthCompletedTasks.total;
 
     const thisMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -488,25 +469,23 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthOverDueTasks = await databases.listDocuments(
+    const totalOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const overdueTaskCount = thisMonthOverDueTasks.total;
-    const overdueTaskDiff = overdueTaskCount - lastMonthOverDueTasks.total;
+    const overdueTaskCount = totalOverDueTasks.total;
+    const overdueTaskDiff = thisMonthOverDueTasks.total;
 
     return c.json({
       data: {
         totalTaskCount,
-        taskCount,
+        taskCount: thisMonthTasks.total,
         taskDiff,
         assignedTaskCount,
         assignedTaskDiff,
