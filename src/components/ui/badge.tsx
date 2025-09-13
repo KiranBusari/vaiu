@@ -3,6 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { IssueStatus } from "@/features/issues/types";
+import { PrStatus } from "@/features/pull-requests/types";
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
@@ -26,6 +27,12 @@ const badgeVariants = cva(
           "border-transparent bg-neutral-400 text-primary hover:bg-neutral-400/80",
         [IssueStatus.IN_PROGRESS]:
           "border-transparent bg-yellow-400 text-primary hover:bg-yellow-400/80",
+        [PrStatus.OPEN]:
+          "border-transparent bg-emerald-400 text-primary hover:bg-emerald-400/80",
+        [PrStatus.CLOSED]:
+          "border-transparent bg-red-400 text-primary hover:bg-red-400/80",
+        [PrStatus.MERGED]:
+          "border-transparent bg-purple-400 text-primary hover:bg-purple-400/80",
       },
     },
     defaultVariants: {

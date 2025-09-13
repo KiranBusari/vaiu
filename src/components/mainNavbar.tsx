@@ -8,6 +8,7 @@ import { Logo } from "./Logo";
 import { Button } from "./ui/button";
 import { Logo2 } from "./Logo2";
 import { usePathname } from "next/navigation";
+import { NotificationPopover } from "@/features/notifications/components/notification-popover";
 
 export function Navbar({ className }: { className?: string }) {
   const pathname = usePathname();
@@ -35,6 +36,7 @@ export function Navbar({ className }: { className?: string }) {
             </Link>
           </Button>
           <ModeToggle />
+          <NotificationPopover />
         </div>
       </div>
     </div>

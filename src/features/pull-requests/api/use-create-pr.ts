@@ -5,18 +5,18 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.v1.projects)[":projectId"]["submit-pull-request"]["$post"],
+  (typeof client.api.v1["pull-requests"])[":projectId"]["submit-pull-request"]["$post"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.v1.projects)[":projectId"]["submit-pull-request"]["$post"]
+  (typeof client.api.v1["pull-requests"])[":projectId"]["submit-pull-request"]["$post"]
 >;
 
 export const useCreatePr = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param, form }) => {
-      const response = await client.api.v1.projects[":projectId"][
+      const response = await client.api.v1["pull-requests"][":projectId"][
         "submit-pull-request"
       ].$post({
         param,
@@ -32,7 +32,7 @@ export const useCreatePr = () => {
     },
     onSuccess: () => {
       toast.success("PR created successfully");
-      queryClient.invalidateQueries({ queryKey: ["submit-pull-request"] });
+      queryClient.invalidateQueries({ queryKey: ["pull-requests"] });
     },
     onError: (e) => {
       toast.error(e.message || "Failed to create PR");

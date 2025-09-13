@@ -36,11 +36,7 @@ export const removeCollaboratorFromProjectSchema = z.object({
   memberId: z.string(),
 });
 
-export const createPrSchema = z.object({
-  title: z.string().trim().min(1, { message: "Required" }),
-  description: z.string().trim().min(1, { message: "Required" }),
-  branch: z.string().trim().min(1, { message: "Required" }),
-});
+
 
 export const addExistingProjectSchema = z.object({
   workspaceId: z.string(),
@@ -67,7 +63,7 @@ export type AddCollaboratorToProjectSchema = z.infer<
 export type RemoveCollaboratorFromProjectSchema = z.infer<
   typeof removeCollaboratorFromProjectSchema
 >;
-export type CreatePrSchema = z.infer<typeof createPrSchema>;
+
 export type AddExistingProjectSchema = z.infer<typeof addExistingProjectSchema>;
 export type FileUploadSchema = z.infer<typeof fileUploadSchema>;
 

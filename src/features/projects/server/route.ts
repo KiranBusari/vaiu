@@ -8,7 +8,6 @@ import { getMember } from "@/features/members/utilts";
 import {
   DATABASE_ID,
   IMAGES_BUCKET_ID,
-  PR_ID,
   PROJECTS_ID,
   ISSUES_ID,
   MEMBERS_ID,
@@ -18,7 +17,6 @@ import {
   addCollaboratorToProjectSchema,
   createProjectSchema,
   updateProjectSchema,
-  createPrSchema,
   addExistingProjectSchema,
   fileUploadSchema,
 } from "../schemas";
@@ -114,6 +112,7 @@ const app = new Hono()
             workspaceId,
             projectAdmin: member.$id,
             inviteCode: generateInviteCode(INVITECODE_LENGTH),
+            owner: repo.data.owner.login,
           },
         );
 
@@ -137,7 +136,11 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId, accessToken } = c.req.valid("form");
-
+      
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
+      
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
@@ -154,6 +157,8 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      const owner = await octokit.rest.users.getAuthenticated();
+
       const project = await databases.createDocument(
         DATABASE_ID,
         PROJECTS_ID,
@@ -164,14 +169,9 @@ const app = new Hono()
           projectAdmin: member.$id,
           accessToken,
           inviteCode: generateInviteCode(INVITECODE_LENGTH),
+          owner: owner.data.login,
         },
       );
-
-      const octokit = new Octokit({
-        auth: accessToken,
-      });
-
-      const owner = await octokit.rest.users.getAuthenticated();
 
       const { data } = await octokit.rest.issues.listForRepo({
         owner: owner.data.login,
@@ -674,89 +674,7 @@ const app = new Hono()
       }
     },
   )
-  .post(
-    "/:projectId/submit-pull-request",
-    sessionMiddleware,
-    zValidator("form", createPrSchema),
-    async (c) => {
-      const databases = c.get("databases");
-      const user = c.get("user");
-
-      const { projectId } = c.req.param();
-
-      const { title, description, branch } = c.req.valid("form");
-
-      if (!title || !description || !branch) {
-        return c.json({ error: "Description and branch are required" }, 400);
-      }
-
-      const existingProject = await databases.getDocument<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectId,
-      );
-
-      const project = await databases.getDocument<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectId,
-      );
-
-      if (!existingProject) {
-        return c.json({ error: "Project not found" }, 404);
-      }
-      if (!project) {
-        return c.json({ error: "Project not found" }, 404);
-      }
-
-      const member = await getMember({
-        databases,
-        workspaceId: project.workspaceId,
-        userId: user.$id,
-      });
-
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      const octokit = new Octokit({
-        auth: project.accessToken,
-      });
-
-      // const owner = await octokit.rest.users.getAuthenticated();
-
-      try {
-        const createPR = await octokit.rest.pulls.create({
-          owner: user.name,
-          repo: project.name,
-          title: title,
-          body: description,
-          head: branch,
-          base: "main",
-        });
-
-        await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
-          title,
-          description,
-          branch,
-          projectId,
-        });
-
-        return c.json(
-          {
-            success: true,
-            data: {
-              pullRequest: createPR.data,
-            },
-          },
-          200,
-        );
-      } catch (error) {
-        console.error("Failed to create PR:", error);
-        return c.json({ error: "Failed to create PR" }, 500);
-      }
-    },
-  )
+  
   .post(
     "/upload-file",
     sessionMiddleware,

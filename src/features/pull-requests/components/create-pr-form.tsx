@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { createPrSchema, type CreatePrSchema } from "../schemas";
 import { useCreatePr } from "../api/use-create-pr";
 import { Textarea } from "@/components/ui/textarea";
-import { useProjectId } from "../hooks/use-projectId";
+import { useProjectId } from "@/features/projects/hooks/use-projectId";
 
 interface CreatePrProps {
   onCancel?: () => void;
@@ -44,6 +44,8 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
     defaultValues: {
       description: "",
       branch: "",
+      baseBranch: "",
+      githubUsername: "",
     },
   });
   const onSubmit = (values: CreatePrSchema) => {
@@ -132,6 +134,48 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                         <Input
                           {...field}
                           placeholder="Enter branch name"
+                          className="border border-slate-50"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="">
+                <FormField
+                  control={form.control}
+                  name="baseBranch"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex justify-between">
+                        <div className="flex items-center">Base Branch name</div>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter base branch"
+                          className="border border-slate-50"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="">
+                <FormField
+                  control={form.control}
+                  name="githubUsername"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex justify-between">
+                        <div className="flex items-center">GitHub Username</div>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter your GitHub username"
                           className="border border-slate-50"
                         />
                       </FormControl>
