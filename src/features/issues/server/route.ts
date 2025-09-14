@@ -252,12 +252,6 @@ const app = new Hono()
 
             // Create new issues if any
             if (issuesToCreate.length > 0) {
-              const workspaceMembers = await databases.listDocuments(
-                DATABASE_ID,
-                MEMBERS_ID,
-                [Query.equal("workspaceId", project.workspaceId)]
-              );
-
               const findMemberByGithubUsername = async (githubUsername: string) => {
                 return githubUsername;
               };
@@ -731,7 +725,7 @@ const app = new Hono()
           };
         }
       }
-    } catch (memberError) {
+    } catch {
       // If member not found by ID, it might be a GitHub username from fetched issues
       console.log(`Member not found by ID ${issue.assigneeId}, treating as GitHub username`);
 
@@ -994,13 +988,6 @@ const app = new Hono()
         });
 
         console.log("Issues to create:", issuesToCreate);
-
-        // Get all members of the workspace to try mapping GitHub usernames
-        const workspaceMembers = await databases.listDocuments(
-          DATABASE_ID,
-          MEMBERS_ID,
-          [Query.equal("workspaceId", project.workspaceId)]
-        );
 
         // Helper function to find member by GitHub username
         const findMemberByGithubUsername = async (githubUsername: string) => {

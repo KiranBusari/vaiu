@@ -1,7 +1,6 @@
 "use client";
 import {
   UserPlus2,
-  GitPullRequestCreateArrowIcon,
   EllipsisVertical,
   Settings,
   UploadIcon,
@@ -25,7 +24,6 @@ import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
-import { useCreatePrModal } from "@/features/pull-requests/hooks/use-create-pr-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +53,6 @@ export const ProjectIdClient = () => {
   const [readmeContent, setReadmeContent] = useState<string | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
-  const { openPr } = useCreatePrModal();
   const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
   const { openFileUploader } = useFileUploadModal();
   const { data: members, isLoading: membersLoading } = useGetProjectMembers({

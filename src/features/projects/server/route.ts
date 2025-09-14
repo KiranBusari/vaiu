@@ -21,7 +21,7 @@ import {
   fileUploadSchema,
 } from "../schemas";
 import { Project } from "../types";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
