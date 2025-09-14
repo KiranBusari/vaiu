@@ -400,7 +400,7 @@ const app = new Hono()
     // Check if user is a super admin
     const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    let member: any = null;
+    let member = null;
 
     if (!isSuper) {
       // Regular users need to be members of the workspace

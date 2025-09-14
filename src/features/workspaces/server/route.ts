@@ -282,7 +282,7 @@ const app = new Hono()
       }
     }
 
-    // Check if workspace has any members
+    // Check if workspace has members
     const workspaceMembers = await databases.listDocuments(
       DATABASE_ID,
       MEMBERS_ID,
@@ -349,7 +349,7 @@ const app = new Hono()
     const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
     let userProjectIds: string[] = [];
-    let member: any = null;
+    let member = null;
 
     if (!isSuper) {
       // Regular users need to be members of the workspace
