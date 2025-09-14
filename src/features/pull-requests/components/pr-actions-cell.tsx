@@ -37,14 +37,11 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const handleAIReview = async () => {
     try {
       reset(); // Clear any previous data/errors
-      const result = await generateReview({
+      setShowAIReview(true);
+      await generateReview({
         projectId,
         prNumber: pr.number,
       });
-      
-      if (result?.review) {
-        setShowAIReview(true);
-      }
     } catch (error) {
       console.error("Failed to generate AI review:", error);
     }
@@ -96,16 +93,25 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
 
       {/* AI Review Dialog */}
       <Dialog open={showAIReview} onOpenChange={setShowAIReview}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="sr-only">
             <DialogTitle>AI Review Results</DialogTitle>
           </DialogHeader>
-          {reviewData?.review && (
-            <div className="overflow-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-4">Analyzing...</span>
+            </div>
+          ) : reviewData?.review ? (
+            <div>
               <AIReviewResults
                 review={reviewData.review}
                 onClose={handleCloseReview}
               />
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <p>No review data available.</p>
             </div>
           )}
         </DialogContent>
