@@ -177,6 +177,115 @@ const app = new Hono()
           return c.json({ error: "Unauthorized access to this project" }, 403);
         }
         query.push(Query.equal("projectId", projectId));
+
+        // Auto-sync with GitHub when viewing project-specific issues
+        try {
+          const project = await databases.getDocument<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            projectId,
+          );
+
+          if (project.accessToken) {
+            const octokit = new Octokit({
+              auth: project.accessToken,
+            });
+
+            const owner = await octokit.rest.users.getAuthenticated();
+            const issuesFromGit = await octokit.rest.issues.listForRepo({
+              owner: owner.data.login,
+              repo: project.name,
+              state: "all", // Get both open and closed issues
+            });
+
+            const issuesFromDb = await databases.listDocuments<Issue>(
+              DATABASE_ID,
+              ISSUES_ID,
+              [Query.equal("projectId", projectId)],
+            );
+
+            // Check for new issues to create
+            const openIssuesFromGit = issuesFromGit.data.filter(issue => issue.state === "open");
+            const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
+              // Check if issue already exists in DB by matching title
+              return !issuesFromDb.documents.some(
+                (dbIssue) => dbIssue.name === gitIssue.title,
+              );
+            });
+
+            // Check for status updates (GitHub issues that were closed should be marked as DONE)
+            const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
+              const gitIssue = issuesFromGit.data.find(
+                (issue) => issue.title === dbIssue.name
+              );
+
+              if (gitIssue) {
+                // If GitHub issue is closed but DB issue is not DONE, update it
+                if (gitIssue.state === "closed" && dbIssue.status !== "DONE") {
+                  return true;
+                }
+                // If GitHub issue is open but DB issue is DONE, update it
+                if (gitIssue.state === "open" && dbIssue.status === "DONE") {
+                  return true;
+                }
+              }
+              return false;
+            });
+
+            // Update existing issues with status changes
+            if (issuesToUpdate.length > 0) {
+              await Promise.all(
+                issuesToUpdate.map(async (dbIssue) => {
+                  const gitIssue = issuesFromGit.data.find(
+                    (issue) => issue.title === dbIssue.name
+                  );
+
+                  if (gitIssue) {
+                    const newStatus = gitIssue.state === "closed" ? "DONE" : "TODO";
+                    return databases.updateDocument(DATABASE_ID, ISSUES_ID, dbIssue.$id, {
+                      status: newStatus,
+                    });
+                  }
+                })
+              );
+            }
+
+            // Create new issues if any
+            if (issuesToCreate.length > 0) {
+              const workspaceMembers = await databases.listDocuments(
+                DATABASE_ID,
+                MEMBERS_ID,
+                [Query.equal("workspaceId", project.workspaceId)]
+              );
+
+              const findMemberByGithubUsername = async (githubUsername: string) => {
+                return githubUsername;
+              };
+
+              await Promise.all(
+                issuesToCreate.map(async (issue) => {
+                  let assigneeId = null;
+                  if (issue.assignee?.login) {
+                    assigneeId = await findMemberByGithubUsername(issue.assignee.login);
+                  }
+
+                  return databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
+                    name: issue.title,
+                    status: IssueStatus.TODO,
+                    workspaceId: project.workspaceId,
+                    projectId: projectId,
+                    assigneeId: assigneeId,
+                    dueDate: getRandomFutureDate(),
+                    position: 1000,
+                    description: issue.body || "",
+                  });
+                })
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error syncing with GitHub:", error);
+        }
       } else {
         // Only show issues from projects the user is a member of
         query.push(Query.contains("projectId", userProjectIds));
@@ -499,6 +608,54 @@ const app = new Hono()
           description,
         },
       );
+
+      // Sync status changes to GitHub
+      try {
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          issue.projectId,
+        );
+
+        if (project.accessToken) {
+          const octokit = new Octokit({
+            auth: project.accessToken,
+          });
+
+          const owner = await octokit.rest.users.getAuthenticated();
+          const issuesFromGit = await octokit.rest.issues.listForRepo({
+            owner: owner.data.login,
+            repo: project.name,
+            state: "all", // Get both open and closed issues
+          });
+
+          // Find the GitHub issue by title
+          const githubIssue = issuesFromGit.data.find(
+            (gitIssue) => gitIssue.title === issue.name,
+          );
+
+          if (githubIssue) {
+            const newState = status === "DONE" ? "closed" : "open";
+
+            // Only update if the state actually changed
+            if (
+              (newState === "closed" && githubIssue.state === "open") ||
+              (newState === "open" && githubIssue.state === "closed")
+            ) {
+              await octokit.rest.issues.update({
+                owner: owner.data.login,
+                repo: project.name,
+                issue_number: githubIssue.number,
+                state: newState,
+              });
+              console.log(`Updated GitHub issue #${githubIssue.number} state to ${newState}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error syncing to GitHub:", error);
+      }
+
       return c.json({ data: issue });
     },
   )
@@ -536,41 +693,61 @@ const app = new Hono()
       PROJECTS_ID,
       issue.projectId,
     );
-    const member = await databases.getDocument(
-      DATABASE_ID,
-      MEMBERS_ID,
-      issue.assigneeId,
-    );
 
     let assignee;
     try {
-      const user = await users.get(member.userId);
-      assignee = {
-        ...member,
-        name: user.name || user.email,
-        email: user.email,
-      };
-    } catch (error) {
-      if (
-        typeof error === "object" &&
-        error &&
-        "code" in error &&
-        error.code === 404
-      ) {
-        // User not found in Appwrite
+      const member = await databases.getDocument(
+        DATABASE_ID,
+        MEMBERS_ID,
+        issue.assigneeId,
+      );
+
+      try {
+        const user = await users.get(member.userId);
         assignee = {
           ...member,
-          name: "Unknown User",
-          email: "user-not-found@example.com",
+          name: user.name || user.email,
+          email: user.email,
         };
-      } else {
-        console.error(`Error fetching user ${member.userId}:`, error);
-        assignee = {
-          ...member,
-          name: "Error Fetching User",
-          email: "error@example.com",
-        };
+      } catch (userError) {
+        if (
+          typeof userError === "object" &&
+          userError &&
+          "code" in userError &&
+          userError.code === 404
+        ) {
+          // User not found in Appwrite
+          assignee = {
+            ...member,
+            name: "Unknown User",
+            email: "user-not-found@example.com",
+          };
+        } else {
+          console.error(`Error fetching user ${member.userId}:`, userError);
+          assignee = {
+            ...member,
+            name: "Error Fetching User",
+            email: "error@example.com",
+          };
+        }
       }
+    } catch (memberError) {
+      // If member not found by ID, it might be a GitHub username from fetched issues
+      console.log(`Member not found by ID ${issue.assigneeId}, treating as GitHub username`);
+
+      // Create a fallback assignee object for GitHub usernames
+      assignee = {
+        $id: issue.assigneeId || "unknown",
+        userId: issue.assigneeId || "unknown",
+        workspaceId: issue.workspaceId,
+        name: issue.assigneeId || "Unassigned",
+        email: `${issue.assigneeId}@github.local`,
+        $createdAt: new Date().toISOString(),
+        $updatedAt: new Date().toISOString(),
+        $permissions: [],
+        $collectionId: MEMBERS_ID,
+        $databaseId: DATABASE_ID,
+      };
     }
 
     return c.json({
@@ -818,19 +995,39 @@ const app = new Hono()
 
         console.log("Issues to create:", issuesToCreate);
 
+        // Get all members of the workspace to try mapping GitHub usernames
+        const workspaceMembers = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_ID,
+          [Query.equal("workspaceId", project.workspaceId)]
+        );
+
+        // Helper function to find member by GitHub username
+        const findMemberByGithubUsername = async (githubUsername: string) => {
+          // For now, we'll just use the GitHub username as assigneeId
+          // In the future, this could be enhanced to match against user profiles
+          // that have GitHub usernames stored
+          return githubUsername;
+        };
+
         const newIssues = await Promise.all(
-          issuesToCreate.map((issue) =>
-            databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
+          issuesToCreate.map(async (issue) => {
+            let assigneeId = null;
+            if (issue.assignee?.login) {
+              assigneeId = await findMemberByGithubUsername(issue.assignee.login);
+            }
+
+            return databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
               name: issue.title,
               status: IssueStatus.TODO,
               workspaceId: project.workspaceId,
               projectId: projectId,
-              assigneeId: issue.assignee?.login,
+              assigneeId: assigneeId,
               dueDate: getRandomFutureDate(),
               position: 1000,
               description: issue.body || "",
-            }),
-          ),
+            });
+          })
         );
 
         console.log("New Issues:", newIssues);
@@ -888,7 +1085,7 @@ const app = new Hono()
             "base64"
           )}`
         }
-        
+
         const comment = await databases.createDocument(
           DATABASE_ID,
           COMMENTS_ID,
@@ -906,7 +1103,7 @@ const app = new Hono()
       } catch (error) {
         console.error("Error creating comment:", error);
         return c.json({ error: "Failed to create comment" }, 500);
-      } 
+      }
     }
   );
 
