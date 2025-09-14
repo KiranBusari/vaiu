@@ -6,10 +6,10 @@ import { zValidator } from "@hono/zod-validator";
 import { getMember } from "@/features/members/utilts";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, ISSUES_ID } from "@/config";
+import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, ISSUES_ID, COMMENTS_ID, IMAGES_BUCKET_ID } from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 
-import { createTaskSchema } from "../schemas";
+import { createCommentSchema, createTaskSchema } from "../schemas";
 import { Issue, IssueStatus } from "../types";
 import { Project } from "@/features/projects/types";
 import { Member } from "@/features/members/types";
@@ -29,7 +29,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -432,7 +432,7 @@ const app = new Hono()
     async (c) => {
       const databases = c.get("databases");
       const user = c.get("user");
-      const { name, status, dueDate, projectId, assigneeId, description } =
+      const { name, status, dueDate, projectId, assigneeId, description, comment } =
         c.req.valid("json");
       const { issueId } = c.req.param();
 
@@ -470,6 +470,19 @@ const app = new Hono()
         return c.json(
           { error: "Unauthorized access to the target project" },
           403,
+        );
+      }
+
+      if (status === "DONE" && comment) {
+        await databases.createDocument(
+          DATABASE_ID,
+          COMMENTS_ID,
+          ID.unique(),
+          {
+            text: comment,
+            issueId,
+            userId: user.$id,
+          }
         );
       }
 
@@ -831,6 +844,69 @@ const app = new Hono()
         return c.json({ error: "An unexpected error occurred" }, 500);
       }
     },
+  )
+  .get("/:issueId/comments", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { issueId } = c.req.param();
+
+    const comments = await databases.listDocuments(
+      DATABASE_ID,
+      COMMENTS_ID,
+      [Query.equal("issueId", issueId), Query.orderDesc("$createdAt")]
+    );
+
+    return c.json({ data: comments });
+  })
+  .post(
+    "/:issueId/comments",
+    sessionMiddleware,
+    zValidator("json", createCommentSchema),
+    async (c) => {
+      try {
+        const databases = c.get("databases");
+        const user = c.get("user");
+        const storage = c.get("storage");
+
+        const { issueId } = c.req.param();
+        const { text, attachment } = c.req.valid("json");
+
+        let uploadedImage: string | undefined;
+
+        if (attachment instanceof File) {
+          const file = await storage.createFile(
+            IMAGES_BUCKET_ID,
+            ID.unique(),
+            attachment
+          )
+
+          const buffer: ArrayBuffer = await storage.getFilePreview(
+            IMAGES_BUCKET_ID,
+            file.$id
+          )
+
+          uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
+            "base64"
+          )}`
+        }
+
+        const comment = await databases.createDocument(
+          DATABASE_ID,
+          COMMENTS_ID,
+          ID.unique(),
+          {
+            text,
+            issueId,
+            userId: user.$id,
+            imageUrl: uploadedImage,
+          }
+        );
+
+        return c.json({ data: comment });
+      } catch (error) {
+        console.error("Error creating comment:", error);
+        return c.json({ error: "Failed to create comment" }, 500);
+      } 
+    }
   );
 
 export default app;

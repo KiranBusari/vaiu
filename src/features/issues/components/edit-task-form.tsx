@@ -1,7 +1,10 @@
 "use client";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -54,6 +57,9 @@ export const EditTaskForm = ({
   initialValues,
 }: EditTaskFormProps) => {
   const { mutate, isPending } = useUpdateTask();
+  const [isDoneDialogOpen, setIsDoneDialogOpen] = useState(false);
+  const [doneComment, setDoneComment] = useState("");
+
   const form = useForm<CreateTaskSchema>({
     resolver: zodResolver(
       createTaskSchema.omit({ workspaceId: true, description: true }),
@@ -65,9 +71,22 @@ export const EditTaskForm = ({
         : undefined,
     },
   });
+
+  const status = form.watch("status");
+
+  useEffect(() => {
+    if (status === "DONE") {
+      setIsDoneDialogOpen(true);
+    }
+  }, [status]);
+
   const onSubmit = (values: CreateTaskSchema) => {
+    const valuesWithComment = {
+      ...values,
+      comment: doneComment,
+    };
     mutate(
-      { json: values, param: { issueId: initialValues.$id } },
+      { json: valuesWithComment, param: { issueId: initialValues.$id } },
       {
         onSuccess: () => {
           form.reset();
@@ -263,6 +282,35 @@ export const EditTaskForm = ({
             </div>
           </form>
         </Form>
+        <Dialog open={isDoneDialogOpen} onOpenChange={setIsDoneDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add a comment</DialogTitle>
+            </DialogHeader>
+            <Textarea
+              placeholder="Add a comment to explain why this issue is done..."
+              value={doneComment}
+              onChange={(e) => setDoneComment(e.target.value)}
+            />
+            <DialogFooter>
+              <Button onClick={() => setIsDoneDialogOpen(false)} variant="secondary">
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                form.setValue("status", initialValues.status);
+                setIsDoneDialogOpen(false);
+              }}>Back</Button>
+              <Button onClick={() => {
+                if (doneComment.trim()) {
+                  form.handleSubmit(onSubmit)();
+                  setIsDoneDialogOpen(false);
+                } else {
+                  alert("Comment is required when moving to Done");
+                }
+              }}>Submit</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
