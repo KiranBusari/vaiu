@@ -282,20 +282,27 @@ const app = new Hono()
       }
     }
 
-    // Check if workspace has members
+    // Check if workspace has members (super admins can delete regardless of membership)
     const workspaceMembers = await databases.listDocuments(
       DATABASE_ID,
       MEMBERS_ID,
       [Query.equal("workspaceId", workspaceId)],
     );
 
-    if (workspaceMembers.total > 0) {
-      return c.json(
-        {
-          error: "Cannot delete workspace that has members. Please remove all members first."
-        },
-        400,
+    if (!isSuper) {
+      // For regular users, allow deletion if only the current user is a member
+      const otherMembers = workspaceMembers.documents.filter(
+        (member) => member.userId !== user.$id
       );
+
+      if (otherMembers.length > 0) {
+        return c.json(
+          {
+            error: "Cannot delete workspace that has other members. Please remove all other members first."
+          },
+          400,
+        );
+      }
     }
 
     // Check if workspace has any projects
@@ -314,7 +321,24 @@ const app = new Hono()
       );
     }
 
-    // TODO: delete members, projects, tasks
+    if (isSuper) {
+      // Super admin: delete all memberships
+      await Promise.all(
+        workspaceMembers.documents.map(member =>
+          databases.deleteDocument(DATABASE_ID, MEMBERS_ID, member.$id)
+        )
+      );
+    } else {
+      // Regular user: delete only their own membership
+      const currentUserMembership = workspaceMembers.documents.find(
+        (member) => member.userId === user.$id
+      );
+
+      if (currentUserMembership) {
+        await databases.deleteDocument(DATABASE_ID, MEMBERS_ID, currentUserMembership.$id);
+      }
+    }
+
     await databases.deleteDocument(DATABASE_ID, WORKSPACE_ID, workspaceId);
     return c.json({ data: { $id: workspaceId } });
   })
