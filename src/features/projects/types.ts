@@ -7,4 +7,7 @@ export type Project = Models.Document & {
   inviteCode: string;
   workspaceId: string;
   owner: string;
+  projectAdmin: string;
+  accessToken: string;
+  projectCollaborators: string[];
 };

@@ -116,11 +116,10 @@ const app = new Hono()
           },
         );
 
-        // Update member's projectId array
+        // Update member's projectId array (keep existing workspace role)
         const currentProjectIds = member.projectId || [];
         await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
           projectId: [...currentProjectIds, project.$id],
-          role: MemberRole.ADMIN,
         });
 
         return c.json({ data: project, repo: repo.data });
@@ -210,11 +209,10 @@ const app = new Hono()
         });
       });
 
-      // Update member's projectId array
+      // Update member's projectId array (keep existing workspace role)
       const currentProjectIds = member.projectId || [];
       await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
         projectId: [...currentProjectIds, project.$id],
-        role: MemberRole.ADMIN,
       });
 
       return c.json({ data: project, issues: data });

@@ -23,6 +23,7 @@ import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useGetProjectMembers } from "../api/use-get-project-members";
+import { useGetProject } from "@/features/projects/api/use-get-project";
 
 export const ProjectMembersList = () => {
   const workspaceId = useWorkspaceId();
@@ -34,6 +35,7 @@ export const ProjectMembersList = () => {
   );
 
   const { data } = useGetProjectMembers({ workspaceId, projectId });
+  const { data: project } = useGetProject({ projectId });
 
   const { mutate: deleteMember, isPending: deletingMember } = useDeleteMember();
   const { mutate: updateMember, isPending: updatingMember } = useUpdateMember();
@@ -72,63 +74,73 @@ export const ProjectMembersList = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7">
-        {data?.documents.map((member, idx) => (
-          <Fragment key={member.$id}>
-            <div className="flex items-center gap-2">
-              <MemberAvatar
-                className="size-10"
-                fallbackClassName="text-lg"
-                name={member.name}
-              />
-              <div className="flex flex-col">
-                <p className="text-sm font-medium">{member.name}</p>
-                <p className="text-xs font-medium">{member.email}</p>
-                <p className="text-xs font-semibold text-destructive">
-                  {member.role}
-                </p>
+        {data?.documents.map((member, idx) => {
+          const isProjectAdmin = project?.projectAdmin === member.$id;
+
+          return (
+            <Fragment key={member.$id}>
+              <div className="flex items-center gap-2">
+                <MemberAvatar
+                  className="size-10"
+                  fallbackClassName="text-lg"
+                  name={member.name}
+                />
+                <div className="flex flex-col">
+                  <p className="text-sm font-medium">{member.name}</p>
+                  <p className="text-xs font-medium">{member.email}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-destructive">
+                      {member.role}
+                    </p>
+                    {isProjectAdmin && (
+                      <p className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md dark:bg-yellow-900 dark:text-yellow-200">
+                        Project Admin
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="ml-auto" variant="secondary" size="icon">
+                      <MoreVertical className="size-4 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" align="end">
+                    <DropdownMenuItem
+                      className={`font-medium ${member.role === MemberRole.ADMIN && "hidden"
+                        }`}
+                      onClick={() =>
+                        handleUpdateMember(member.$id, MemberRole.ADMIN)
+                      }
+                      disabled={updatingMember}
+                    >
+                      Set as Administrator
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="font-medium"
+                      onClick={() =>
+                        handleUpdateMember(member.$id, MemberRole.MEMBER)
+                      }
+                      disabled={updatingMember}
+                    >
+                      Set as Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="font-medium text-amber-700"
+                      onClick={() => handleDeleteMember(member.$id)}
+                      disabled={deletingMember}
+                    >
+                      Remove {member.name}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="ml-auto" variant="secondary" size="icon">
-                    <MoreVertical className="size-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="end">
-                  <DropdownMenuItem
-                    className={`font-medium ${
-                      member.role === MemberRole.ADMIN && "hidden"
-                    }`}
-                    onClick={() =>
-                      handleUpdateMember(member.$id, MemberRole.ADMIN)
-                    }
-                    disabled={updatingMember}
-                  >
-                    Set as Administrator
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="font-medium"
-                    onClick={() =>
-                      handleUpdateMember(member.$id, MemberRole.MEMBER)
-                    }
-                    disabled={updatingMember}
-                  >
-                    Set as Member
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="font-medium text-amber-700"
-                    onClick={() => handleDeleteMember(member.$id)}
-                    disabled={deletingMember}
-                  >
-                    Remove {member.name}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            {idx < data.documents.length - 1 && (
-              <Separator className="my-2.5 bg-neutral-400/40" />
-            )}
-          </Fragment>
-        ))}
+              {idx < data.documents.length - 1 && (
+                <Separator className="my-2.5 bg-neutral-400/40" />
+              )}
+            </Fragment>
+          );
+        })}
       </CardContent>
     </Card>
   );
