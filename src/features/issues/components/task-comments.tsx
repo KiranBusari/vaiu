@@ -8,40 +8,24 @@ interface TaskCommentsProps {
   issueId: string;
 }
 
-import { IMAGES_BUCKET_ID } from "@/config";
-import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import { useGetIssueComments } from "../api/use-get-comments";
 import { useCreateIssueComment } from "../api/use-create-issue-comments";
+
+import { formatDistanceToNow } from "date-fns";
+import { MemberAvatar } from "@/features/members/components/members-avatar";
 
 export const TaskComments = ({ issueId }: TaskCommentsProps) => {
   const { data: comments, isLoading } = useGetIssueComments({issueId});
   const { mutate: createComment, isPending } = useCreateIssueComment(issueId);
   const [text, setText] = React.useState("");
-  const [attachment, setAttachment] = React.useState<File | undefined>();
-  const [preview, setPreview] = React.useState<string | undefined>();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setAttachment(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleSubmit = () => {
-    if (text.trim() || attachment) {
+    if (text.trim()) {
       createComment({ 
-        json: { text, attachment },
+        json: { text },
         param: { issueId }
       });
       setText("");
-      setAttachment(undefined);
-      setPreview(undefined);
     }
   };
 
@@ -56,12 +40,6 @@ export const TaskComments = ({ issueId }: TaskCommentsProps) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
-          <Input type="file" onChange={handleFileChange} />
-          {preview && (
-            <div className="mt-2">
-              <Image src={preview} alt="Attachment preview" width={100} height={100} />
-            </div>
-          )}
           <Button size="sm" className="self-end" onClick={handleSubmit} disabled={isPending}>
             {isPending ? "Commenting..." : "Comment"}
           </Button>
@@ -69,24 +47,17 @@ export const TaskComments = ({ issueId }: TaskCommentsProps) => {
         {/* Comment list */}
         <div className="mt-4 space-y-4">
           {isLoading && <p>Loading comments...</p>}
-          {comments?.documents?.map((comment: any) => (
-            <div key={comment.$id} className="flex items-start gap-x-4">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-muted" />
-              </div>
+          {comments?.documents?.map((comment) => (
+            <div key={comment.$id} className="flex items-start gap-x-4 rounded-md bg-muted p-4">
+              <MemberAvatar name={comment.username || "?"} />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">User name</p>
+                  <p className="text-sm font-medium">{comment.username || "Unknown User"}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(comment.$createdAt).toLocaleDateString()}
+                    {formatDistanceToNow(new Date(comment.$createdAt), { addSuffix: true })}
                   </p>
                 </div>
                 <p className="mt-1 text-sm">{comment.text}</p>
-                {comment.attachment && (
-                  <div className="mt-2">
-                    <Image src={`/api/v1/storage/buckets/${IMAGES_BUCKET_ID}/files/${comment.attachment}/view`} alt="Attachment" width={100} height={100} />
-                  </div>
-                )}
               </div>
             </div>
           ))}

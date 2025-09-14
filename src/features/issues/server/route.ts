@@ -888,7 +888,7 @@ const app = new Hono()
             "base64"
           )}`
         }
-
+        
         const comment = await databases.createDocument(
           DATABASE_ID,
           COMMENTS_ID,
@@ -897,7 +897,8 @@ const app = new Hono()
             text,
             issueId,
             userId: user.$id,
-            imageUrl: uploadedImage,
+            username: user.name,
+            attachment: uploadedImage,
           }
         );
 
