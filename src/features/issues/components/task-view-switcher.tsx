@@ -21,8 +21,6 @@ import { IssueStatus } from "../types";
 import { useBulkUpdateTasks } from "../api/use-bulk-update-tasks";
 import { DataCalander } from "./data-calander";
 import { Button } from "@/components/ui/button";
-import { FaGithub } from "react-icons/fa";
-import { useFetchIssues } from "../api/use-fetch-issues";
 
 interface TaskViewSwitcherProps {
   hideProjectFilter?: boolean;
@@ -48,16 +46,6 @@ export const TaskViewSwitcher = ({
     dueDate,
     status,
   });
-
-  const { mutate: FetchIssues, isPending } = useFetchIssues();
-
-  const handleFetchIssues = () => {
-    FetchIssues({
-      json: {
-        projectId: paramProjectId || projectId,
-      },
-    });
-  };
 
   const onKanbanChange = useCallback(
     (
@@ -85,15 +73,6 @@ export const TaskViewSwitcher = ({
             Issues
           </p>
           <div className="flex items-center space-x-4">
-            <Button
-              size={"sm"}
-              onClick={handleFetchIssues}
-              disabled={isPending}
-              className="w-full bg-slate-200 text-black hover:bg-slate-400 lg:w-auto"
-            >
-              <FaGithub className="size-4" />
-              Fetch Issues
-            </Button>
             <Button
               size={"sm"}
               onClick={open}

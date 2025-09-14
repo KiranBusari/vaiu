@@ -19,7 +19,7 @@ import {
 } from "../schemas";
 import { MemberRole } from "@/features/members/types";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
-import { getMember, getProjectMember } from "@/features/members/utilts";
+import { getMember, getProjectMember, isSuperAdmin } from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
@@ -29,6 +29,21 @@ const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
     const user = c.get("user");
     const databases = c.get("databases");
+
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+    if (isSuper) {
+      // Super admins can see all workspaces
+      const workspaces = await databases.listDocuments(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        [Query.orderDesc("$createdAt")],
+      );
+      return c.json({ data: workspaces });
+    }
+
+    // Regular users can only see workspaces they're members of
     const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
       Query.equal("userId", user.$id),
     ]);
@@ -50,14 +65,20 @@ const app = new Hono()
     const { workspaceId } = c.req.param();
 
     try {
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
+      if (!isSuper) {
+        // Regular users need to be members of the workspace
+        const member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
       }
 
       const workspace = await databases.getDocument<Workspace>(
@@ -245,15 +266,79 @@ const app = new Hono()
     const databases = c.get("databases");
     const user = c.get("user");
     const { workspaceId } = c.req.param();
-    const member = await getMember({
-      databases,
-      workspaceId,
-      userId: user.$id,
-    });
-    if (!member || member.role !== MemberRole.ADMIN) {
-      return c.json({ error: "Unauthorized" }, 401);
+
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+    if (!isSuper) {
+      // Regular users need to be workspace admins
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+      if (!member || member.role !== MemberRole.ADMIN) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     }
-    // TODO: delete members, projects, tasks
+
+    // Check if workspace has members (super admins can delete regardless of membership)
+    const workspaceMembers = await databases.listDocuments(
+      DATABASE_ID,
+      MEMBERS_ID,
+      [Query.equal("workspaceId", workspaceId)],
+    );
+
+    if (!isSuper) {
+      // For regular users, allow deletion if only the current user is a member
+      const otherMembers = workspaceMembers.documents.filter(
+        (member) => member.userId !== user.$id
+      );
+
+      if (otherMembers.length > 0) {
+        return c.json(
+          {
+            error: "Cannot delete workspace that has other members. Please remove all other members first."
+          },
+          400,
+        );
+      }
+    }
+
+    // Check if workspace has any projects
+    const workspaceProjects = await databases.listDocuments(
+      DATABASE_ID,
+      PROJECTS_ID,
+      [Query.equal("workspaceId", workspaceId)],
+    );
+
+    if (workspaceProjects.total > 0) {
+      return c.json(
+        {
+          error: "Cannot delete workspace that has projects. Please delete all projects first."
+        },
+        400,
+      );
+    }
+
+    if (isSuper) {
+      // Super admin: delete all memberships
+      await Promise.all(
+        workspaceMembers.documents.map(member =>
+          databases.deleteDocument(DATABASE_ID, MEMBERS_ID, member.$id)
+        )
+      );
+    } else {
+      // Regular user: delete only their own membership
+      const currentUserMembership = workspaceMembers.documents.find(
+        (member) => member.userId === user.$id
+      );
+
+      if (currentUserMembership) {
+        await databases.deleteDocument(DATABASE_ID, MEMBERS_ID, currentUserMembership.$id);
+      }
+    }
+
     await databases.deleteDocument(DATABASE_ID, WORKSPACE_ID, workspaceId);
     return c.json({ data: { $id: workspaceId } });
   })
@@ -284,17 +369,40 @@ const app = new Hono()
     const user = c.get("user");
     const { workspaceId } = c.req.param();
 
-    const member = await getMember({
-      databases,
-      workspaceId: workspaceId,
-      userId: user.$id,
-    });
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    // Get the projects the user is a member of
-    const userProjectIds = member.projectId || [];
+    let userProjectIds: string[] = [];
+    let member = null;
+
+    if (!isSuper) {
+      // Regular users need to be members of the workspace
+      member = await getMember({
+        databases,
+        workspaceId: workspaceId,
+        userId: user.$id,
+      });
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+      userProjectIds = member.projectId || [];
+    } else {
+      // Super admins can see all projects in the workspace
+      const allProjects = await databases.listDocuments(
+        DATABASE_ID,
+        PROJECTS_ID,
+        [Query.equal("workspaceId", workspaceId)],
+      );
+      userProjectIds = allProjects.documents.map(project => project.$id);
+
+      // For super admins, we need a member record for analytics
+      const memberRecords = await databases.listDocuments(
+        DATABASE_ID,
+        MEMBERS_ID,
+        [Query.equal("userId", user.$id), Query.limit(1)],
+      );
+      member = memberRecords.documents[0];
+    }
 
     // If user is not a member of any projects, return zero analytics
     if (userProjectIds.length === 0) {

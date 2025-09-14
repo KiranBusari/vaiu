@@ -8,7 +8,7 @@ import { ModeToggle } from "./ui/ModeToggle";
 import { SidebarTrigger } from "./ui/sidebar";
 import { SidebarComponent } from "./sidebar";
 
-import { NotificationBell } from "@/features/notifications/components/notification-bell";
+// import { NotificationBell } from "@/features/notifications/components/notification-bell";
 
 const pathnameMap = {
   tasks: {
@@ -41,7 +41,7 @@ export const Navbar = () => {
       </div>
       <SidebarComponent />
       <div className="flex items-center justify-center gap-x-4">
-        <NotificationBell />
+        {/* <NotificationBell /> */}
         <UserButton />
         <ModeToggle />
       </div>

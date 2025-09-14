@@ -204,7 +204,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                 disabled={isPending}
                 type="submit"
                 size="lg"
-                className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white"
+                className="bg-slate-200 text-black hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white"
               >
                 Create Pull Request
               </Button>

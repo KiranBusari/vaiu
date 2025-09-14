@@ -1,7 +1,6 @@
 "use client";
 import {
   UserPlus2,
-  GitPullRequestCreateArrowIcon,
   EllipsisVertical,
   Settings,
   UploadIcon,
@@ -25,7 +24,6 @@ import { PageError } from "@/components/page-error";
 import { useGetProjectAnalytics } from "@/features/projects/api/use-get-project-analytics";
 import { Analytics } from "@/components/analytics";
 import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-add-collaborator-to-project-modal";
-import { useCreatePrModal } from "@/features/pull-requests/hooks/use-create-pr-modal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +53,6 @@ export const ProjectIdClient = () => {
   const [readmeContent, setReadmeContent] = useState<string | null>(null);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
-  const { openPr } = useCreatePrModal();
   const { open: openCollaboratorModal } = useAddCollaboratorToProjectModal();
   const { openFileUploader } = useFileUploadModal();
   const { data: members, isLoading: membersLoading } = useGetProjectMembers({
@@ -74,18 +71,6 @@ export const ProjectIdClient = () => {
     if (!project) return "";
     return `/workspaces/${project.workspaceId}/projects/${project.$id}/members`;
   }, [project]);
-  const handleCreatePr = async () => {
-    try {
-      await openPr();
-    } catch (error) {
-      console.error("Error creating pull request:", error);
-      toast.error(
-        typeof error === "string"
-          ? error
-          : "You have to push to the specified branch first.",
-      );
-    }
-  };
 
   const handleFileUpload = async () => {
     try {
@@ -182,8 +167,8 @@ export const ProjectIdClient = () => {
           <DropdownMenu>
             <DropdownMenuTrigger className="ml-2" asChild>
               <Button variant="outline" size="default" className="items-center">
-                <EllipsisVertical className="size-4" />
                 <p className="text-sm">Actions</p>
+                <EllipsisVertical className="size-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -196,14 +181,6 @@ export const ProjectIdClient = () => {
                 >
                   <UploadIcon className="mr-2 size-4" />
                   Upload Readme
-                </Button>
-                <Button
-                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  onClick={handleCreatePr}
-                  variant="default"
-                >
-                  <GitPullRequestCreateArrowIcon className="mr-2 size-4" />
-                  Create Pull Request
                 </Button>
                 <Button
                   className="w-full justify-start"

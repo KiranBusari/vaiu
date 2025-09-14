@@ -4,7 +4,7 @@ import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { getMember } from "@/features/members/utilts";
+import { getMember, isSuperAdmin } from "@/features/members/utilts";
 import {
   DATABASE_ID,
   IMAGES_BUCKET_ID,
@@ -21,7 +21,7 @@ import {
   fileUploadSchema,
 } from "../schemas";
 import { Project } from "../types";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
@@ -136,16 +136,15 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId, accessToken } = c.req.valid("form");
-      
+
       const octokit = new Octokit({
         auth: accessToken,
       });
-      
+
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
       const repoName = extractRepoName(projectLink);
-      // console.log("repoName", repoName);
 
       const member = await getMember({
         databases,
@@ -269,6 +268,34 @@ const app = new Hono()
         return c.json({ error: "Missing workspaceId" }, 400);
       }
 
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+      if (isSuper) {
+        // Super admins can see all projects in the workspace
+        try {
+          const projects = await databases.listDocuments<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            [
+              Query.equal("workspaceId", workspaceId),
+              Query.orderDesc("$createdAt"),
+            ],
+          );
+
+          return c.json({
+            data: {
+              documents: projects.documents,
+              total: projects.total,
+            },
+          });
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          return c.json({ error: "Failed to fetch projects" }, 500);
+        }
+      }
+
+      // Regular users can only see projects they're members of
       const member = await getMember({
         databases,
         workspaceId,
@@ -340,15 +367,22 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: project.workspaceId,
-      userId: user.$id,
-    });
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+    if (!isSuper) {
+      // Regular users need to be members of the workspace
+      const member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     }
+
     return c.json({ data: project });
   })
   .get("/:projectId/analytics", sessionMiddleware, async (c) => {
@@ -362,20 +396,35 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: project.workspaceId,
-      userId: user.$id,
-    });
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+    let member = null;
+
+    if (!isSuper) {
+      // Regular users need to be members of the workspace
+      member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+    } else {
+      // For super admins, we need to get a member record for analytics
+      // We'll use the first member record we can find for this user
+      const memberRecords = await databases.listDocuments(
+        DATABASE_ID,
+        MEMBERS_ID,
+        [Query.equal("userId", user.$id), Query.limit(1)],
+      );
+      member = memberRecords.documents[0];
     }
 
     const now = new Date();
     const thisMonthStart = startOfMonth(now);
     const thisMonthEnd = endOfMonth(now);
-    const lastMonthStart = startOfMonth(subMonths(now, 1));
-    const lastMonthEnd = endOfMonth(subMonths(now, 1));
 
     const thisMonthTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -386,23 +435,13 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthTasks = await databases.listDocuments(
-      DATABASE_ID,
-      ISSUES_ID,
-      [
-        Query.equal("projectId", projectId),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
-      ],
-    );
 
     const totalTasks = await databases.listDocuments(DATABASE_ID, ISSUES_ID, [
       Query.equal("projectId", projectId),
     ]);
 
     const totalTaskCount = totalTasks.total;
-    const taskCount = thisMonthTasks.total;
-    const taskDiff = taskCount - lastMonthTasks.total;
+    const taskDiff = thisMonthTasks.total;
 
     const thisMonthAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -414,19 +453,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthAssignedTasks = await databases.listDocuments(
+    const totalAssignedTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("assigneeId", member.$id),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const assignedTaskCount = thisMonthAssignedTasks.total;
-    const assignedTaskDiff = assignedTaskCount - lastMonthAssignedTasks.total;
+    const assignedTaskCount = totalAssignedTasks.total;
+    const assignedTaskDiff = thisMonthAssignedTasks.total;
 
     const thisMonthIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -438,20 +475,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthIncompleteTasks = await databases.listDocuments(
+    const totalIncompleteTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.notEqual("status", IssueStatus.DONE),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const incompleteTaskCount = thisMonthIncompleteTasks.total;
-    const incompleteTaskDiff =
-      incompleteTaskCount - lastMonthIncompleteTasks.total;
+    const incompleteTaskCount = totalIncompleteTasks.total;
+    const incompleteTaskDiff = thisMonthIncompleteTasks.total;
 
     const thisMonthCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -463,19 +497,17 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthCompletedTasks = await databases.listDocuments(
+    const totalCompletedTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.equal("status", IssueStatus.DONE),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const completedTaskCount = thisMonthCompletedTasks.total;
-    const completeTaskDiff = completedTaskCount - lastMonthCompletedTasks.total;
+    const completedTaskCount = totalCompletedTasks.total;
+    const completeTaskDiff = thisMonthCompletedTasks.total;
 
     const thisMonthOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
@@ -488,25 +520,23 @@ const app = new Hono()
         Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
       ],
     );
-    const lastMonthOverDueTasks = await databases.listDocuments(
+    const totalOverDueTasks = await databases.listDocuments(
       DATABASE_ID,
       ISSUES_ID,
       [
         Query.equal("projectId", projectId),
         Query.notEqual("status", IssueStatus.DONE),
         Query.lessThan("dueDate", now.toISOString()),
-        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
-        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
       ],
     );
 
-    const overdueTaskCount = thisMonthOverDueTasks.total;
-    const overdueTaskDiff = overdueTaskCount - lastMonthOverDueTasks.total;
+    const overdueTaskCount = totalOverDueTasks.total;
+    const overdueTaskDiff = thisMonthOverDueTasks.total;
 
     return c.json({
       data: {
         totalTaskCount,
-        taskCount,
+        taskCount: thisMonthTasks.total,
         taskDiff,
         assignedTaskCount,
         assignedTaskDiff,
@@ -587,14 +617,55 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: existingProject.workspaceId,
-      userId: user.$id,
-    });
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    if (!member || existingProject.projectAdmin !== member.$id) {
-      return c.json({ error: "Unauthorized" }, 401);
+    if (!isSuper) {
+      // Regular users need to be project admins
+      const member = await getMember({
+        databases,
+        workspaceId: existingProject.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member || existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+    }
+
+    // Check if project has any members
+    const projectMembers = await databases.listDocuments(
+      DATABASE_ID,
+      MEMBERS_ID,
+      [
+        Query.equal("workspaceId", existingProject.workspaceId),
+        Query.contains("projectId", projectId),
+      ],
+    );
+
+    if (projectMembers.total > 0) {
+      return c.json(
+        {
+          error: "Cannot delete project that has members. Please remove all members first."
+        },
+        400,
+      );
+    }
+
+    // Check if project has any issues
+    const projectIssues = await databases.listDocuments(
+      DATABASE_ID,
+      ISSUES_ID,
+      [Query.equal("projectId", projectId)],
+    );
+
+    if (projectIssues.total > 0) {
+      return c.json(
+        {
+          error: "Cannot delete project that has issues. Please delete all issues first."
+        },
+        400,
+      );
     }
 
     const octokit = new Octokit({
@@ -674,7 +745,6 @@ const app = new Hono()
       }
     },
   )
-  
   .post(
     "/upload-file",
     sessionMiddleware,

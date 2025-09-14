@@ -1,6 +1,6 @@
 "use client";
 import { useQueryState } from "nuqs";
-import { Loader } from "lucide-react";
+import { Loader, PlusIcon } from "lucide-react";
 
 import { DottedSeparator } from "@/components/dotted-separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,9 @@ import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useGetPullRequests } from "../api/use-get-pull-requests";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { Button } from "@/components/ui/button";
+import { useCreatePrModal } from "../hooks/use-create-pr-modal";
+import { toast } from "sonner";
 
 export const PrViewSwitcher = () => {
   const [view, setView] = useQueryState("pr-view", {
@@ -18,11 +21,26 @@ export const PrViewSwitcher = () => {
   const workspaceId = useWorkspaceId();
   const projectId = useProjectId();
 
+  const { openPr } = useCreatePrModal();
+
   const { data: prs, isLoading: prsLoading } = useGetPullRequests({
     workspaceId,
     projectId,
   });
 
+  const handleCreatePr = async () => {
+    try {
+      await openPr();
+    } catch (error) {
+      console.error("Error creating pull request:", error);
+      toast.error(
+        typeof error === "string"
+          ? error
+          : "You have to push to the specified branch first.",
+      );
+    }
+  };
+  
   return (
     <Tabs
       defaultValue={view}
@@ -34,6 +52,16 @@ export const PrViewSwitcher = () => {
           <p className="flex items-center text-center text-xl font-bold">
             Pull Requests
           </p>
+          <div className="flex items-center space-x-4">
+            <Button
+              size={"sm"}
+              onClick={handleCreatePr}
+              className="w-full bg-slate-200 text-black hover:bg-slate-400 lg:w-auto"
+            >
+              <PlusIcon className="size-4" />
+              New
+            </Button>
+          </div>
         </div>
         <div className="mt-4 flex w-full items-center justify-start gap-y-2 lg:flex-row">
           <TabsList className="w-full lg:w-auto">
