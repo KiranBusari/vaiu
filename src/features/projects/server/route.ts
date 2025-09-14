@@ -145,7 +145,6 @@ const app = new Hono()
         return c.json({ error: "Please Paste the project link" }, 401);
       }
       const repoName = extractRepoName(projectLink);
-      // console.log("repoName", repoName);
 
       const member = await getMember({
         databases,

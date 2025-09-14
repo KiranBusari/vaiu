@@ -40,7 +40,7 @@ export const PrViewSwitcher = () => {
       );
     }
   };
-
+  
   return (
     <Tabs
       defaultValue={view}
