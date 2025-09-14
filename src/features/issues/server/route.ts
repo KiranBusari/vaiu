@@ -3,7 +3,7 @@ import { Hono } from "hono";
 
 import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
-import { getMember } from "@/features/members/utilts";
+import { getMember, isSuperAdmin } from "@/features/members/utilts";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, ISSUES_ID, COMMENTS_ID, IMAGES_BUCKET_ID } from "@/config";
@@ -47,29 +47,7 @@ const app = new Hono()
       issueId,
     );
 
-    // console.log("Issues from DB:", issuesFromDb);
-
-    const member = await getMember({
-      databases,
-      workspaceId: issuesFromDb.workspaceId,
-      userId: user.$id,
-    });
-
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
-
-    // Check if user is a member of the project that this issue belongs to
-    const userProjectIds = member.projectId || [];
-    if (!userProjectIds.includes(issuesFromDb.projectId)) {
-      return c.json(
-        { error: "Unauthorized access to this project's issue" },
-        403,
-      );
-    }
-
     const projectId = issuesFromDb.projectId;
-
     const existingProject = await databases.getDocument<Project>(
       DATABASE_ID,
       PROJECTS_ID,
@@ -80,8 +58,33 @@ const app = new Hono()
       return c.json({ error: "Project not found" }, 404);
     }
 
-    if (existingProject.projectAdmin !== member.$id) {
-      return c.json({ error: "Unauthorized to delete issue" }, 401);
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+    if (!isSuper) {
+      // Regular users need to be members and project admins
+      const member = await getMember({
+        databases,
+        workspaceId: issuesFromDb.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Check if user is a member of the project that this issue belongs to
+      const userProjectIds = member.projectId || [];
+      if (!userProjectIds.includes(issuesFromDb.projectId)) {
+        return c.json(
+          { error: "Unauthorized access to this project's issue" },
+          403,
+        );
+      }
+
+      if (existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized to delete issue" }, 401);
+      }
     }
 
     const octokit = new Octokit({
@@ -142,18 +145,34 @@ const app = new Hono()
       const { workspaceId, projectId, assigneeId, status, search, dueDate } =
         c.req.valid("query");
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
+      let userProjectIds: string[] = [];
+
+      if (!isSuper) {
+        // Regular users need to be members of the workspace
+        const member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Get the projects the user is a member of
+        userProjectIds = member.projectId || [];
+      } else {
+        // Super admins can see all projects in the workspace
+        const allProjects = await databases.listDocuments(
+          DATABASE_ID,
+          PROJECTS_ID,
+          [Query.equal("workspaceId", workspaceId)],
+        );
+        userProjectIds = allProjects.documents.map(project => project.$id);
       }
-
-      // Get the projects the user is a member of
-      const userProjectIds = member.projectId || [];
 
       // If user is not a member of any projects, return empty result
       if (userProjectIds.length === 0) {

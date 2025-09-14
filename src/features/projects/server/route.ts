@@ -4,7 +4,7 @@ import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { getMember } from "@/features/members/utilts";
+import { getMember, isSuperAdmin } from "@/features/members/utilts";
 import {
   DATABASE_ID,
   IMAGES_BUCKET_ID,
@@ -136,11 +136,11 @@ const app = new Hono()
       const user = c.get("user");
 
       const { projectLink, workspaceId, accessToken } = c.req.valid("form");
-      
+
       const octokit = new Octokit({
         auth: accessToken,
       });
-      
+
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
@@ -269,6 +269,34 @@ const app = new Hono()
         return c.json({ error: "Missing workspaceId" }, 400);
       }
 
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+      if (isSuper) {
+        // Super admins can see all projects in the workspace
+        try {
+          const projects = await databases.listDocuments<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            [
+              Query.equal("workspaceId", workspaceId),
+              Query.orderDesc("$createdAt"),
+            ],
+          );
+
+          return c.json({
+            data: {
+              documents: projects.documents,
+              total: projects.total,
+            },
+          });
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          return c.json({ error: "Failed to fetch projects" }, 500);
+        }
+      }
+
+      // Regular users can only see projects they're members of
       const member = await getMember({
         databases,
         workspaceId,
@@ -340,15 +368,22 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: project.workspaceId,
-      userId: user.$id,
-    });
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+    if (!isSuper) {
+      // Regular users need to be members of the workspace
+      const member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     }
+
     return c.json({ data: project });
   })
   .get("/:projectId/analytics", sessionMiddleware, async (c) => {
@@ -362,13 +397,30 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: project.workspaceId,
-      userId: user.$id,
-    });
-    if (!member) {
-      return c.json({ error: "Unauthorized" }, 401);
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+    let member: any = null;
+
+    if (!isSuper) {
+      // Regular users need to be members of the workspace
+      member = await getMember({
+        databases,
+        workspaceId: project.workspaceId,
+        userId: user.$id,
+      });
+      if (!member) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+    } else {
+      // For super admins, we need to get a member record for analytics
+      // We'll use the first member record we can find for this user
+      const memberRecords = await databases.listDocuments(
+        DATABASE_ID,
+        MEMBERS_ID,
+        [Query.equal("userId", user.$id), Query.limit(1)],
+      );
+      member = memberRecords.documents[0];
     }
 
     const now = new Date();
@@ -566,14 +618,55 @@ const app = new Hono()
       projectId,
     );
 
-    const member = await getMember({
-      databases,
-      workspaceId: existingProject.workspaceId,
-      userId: user.$id,
-    });
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-    if (!member || existingProject.projectAdmin !== member.$id) {
-      return c.json({ error: "Unauthorized" }, 401);
+    if (!isSuper) {
+      // Regular users need to be project admins
+      const member = await getMember({
+        databases,
+        workspaceId: existingProject.workspaceId,
+        userId: user.$id,
+      });
+
+      if (!member || existingProject.projectAdmin !== member.$id) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+    }
+
+    // Check if project has any members
+    const projectMembers = await databases.listDocuments(
+      DATABASE_ID,
+      MEMBERS_ID,
+      [
+        Query.equal("workspaceId", existingProject.workspaceId),
+        Query.contains("projectId", projectId),
+      ],
+    );
+
+    if (projectMembers.total > 0) {
+      return c.json(
+        {
+          error: "Cannot delete project that has members. Please remove all members first."
+        },
+        400,
+      );
+    }
+
+    // Check if project has any issues
+    const projectIssues = await databases.listDocuments(
+      DATABASE_ID,
+      ISSUES_ID,
+      [Query.equal("projectId", projectId)],
+    );
+
+    if (projectIssues.total > 0) {
+      return c.json(
+        {
+          error: "Cannot delete project that has issues. Please delete all issues first."
+        },
+        400,
+      );
     }
 
     const octokit = new Octokit({
@@ -653,7 +746,6 @@ const app = new Hono()
       }
     },
   )
-  
   .post(
     "/upload-file",
     sessionMiddleware,

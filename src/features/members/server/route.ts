@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { Hono } from "hono";
-import { Query } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 
 import { DATABASE_ID, MEMBERS_ID } from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { getMember, getProjectMember } from "../utilts";
+import { getMember, getProjectMember, isSuperAdmin } from "../utilts";
 import { Member, MemberRole } from "../types";
 
 const app = new Hono()
@@ -27,14 +27,20 @@ const app = new Hono()
         const user = c.get("user");
         const { workspaceId } = c.req.valid("query");
 
-        const member = await getMember({
-          databases,
-          workspaceId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!member) {
-          return c.json({ error: "Unauthorized" }, 401);
+        if (!isSuper) {
+          // Regular users need to be members of the workspace
+          const member = await getMember({
+            databases,
+            workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
         }
         const members = await databases.listDocuments<Member>(
           DATABASE_ID,
@@ -135,49 +141,94 @@ const app = new Hono()
         memberId,
       );
 
-      const requestingMember = await getMember({
-        databases,
-        workspaceId: memberToDelete.workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!requestingMember) {
-        return c.json({ error: "Unauthorized access to workspace" }, 401);
+      if (!isSuper) {
+        // Regular users need proper permissions
+        const requestingMember = await getMember({
+          databases,
+          workspaceId: memberToDelete.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!requestingMember) {
+          return c.json({ error: "Unauthorized access to workspace" }, 401);
+        }
+
+        // Only allow deletion if:
+        // 1. User is deleting themselves, OR
+        // 2. User is an admin
+        const canDelete =
+          requestingMember.$id === memberToDelete.$id ||
+          requestingMember.role === MemberRole.ADMIN;
+
+        if (!canDelete) {
+          return c.json(
+            { error: "Insufficient permissions to delete member" },
+            403,
+          );
+        }
       }
 
-      // Only allow deletion if:
-      // 1. User is deleting themselves, OR
-      // 2. User is an admin
-      const canDelete =
-        requestingMember.$id === memberToDelete.$id ||
-        requestingMember.role === MemberRole.ADMIN;
-
-      if (!canDelete) {
-        return c.json(
-          { error: "Insufficient permissions to delete member" },
-          403,
+      // Check if this is the last admin in the workspace
+      if (memberToDelete.role === MemberRole.ADMIN) {
+        const allAdminsInWorkspace = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_ID,
+          [
+            Query.equal("workspaceId", memberToDelete.workspaceId),
+            Query.equal("role", MemberRole.ADMIN),
+          ],
         );
+
+        if (allAdminsInWorkspace.total === 1) {
+          return c.json(
+            { error: "Cannot delete the last admin of the workspace. At least one admin must remain." },
+            400,
+          );
+        }
       }
 
-      const queryFilters = [
-        Query.equal("workspaceId", memberToDelete.workspaceId),
-      ];
-      if (memberToDelete.projectId) {
-        queryFilters.push(Query.equal("projectId", memberToDelete.projectId));
-      }
-
-      const allMembersInScope = await databases.listDocuments(
+      // Check if this is the last member in the workspace
+      const allMembersInWorkspace = await databases.listDocuments(
         DATABASE_ID,
         MEMBERS_ID,
-        queryFilters,
+        [Query.equal("workspaceId", memberToDelete.workspaceId)],
       );
 
-      if (allMembersInScope.total === 1) {
-        const scopeType = memberToDelete.projectId ? "project" : "workspace";
+      if (allMembersInWorkspace.total === 1) {
         return c.json(
-          { error: `Cannot delete the only member of the ${scopeType}` },
+          { error: "Cannot delete the only member of the workspace" },
           400,
         );
+      }
+
+      // If deleting from a specific project, check project-level constraints
+      if (memberToDelete.projectId && memberToDelete.projectId.length > 0) {
+        const projectMembers = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_ID,
+          [
+            Query.equal("workspaceId", memberToDelete.workspaceId),
+            Query.contains("projectId", memberToDelete.projectId),
+          ],
+        );
+
+        // Check if this is the last member of any project
+        const isLastMemberOfAnyProject = memberToDelete.projectId.some((projectId: string) => {
+          const membersOfThisProject = projectMembers.documents.filter(member =>
+            member.projectId && member.projectId.includes(projectId)
+          );
+          return membersOfThisProject.length === 1;
+        });
+
+        if (isLastMemberOfAnyProject) {
+          return c.json(
+            { error: "Cannot delete the only member of a project" },
+            400,
+          );
+        }
       }
 
       await databases.deleteDocument(DATABASE_ID, MEMBERS_ID, memberId);
@@ -219,19 +270,24 @@ const app = new Hono()
           memberId,
         );
 
-        // Check if the requesting user has admin permissions
-        const requestingMember = await getMember({
-          databases,
-          workspaceId: memberToUpdate.workspaceId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!requestingMember) {
-          return c.json({ error: "Unauthorized access to workspace" }, 401);
-        }
+        if (!isSuper) {
+          // Regular users need admin permissions
+          const requestingMember = await getMember({
+            databases,
+            workspaceId: memberToUpdate.workspaceId,
+            userId: user.$id,
+          });
 
-        if (requestingMember.role !== MemberRole.ADMIN) {
-          return c.json({ error: "Only admins can update member roles" }, 403);
+          if (!requestingMember) {
+            return c.json({ error: "Unauthorized access to workspace" }, 401);
+          }
+
+          if (requestingMember.role !== MemberRole.ADMIN) {
+            return c.json({ error: "Only admins can update member roles" }, 403);
+          }
         }
 
         // Prevent demoting the only admin
@@ -285,6 +341,195 @@ const app = new Hono()
       } catch (error) {
         console.error("Error updating member:", error);
         return c.json({ error: "Failed to update member role" }, 500);
+      }
+    },
+  )
+  .post(
+    "/assign-super-admin",
+    sessionMiddleware,
+    zValidator(
+      "json",
+      z.object({
+        userId: z.string().min(1, "User ID is required"),
+        workspaceId: z.string().min(1, "Workspace ID is required"),
+      }),
+    ),
+    async (c) => {
+      try {
+        const { userId, workspaceId } = c.req.valid("json");
+        const databases = c.get("databases");
+        const currentUser = c.get("user");
+
+        // Only existing super admins can assign super admin role
+        const isCurrentUserSuper = await isSuperAdmin({
+          databases,
+          userId: currentUser.$id
+        });
+
+        if (!isCurrentUserSuper) {
+          return c.json({ error: "Only super admins can assign super admin role" }, 403);
+        }
+
+        // Check if user is already a member of the workspace
+        const existingMember = await getMember({
+          databases,
+          workspaceId,
+          userId,
+        });
+
+        if (existingMember) {
+          // Update existing member to super admin
+          const updatedMember = await databases.updateDocument(
+            DATABASE_ID,
+            MEMBERS_ID,
+            existingMember.$id,
+            { role: MemberRole.SUPER_ADMIN },
+          );
+
+          return c.json({
+            data: {
+              ...updatedMember,
+              message: "User promoted to super admin successfully",
+            },
+          });
+        } else {
+          // Create new super admin member
+          const newMember = await databases.createDocument(
+            DATABASE_ID,
+            MEMBERS_ID,
+            ID.unique(),
+            {
+              userId,
+              workspaceId,
+              projectId: [],
+              role: MemberRole.SUPER_ADMIN,
+            },
+          );
+
+          return c.json({
+            data: {
+              ...newMember,
+              message: "User assigned super admin role successfully",
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Error assigning super admin:", error);
+        return c.json({ error: "Failed to assign super admin role" }, 500);
+      }
+    },
+  )
+  .delete(
+    "/remove-super-admin/:memberId",
+    sessionMiddleware,
+    async (c) => {
+      try {
+        const { memberId } = c.req.param();
+        const databases = c.get("databases");
+        const currentUser = c.get("user");
+
+        // Only existing super admins can remove super admin role
+        const isCurrentUserSuper = await isSuperAdmin({
+          databases,
+          userId: currentUser.$id
+        });
+
+        if (!isCurrentUserSuper) {
+          return c.json({ error: "Only super admins can remove super admin role" }, 403);
+        }
+
+        const memberToUpdate = await databases.getDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          memberId,
+        );
+
+        if (!memberToUpdate) {
+          return c.json({ error: "Member not found" }, 404);
+        }
+
+        if (memberToUpdate.role !== MemberRole.SUPER_ADMIN) {
+          return c.json({ error: "Member is not a super admin" }, 400);
+        }
+
+        // Prevent removing the last super admin
+        const allSuperAdmins = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_ID,
+          [Query.equal("role", MemberRole.SUPER_ADMIN)],
+        );
+
+        if (allSuperAdmins.total <= 1) {
+          return c.json({
+            error: "Cannot remove the last super admin. At least one super admin must remain."
+          }, 400);
+        }
+
+        // Demote to regular member
+        const updatedMember = await databases.updateDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          memberId,
+          { role: MemberRole.MEMBER },
+        );
+
+        return c.json({
+          data: {
+            ...updatedMember,
+            message: "Super admin role removed successfully",
+          },
+        });
+      } catch (error) {
+        console.error("Error removing super admin:", error);
+        return c.json({ error: "Failed to remove super admin role" }, 500);
+      }
+    },
+  )
+  .get(
+    "/super-admins",
+    sessionMiddleware,
+    async (c) => {
+      try {
+        const databases = c.get("databases");
+        const currentUser = c.get("user");
+        const { users } = await createAdminClient();
+
+        // Only existing super admins can view super admin list
+        const isCurrentUserSuper = await isSuperAdmin({
+          databases,
+          userId: currentUser.$id
+        });
+
+        if (!isCurrentUserSuper) {
+          return c.json({ error: "Only super admins can view super admin list" }, 403);
+        }
+
+        const superAdmins = await databases.listDocuments(
+          DATABASE_ID,
+          MEMBERS_ID,
+          [Query.equal("role", MemberRole.SUPER_ADMIN)],
+        );
+
+        const populatedSuperAdmins = await Promise.all(
+          superAdmins.documents.map(async (member) => {
+            const user = await users.get(member.userId);
+            return {
+              ...member,
+              name: user.name || user.email,
+              email: user.email,
+            };
+          }),
+        );
+
+        return c.json({
+          data: {
+            documents: populatedSuperAdmins,
+            total: superAdmins.total,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching super admins:", error);
+        return c.json({ error: "Failed to fetch super admins" }, 500);
       }
     },
   );
