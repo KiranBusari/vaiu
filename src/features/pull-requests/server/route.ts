@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
-import { getMember } from "@/features/members/utilts";
+import { getMember, isSuperAdmin } from "@/features/members/utilts";
 import { DATABASE_ID, PROJECTS_ID, PR_ID } from "@/config";
 import { Project } from "@/features/projects/types";
 import { Octokit, RequestError } from "octokit";
@@ -25,14 +25,19 @@ const app = new Hono()
       const user = c.get("user");
       const { workspaceId, projectId } = c.req.valid("query");
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
+      if (!isSuper) {
+        const member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
       }
 
       const project = await databases.getDocument<Project>(
@@ -124,14 +129,19 @@ const app = new Hono()
         return c.json({ error: "Project not found" }, 404);
       }
 
-      const member = await getMember({
-        databases,
-        workspaceId: project.workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
+      if (!isSuper) {
+        const member = await getMember({
+          databases,
+          workspaceId: project.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
       }
 
       const octokit = new Octokit({
@@ -251,14 +261,19 @@ const app = new Hono()
           return c.json({ error: "Project not found" }, 404);
         }
 
-        const member = await getMember({
-          databases,
-          workspaceId: project.workspaceId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!member) {
-          return c.json({ error: "Unauthorized" }, 401);
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
         }
 
         const octokit = new Octokit({

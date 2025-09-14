@@ -62,7 +62,7 @@ const app = new Hono()
     const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
     if (!isSuper) {
-      // Regular users need to be members and project admins
+      // Regular user: check member permissions
       const member = await getMember({
         databases,
         workspaceId: issuesFromDb.workspaceId,
@@ -73,17 +73,10 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      // Check if user is a member of the project that this issue belongs to
+      // Check if user is a member of the project
       const userProjectIds = member.projectId || [];
-      if (!userProjectIds.includes(issuesFromDb.projectId)) {
-        return c.json(
-          { error: "Unauthorized access to this project's issue" },
-          403,
-        );
-      }
-
-      if (existingProject.projectAdmin !== member.$id) {
-        return c.json({ error: "Unauthorized to delete issue" }, 401);
+      if (!userProjectIds.includes(projectId)) {
+        return c.json({ error: "Unauthorized to delete this issue" }, 403);
       }
     }
 
@@ -477,24 +470,29 @@ const app = new Hono()
           auth: accessToken,
         });
 
-        const member = await getMember({
-          databases,
-          workspaceId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!member) {
-          return c.json({ error: "Unauthorized" }, 401);
-        }
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId,
+            userId: user.$id,
+          });
 
-        // Check if user is a member of the project they're trying to create an issue for
-        const userProjectIds = member.projectId || [];
-        if (!userProjectIds.includes(projectId)) {
-          return c.json({ error: "Unauthorized access to this project" }, 403);
-        }
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
 
-        if (projects.documents[0].projectAdmin !== member.$id) {
-          return c.json({ error: "Only Admins can create Issues" }, 403);
+          // Check if user is a member of the project they're trying to create an issue for
+          const userProjectIds = member.projectId || [];
+          if (!userProjectIds.includes(projectId)) {
+            return c.json({ error: "Unauthorized access to this project" }, 403);
+          }
+
+          if (projects.documents[0].projectAdmin !== member.$id) {
+            return c.json({ error: "Only Admins can create Issues" }, 403);
+          }
         }
 
         const highestPositionTask = await databases.listDocuments(
@@ -564,38 +562,59 @@ const app = new Hono()
         issueId,
       );
 
-      const member = await getMember({
-        databases,
-        workspaceId: exisistingTask.workspaceId,
-        userId: user.$id,
-      });
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
+      if (!isSuper) {
+        const member = await getMember({
+          databases,
+          workspaceId: exisistingTask.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        // Check if user is a member of the project that this issue belongs to
+        const userProjectIds = member.projectId || [];
+        if (!userProjectIds.includes(exisistingTask.projectId)) {
+          return c.json(
+            { error: "Unauthorized access to this project's issue" },
+            403,
+          );
+        }
+
+        // If projectId is being changed, ensure user is also a member of the new project
+        if (
+          projectId &&
+          projectId !== exisistingTask.projectId &&
+          !userProjectIds.includes(projectId)
+        ) {
+          return c.json(
+            { error: "Unauthorized access to the target project" },
+            403,
+          );
+        }
       }
 
-      // Check if user is a member of the project that this issue belongs to
-      const userProjectIds = member.projectId || [];
-      if (!userProjectIds.includes(exisistingTask.projectId)) {
+      // Require comment when moving to IN_REVIEW or DONE status
+      if (status === "IN_REVIEW" && !comment) {
         return c.json(
-          { error: "Unauthorized access to this project's issue" },
-          403,
+          { error: "Comment is required when moving issue to In Review" },
+          400,
         );
       }
 
-      // If projectId is being changed, ensure user is also a member of the new project
-      if (
-        projectId &&
-        projectId !== exisistingTask.projectId &&
-        !userProjectIds.includes(projectId)
-      ) {
+      if (status === "DONE" && !comment) {
         return c.json(
-          { error: "Unauthorized access to the target project" },
-          403,
+          { error: "Comment is required when moving issue to Done" },
+          400,
         );
       }
 
-      if (status === "DONE" && comment) {
+      // Create comment when moving to IN_REVIEW or DONE
+      if ((status === "IN_REVIEW" || status === "DONE") && comment) {
         await databases.createDocument(
           DATABASE_ID,
           COMMENTS_ID,
@@ -683,22 +702,28 @@ const app = new Hono()
       ISSUES_ID,
       issueId,
     );
-    const currentMember = await getMember({
-      databases,
-      workspaceId: issue.workspaceId,
-      userId: currentUser.$id,
-    });
-    if (!currentMember) {
-      return c.json({ error: "Unauthorized" }, 401);
-    }
 
-    // Check if user is a member of the project that this issue belongs to
-    const userProjectIds = currentMember.projectId || [];
-    if (!userProjectIds.includes(issue.projectId)) {
-      return c.json(
-        { error: "Unauthorized access to this project's issue" },
-        403,
-      );
+    // Check if user is a super admin
+    const isSuper = await isSuperAdmin({ databases, userId: currentUser.$id });
+
+    if (!isSuper) {
+      const currentMember = await getMember({
+        databases,
+        workspaceId: issue.workspaceId,
+        userId: currentUser.$id,
+      });
+      if (!currentMember) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Check if user is a member of the project that this issue belongs to
+      const userProjectIds = currentMember.projectId || [];
+      if (!userProjectIds.includes(issue.projectId)) {
+        return c.json(
+          { error: "Unauthorized access to this project's issue" },
+          403,
+        );
+      }
     }
 
     const project = await databases.getDocument<Project>(
@@ -827,35 +852,41 @@ const app = new Hono()
         return c.json({ error: "Workspace Id is required" }, 400);
       }
 
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+      let member = null;
 
-      // Check if user is a member of all projects that contain the issues being updated
-      const userProjectIds = member.projectId || [];
-      const issueProjectIds = new Set(
-        issueToUpdate.documents
-          .map((issue) => issue?.projectId)
-          .filter(Boolean),
-      );
+      if (!isSuper) {
+        member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
 
-      const unauthorizedProjects = Array.from(issueProjectIds).filter(
-        (projectId) => projectId && !userProjectIds.includes(projectId),
-      );
-
-      if (unauthorizedProjects.length > 0) {
-        return c.json(
-          {
-            error: "Unauthorized access to some project issues",
-            unauthorizedProjects,
-          },
-          403,
+        // Check if user is a member of all projects that contain the issues being updated
+        const userProjectIds = member.projectId || [];
+        const issueProjectIds = new Set(
+          issueToUpdate.documents
+            .map((issue) => issue?.projectId)
+            .filter(Boolean),
         );
+
+        const unauthorizedProjects = Array.from(issueProjectIds).filter(
+          (projectId) => projectId && !userProjectIds.includes(projectId),
+        );
+
+        if (unauthorizedProjects.length > 0) {
+          return c.json(
+            {
+              error: "Unauthorized access to some project issues",
+              unauthorizedProjects,
+            },
+            403,
+          );
+        }
       }
 
       for (const update of issues) {
@@ -868,11 +899,23 @@ const app = new Hono()
 
         const isMovingToDone =
           update.status === "DONE" && existing.status !== "DONE";
-        if (isMovingToDone && member.role !== "ADMIN") {
+        const isMovingToReview =
+          update.status === "IN_REVIEW" && existing.status !== "IN_REVIEW";
+
+        // Check permissions for moving to DONE (only super admin or admin can do this)
+        if (isMovingToDone && !isSuper && member?.role !== "ADMIN") {
           return c.json({ error: "Only Admin can move issue to Done" }, 403);
         }
 
-        if (isMovingToDone && member.role === "ADMIN") {
+        // Note: Moving to IN_REVIEW doesn't require admin permissions, but it would require
+        // a comment in the individual PATCH route. Bulk update doesn't support comments.
+        if (isMovingToReview) {
+          return c.json({
+            error: "Moving to In Review requires a comment. Please add a comment."
+          }, 400);
+        }
+
+        if (isMovingToDone && (isSuper || member?.role === "ADMIN")) {
           const project = await databases.getDocument<Project>(
             DATABASE_ID,
             PROJECTS_ID,
@@ -946,31 +989,35 @@ const app = new Hono()
           PROJECTS_ID,
           projectId,
         );
-        console.log("Project:", project);
 
-        // Check if user is a member of the workspace and project
-        const member = await getMember({
-          databases,
-          workspaceId: project.workspaceId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!member) {
-          return c.json({ error: "Unauthorized" }, 401);
-        }
+        if (!isSuper) {
+          // Check if user is a member of the workspace and project
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
 
-        // Check if user is a member of the project
-        const userProjectIds = member.projectId || [];
-        if (!userProjectIds.includes(projectId)) {
-          return c.json({ error: "Unauthorized access to this project" }, 403);
-        }
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
 
-        // Only project admins can fetch issues from GitHub
-        if (project.projectAdmin !== member.$id) {
-          return c.json(
-            { error: "Only project admins can fetch issues from GitHub" },
-            403,
-          );
+          // Check if user is a member of the project
+          const userProjectIds = member.projectId || [];
+          if (!userProjectIds.includes(projectId)) {
+            return c.json({ error: "Unauthorized access to this project" }, 403);
+          }
+
+          // Only project admins can fetch issues from GitHub
+          if (project.projectAdmin !== member.$id) {
+            return c.json(
+              { error: "Only project admins can fetch issues from GitHub" },
+              403,
+            );
+          }
         }
 
         const octokit = new Octokit({

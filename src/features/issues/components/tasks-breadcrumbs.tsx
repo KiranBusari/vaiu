@@ -31,7 +31,7 @@ export const TasksBreadcrumbs = ({ project, issue }: TasksBreadcrumbsProps) => {
       { param: { issueId: issue.$id } },
       {
         onSuccess: () => {
-          router.push(`/workspaces/${workspaceId}/issues`);
+          router.push(`/workspaces/${workspaceId}/projects/${project.$id}`);
         },
       },
     );
