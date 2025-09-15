@@ -474,7 +474,7 @@ export const MembersList = ({ data }: MembersListProps) => {
           </>
         ) : (
           <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
-            No members found
+            
           </li>
         )}
       </ul>

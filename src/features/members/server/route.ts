@@ -87,15 +87,29 @@ const app = new Hono()
         const user = c.get("user");
         const { workspaceId, projectId } = c.req.valid("query");
 
-        const member = await getProjectMember({
-          databases,
-          workspaceId,
-          projectId,
-          userId: user.$id,
-        });
+        // Check if user is a super admin first
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-        if (!member) {
-          return c.json({ error: "Unauthorized" }, 401);
+        if (!isSuper) {
+          const member = await getProjectMember({
+            databases,
+            workspaceId,
+            projectId,
+            userId: user.$id,
+          });
+
+          // If not a project member, check if user is workspace admin
+          if (!member) {
+            const workspaceMember = await getMember({
+              databases,
+              workspaceId,
+              userId: user.$id,
+            });
+
+            if (!workspaceMember || workspaceMember.role !== MemberRole.ADMIN) {
+              return c.json({ error: "Unauthorized" }, 401);
+            }
+          }
         }
 
         const members = await databases.listDocuments<Member>(
