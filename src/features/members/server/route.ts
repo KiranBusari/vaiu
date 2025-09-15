@@ -47,17 +47,27 @@ const app = new Hono()
           MEMBERS_ID,
           [Query.equal("workspaceId", workspaceId)],
         );
-        const populatedMembers = await Promise.all(
-          members.documents.map(async (member) => {
-            const user = await users.get(member.userId);
 
-            return {
-              ...member,
-              name: user.name || user.email,
-              email: user.email,
-            };
-          }),
+        // Batch user lookups to improve performance
+        const userIds = members.documents.map(member => member.userId);
+        const usersPromises = userIds.map(userId =>
+          users.get(userId).catch(error => {
+            console.warn(`Failed to fetch user ${userId}:`, error);
+            return { $id: userId, name: "Unknown User", email: "unknown@example.com" };
+          })
         );
+
+        const usersData = await Promise.all(usersPromises);
+        const usersMap = new Map(usersData.map(user => [user.$id, user]));
+
+        const populatedMembers = members.documents.map((member) => {
+          const user = usersMap.get(member.userId);
+          return {
+            ...member,
+            name: user?.name || user?.email || "Unknown User",
+            email: user?.email || "unknown@example.com",
+          };
+        });
         return c.json({
           data: {
             ...members,

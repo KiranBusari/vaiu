@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { MemberRole } from "@/features/members/types";
-import { useDeleteMember } from "@/features/members/api/use-delete-member";
+import { useRemoveProjectMember } from "@/features/members/api/use-remove-project-member";
 import { useUpdateMember } from "@/features/members/api/use-update-member";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { MemberAvatar } from "@/features/members/components/members-avatar";
@@ -30,31 +30,24 @@ export const ProjectMembersList = () => {
   const projectId = useProjectId();
   const [ConfirmDialog, confirm] = useConfirm(
     "Remove Member",
-    "This member will be removed from the workspace",
+    "This member will be removed from this project only",
     "destructive",
   );
 
   const { data } = useGetProjectMembers({ workspaceId, projectId });
   const { data: project } = useGetProject({ projectId });
 
-  const { mutate: deleteMember, isPending: deletingMember } = useDeleteMember();
+  const { mutate: removeProjectMember, isPending: removingMember } = useRemoveProjectMember();
   const { mutate: updateMember, isPending: updatingMember } = useUpdateMember();
 
   const handleUpdateMember = (memberId: string, role: MemberRole) => {
     updateMember({ param: { memberId }, json: { role } });
   };
 
-  const handleDeleteMember = async (memberId: string) => {
+  const handleRemoveFromProject = async (memberId: string) => {
     const ok = await confirm();
     if (!ok) return;
-    deleteMember(
-      { param: { memberId } },
-      {
-        onSuccess: () => {
-          window.location.reload();
-        },
-      },
-    );
+    removeProjectMember({ param: { projectId, memberId } });
   };
   return (
     <Card className="size-full border-none shadow-none">
@@ -127,8 +120,8 @@ export const ProjectMembersList = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="font-medium text-amber-700"
-                      onClick={() => handleDeleteMember(member.$id)}
-                      disabled={deletingMember}
+                      onClick={() => handleRemoveFromProject(member.$id)}
+                      disabled={removingMember}
                     >
                       Remove {member.name}
                     </DropdownMenuItem>

@@ -619,15 +619,23 @@ const app = new Hono()
     const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
     if (!isSuper) {
-      // Regular users need to be project admins
+      // Regular users need to be workspace admins or project admins
       const member = await getMember({
         databases,
         workspaceId: existingProject.workspaceId,
         userId: user.$id,
       });
 
-      if (!member || existingProject.projectAdmin !== member.$id) {
-        return c.json({ error: "Unauthorized" }, 401);
+      if (!member) {
+        return c.json({ error: "Unauthorized access to workspace" }, 401);
+      }
+
+      const canDelete =
+        member.role === MemberRole.ADMIN || // Workspace admin
+        existingProject.projectAdmin === member.$id; // Project admin
+
+      if (!canDelete) {
+        return c.json({ error: "Only workspace admins or project admins can delete projects" }, 403);
       }
     }
 
@@ -642,12 +650,43 @@ const app = new Hono()
     );
 
     if (projectMembers.total > 0) {
-      return c.json(
-        {
-          error: "Cannot delete project that has members. Please remove all members first."
-        },
-        400,
-      );
+      // Allow workspace admin, project admin, or super admin to delete project with members
+      // This removes all member associations automatically
+      if (!isSuper) {
+        const member = await getMember({
+          databases,
+          workspaceId: existingProject.workspaceId,
+          userId: user.$id,
+        });
+
+        const canDeleteWithMembers =
+          member?.role === MemberRole.ADMIN || // Workspace admin
+          existingProject.projectAdmin === member?.$id; // Project admin
+
+        if (!canDeleteWithMembers) {
+          return c.json(
+            {
+              error: "You must be a workspace admin, project admin, or super admin to delete a project with members"
+            },
+            400,
+          );
+        }
+      }
+
+      // If super admin, workspace admin, or project admin is deleting, remove all members from project first
+      for (const member of projectMembers.documents) {
+        const updatedProjectIds = member.projectId.filter(
+          (id: string) => id !== projectId
+        );
+        await databases.updateDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          member.$id,
+          {
+            projectId: updatedProjectIds,
+          },
+        );
+      }
     }
 
     // Check if project has any issues
@@ -884,6 +923,103 @@ const app = new Hono()
       );
       return c.json({ data: project });
     },
-  );
+  )
+  .delete("/:projectId/members/:memberId", sessionMiddleware, async (c) => {
+    try {
+      const { projectId, memberId } = c.req.param();
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      // Check if user is super admin first
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+      if (!isSuper) {
+        // Get the member to remove
+        const memberToRemove = await databases.getDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          memberId,
+        );
+
+        // Check if current user has permission (workspace admin or project admin)
+        const currentMember = await getMember({
+          databases,
+          workspaceId: memberToRemove.workspaceId,
+          userId: user.$id,
+        });
+
+        if (!currentMember) {
+          return c.json({ error: "Unauthorized access to workspace" }, 401);
+        }
+
+        // Get the project to check if user is project admin
+        const project = await databases.getDocument(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId,
+        );
+
+        const canRemove =
+          currentMember.role === MemberRole.ADMIN || // Workspace admin
+          project.projectAdmin === currentMember.$id; // Project admin
+
+        if (!canRemove) {
+          return c.json({ error: "Only workspace admins or project admins can remove members" }, 403);
+        }
+      }
+
+      // Get the member to check their current projects
+      const memberToRemove = await databases.getDocument(
+        DATABASE_ID,
+        MEMBERS_ID,
+        memberId,
+      );
+
+      // Check if member is part of this project
+      if (!memberToRemove.projectId || !memberToRemove.projectId.includes(projectId)) {
+        return c.json({ error: "Member is not part of this project" }, 400);
+      }
+
+      // Get the project to check if we're removing the project admin
+      const project = await databases.getDocument(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId,
+      );
+
+      // Prevent removing the project admin - they must transfer admin role first
+      if (project.projectAdmin === memberId) {
+        return c.json({
+          error: "Cannot remove the project admin. Please transfer admin role to another member first or delete the entire project."
+        }, 400);
+      }
+
+      // Remove the project from member's projectId array
+      const updatedProjectIds = memberToRemove.projectId.filter(
+        (id: string) => id !== projectId
+      );
+
+      // Update member with new project list
+      await databases.updateDocument(
+        DATABASE_ID,
+        MEMBERS_ID,
+        memberId,
+        {
+          projectId: updatedProjectIds,
+        },
+      );
+
+      return c.json({
+        data: {
+          message: "Member removed from project successfully",
+          memberId,
+          projectId,
+        }
+      });
+    } catch (error) {
+      console.error("Failed to remove member from project:", error);
+      return c.json({ error: "Failed to remove member from project" }, 500);
+    }
+  });
 
 export default app;
