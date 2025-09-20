@@ -4,10 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 interface useGetPullRequestsProps {
   workspaceId: string;
   projectId: string;
+  enabled?: boolean;
 }
 export const useGetPullRequests = ({
   workspaceId,
   projectId,
+  enabled = true,
 }: useGetPullRequestsProps) => {
   const query = useQuery({
     queryKey: [
@@ -31,6 +33,7 @@ export const useGetPullRequests = ({
       const { data } = await response.json();
       return data;
     },
+    enabled,
   });
 
   return query;

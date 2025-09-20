@@ -77,6 +77,7 @@ const app = new Hono()
             number: pr.number,
             $createdAt: pr.created_at,
             $updatedAt: pr.updated_at,
+            $mergedAt: pr.merged_at,
 
             $collectionId: "",
             $databaseId: "",
