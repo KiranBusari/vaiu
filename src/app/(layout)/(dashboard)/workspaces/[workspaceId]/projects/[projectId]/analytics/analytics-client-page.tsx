@@ -11,12 +11,12 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
-import { PrStatus } from "@/features/pull-requests/types";
-import { IssueStatus } from "@/features/issues/types";
+import { IssueStatus, Issue } from "@/features/issues/types";
+import { PullRequest, PrStatus } from "@/features/pull-requests/types";
 import { differenceInDays, differenceInHours, formatDistanceToNow } from 'date-fns';
 
 // --- Data Processing Functions (Pull Requests) ---
-const processVelocityData = (documents: any[]) => {
+const processVelocityData = (documents: PullRequest[]) => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -43,7 +43,7 @@ const processVelocityData = (documents: any[]) => {
     });
     return Array.from(dailyData.entries()).map(([date, counts]) => ({ date, ...counts }));
 };
-const processPrStatusData = (documents: any[]) => {
+const processPrStatusData = (documents: PullRequest[]) => {
     const statusCounts = { [PrStatus.OPEN]: 0, [PrStatus.MERGED]: 0, [PrStatus.CLOSED]: 0 };
     documents.forEach(pr => { if (pr.status in statusCounts) statusCounts[pr.status as PrStatus]++; });
     return [
@@ -52,7 +52,7 @@ const processPrStatusData = (documents: any[]) => {
         { name: 'Closed', value: statusCounts[PrStatus.CLOSED], fill: 'hsl(var(--chart-3))' },
     ].filter(item => item.value > 0);
 };
-const calculatePrKpis = (documents: any[]) => {
+const calculatePrKpis = (documents: PullRequest[]) => {
     const openPrs = documents.filter(pr => pr.status === PrStatus.OPEN);
     const mergedPrs = documents.filter(pr => pr.status === PrStatus.MERGED && pr.$mergedAt && pr.$createdAt);
     const totalMergeTime = mergedPrs.reduce((acc, pr) => acc + differenceInHours(new Date(pr.$mergedAt), new Date(pr.$createdAt)), 0);
@@ -65,14 +65,14 @@ const calculatePrKpis = (documents: any[]) => {
         stalePrs: stalePrs.sort((a, b) => new Date(a.$updatedAt).getTime() - new Date(b.$updatedAt).getTime()),
     };
 }
-const processPrAuthorData = (documents: any[]) => {
+const processPrAuthorData = (documents: PullRequest[]) => {
     const authorCounts = new Map<string, number>();
     documents.forEach(pr => { authorCounts.set(pr.author, (authorCounts.get(pr.author) || 0) + 1); });
     return Array.from(authorCounts.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10);
 }
 
 // --- Data Processing Functions (Issues) ---
-const processIssueStatusData = (documents: any[]) => {
+const processIssueStatusData = (documents: Issue[]) => {
     const statusCounts = { [IssueStatus.BACKLOG]: 0, [IssueStatus.TODO]: 0, [IssueStatus.IN_PROGRESS]: 0, [IssueStatus.IN_REVIEW]: 0, [IssueStatus.DONE]: 0 };
     documents.forEach(issue => { if (issue.status in statusCounts) statusCounts[issue.status as IssueStatus]++; });
     return [
@@ -83,7 +83,7 @@ const processIssueStatusData = (documents: any[]) => {
         { name: 'Done', value: statusCounts.DONE, fill: 'hsl(var(--chart-1))' },
     ].filter(item => item.value > 0);
 }
-const calculateIssueKpis = (documents: any[]) => {
+const calculateIssueKpis = (documents: Issue[]) => {
     const openIssues = documents.filter(issue => issue.status !== IssueStatus.DONE);
     const doneIssues = documents.filter(issue => issue.status === IssueStatus.DONE);
     return {
@@ -153,7 +153,7 @@ const PullRequestAnalytics = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card><CardHeader><CardTitle>Top Contributors</CardTitle><CardDescription>Top 10 authors by PR count.</CardDescription></CardHeader><CardContent><ChartContainer config={{}} className="h-[300px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={authors} layout="vertical"><CartesianGrid horizontal={false} /><XAxis type="number" /><YAxis dataKey="name" type="category" width={80} tickLine={false} axisLine={false} /><Tooltip content={<ChartTooltipContent />} /><Bar dataKey="count" fill="hsl(var(--chart-4))" radius={4} name="PRs" /></BarChart></ResponsiveContainer></ChartContainer></CardContent></Card>
-                <Card><CardHeader><CardTitle>Stale Pull Requests</CardTitle><CardDescription>PRs with no updates in over 3 days.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Pull Request</TableHead><TableHead>Author</TableHead><TableHead>Last Updated</TableHead></TableRow></TableHeader><TableBody>{kpis.stalePrs.map((pr: any) => (<TableRow key={pr.$id}><TableCell><a href={pr.url} target="_blank" rel="noopener noreferrer" className="hover:underline">#{pr.number} {pr.title}</a></TableCell><TableCell>{pr.author}</TableCell><TableCell>{formatDistanceToNow(new Date(pr.$updatedAt), { addSuffix: true })}</TableCell></TableRow>))}{kpis.stalePrs.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center">No stale PRs found. Great job!</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+                <Card><CardHeader><CardTitle>Stale Pull Requests</CardTitle><CardDescription>PRs with no updates in over 3 days.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Pull Request</TableHead><TableHead>Author</TableHead><TableHead>Last Updated</TableHead></TableRow></TableHeader><TableBody>{kpis.stalePrs.map((pr: PullRequest) => (<TableRow key={pr.$id}><TableCell><a href={pr.url} target="_blank" rel="noopener noreferrer" className="hover:underline">#{pr.number} {pr.title}</a></TableCell><TableCell>{pr.author}</TableCell><TableCell>{formatDistanceToNow(new Date(pr.$updatedAt), { addSuffix: true })}</TableCell></TableRow>))}{kpis.stalePrs.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center">No stale PRs found. Great job!</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
             </div>
         </div>
     );
