@@ -152,13 +152,81 @@ const PullRequestAnalytics = () => {
                 <Card><CardHeader><CardTitle>PR Status</CardTitle><CardDescription>Distribution of all PRs.</CardDescription></CardHeader><CardContent><ChartContainer config={{}} className="h-[300px] w-full"><ResponsiveContainer width="100%" height="100%"><RadialBarChart innerRadius="30%" outerRadius="100%" data={status} startAngle={90} endAngle={-270}><RadialBar background dataKey="value" /><Tooltip content={<ChartTooltipContent />} /><Legend /></RadialBarChart></ResponsiveContainer></ChartContainer></CardContent></Card>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card><CardHeader><CardTitle>Top Contributors</CardTitle><CardDescription>Top 10 authors by PR count.</CardDescription></CardHeader><CardContent><ChartContainer config={{}} className="h-[300px] w-full"><ResponsiveContainer width="100%" height="100%"><BarChart data={authors} layout="vertical"><CartesianGrid horizontal={false} /><XAxis type="number" /><YAxis dataKey="name" type="category" width={80} tickLine={false} axisLine={false} /><Tooltip content={<ChartTooltipContent />} /><Bar dataKey="count" fill="hsl(var(--chart-4))" radius={4} name="PRs" /></BarChart></ResponsiveContainer></ChartContainer></CardContent></Card>
-                <Card><CardHeader><CardTitle>Stale Pull Requests</CardTitle><CardDescription>PRs with no updates in over 3 days.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Pull Request</TableHead><TableHead>Author</TableHead><TableHead>Last Updated</TableHead></TableRow></TableHeader><TableBody>{kpis.stalePrs.map((pr: PullRequest) => (<TableRow key={pr.$id}><TableCell><a href={pr.url} target="_blank" rel="noopener noreferrer" className="hover:underline">#{pr.number} {pr.title}</a></TableCell><TableCell>{pr.author}</TableCell><TableCell>{formatDistanceToNow(new Date(pr.$updatedAt), { addSuffix: true })}</TableCell></TableRow>))}{kpis.stalePrs.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center">No stale PRs found. Great job!</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Top Contributors</CardTitle>
+                        <CardDescription>Top 10 authors by PR count.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ChartContainer config={{}} className="h-[300px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={authors} layout="vertical">
+                                    <CartesianGrid horizontal={false} />
+                                    <XAxis type="number" />
+                                    <YAxis dataKey="name" type="category" width={80} tickLine={false} axisLine={false} />
+                                    <Tooltip content={<ChartTooltipContent />} />
+                                    <Bar dataKey="count" fill="hsl(var(--chart-4))" radius={4} name="PRs" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </ChartContainer>
+                    </CardContent>
+                </Card>
+                <StalePullRequestsCard stalePrs={kpis.stalePrs} />
             </div>
         </div>
     );
 }
 
+// --- Stale Pull Requests Card Component ---
+
+function StalePullRequestsCard({ stalePrs }: { stalePrs: PullRequest[] }) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Stale Pull Requests</CardTitle>
+                <CardDescription>PRs with no updates in over 3 days.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Pull Request</TableHead>
+                            <TableHead>Author</TableHead>
+                            <TableHead>Last Updated</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {stalePrs.map((pr: PullRequest) => (
+                            <TableRow key={pr.$id}>
+                                <TableCell>
+                                    <a
+                                        href={pr.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:underline"
+                                    >
+                                        #{pr.number} {pr.title}
+                                    </a>
+                                </TableCell>
+                                <TableCell>{pr.author}</TableCell>
+                                <TableCell>
+                                    {formatDistanceToNow(new Date(pr.$updatedAt), { addSuffix: true })}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        {stalePrs.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={3} className="text-center">
+                                    No stale PRs found. Great job!
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+}
 // --- Issue Analytics Component ---
 const IssueAnalytics = () => {
     const workspaceId = useWorkspaceId();
