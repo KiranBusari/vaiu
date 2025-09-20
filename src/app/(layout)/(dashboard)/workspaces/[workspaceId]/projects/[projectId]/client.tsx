@@ -6,6 +6,7 @@ import {
   UploadIcon,
   Copy,
   CheckIcon,
+  BarChartHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -70,6 +71,11 @@ export const ProjectIdClient = () => {
   const userManagementUrl = useMemo(() => {
     if (!project) return "";
     return `/workspaces/${project.workspaceId}/projects/${project.$id}/members`;
+  }, [project]);
+
+  const analyticsUrl = useMemo(() => {
+    if (!project) return "";
+    return `/workspaces/${project.workspaceId}/projects/${project.$id}/analytics`;
   }, [project]);
 
   const handleFileUpload = async () => {
@@ -198,6 +204,16 @@ export const ProjectIdClient = () => {
                   <Link href={userManagementUrl}>
                     <UserPlus2 className="mr-2 size-4" />
                     User Management
+                  </Link>
+                </Button>
+                <Button
+                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
+                  variant="default"
+                  asChild
+                >
+                  <Link href={analyticsUrl}>
+                    <BarChartHorizontal className="mr-2 size-4" />
+                    Analytics
                   </Link>
                 </Button>
                 <Button

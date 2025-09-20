@@ -9,6 +9,7 @@ interface useGetIssuesProps {
   assigneeId?: string | null;
   dueDate?: string | null;
   search?: string | null;
+  enabled?: boolean;
 }
 export const useGetIssues = ({
   workspaceId,
@@ -17,6 +18,7 @@ export const useGetIssues = ({
   dueDate,
   search,
   status,
+  enabled = true,
 }: useGetIssuesProps) => {
   const query = useQuery({
     queryKey: [
@@ -46,10 +48,10 @@ export const useGetIssues = ({
         );
       }
       const { data } = await response.json();
-      // console.log("Data", data);
 
       return data;
     },
+    enabled,
   });
 
   return query;
