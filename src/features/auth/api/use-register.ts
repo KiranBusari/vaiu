@@ -27,8 +27,8 @@ export const useRegister = () => {
       return await response.json();
     },
     onSuccess: () => {
-      router.push("/verify");
-      toast.success("Registered successfully!");
+      router.push("/check-email");
+      toast.success("Registered successfully! A magic link has been sent to your email.");
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },
     onError: (e) => {
