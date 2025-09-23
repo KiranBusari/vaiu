@@ -3,7 +3,7 @@ import { ID } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 import { deleteCookie, setCookie } from "hono/cookie";
 
-import { createAdminClient, createSessionClient } from "@/lib/appwrite";
+import { createAdminClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { AUTH_COOKIE } from "../constants";
@@ -12,7 +12,6 @@ import {
   loginSchema,
   registerSchema,
   resetPasswordSchema,
-  verifyUserSchema,
 } from "../schemas";
 import { headers } from "next/headers";
 
@@ -125,20 +124,22 @@ const app = new Hono()
         }
       } catch (error: unknown) {
         console.log("Error checking users:", error);
-        // Continue with registration if we can't check (better UX)
       }
       const { account } = await createAdminClient();
-      console.log("Account", account);
-      await account.create(ID.unique(), email, password, name);
-      const session = await account.createEmailPasswordSession(email, password);
+      const user = await account.create(
+        ID.unique(),
+        email,
+        password,
+        name
+      );
 
-      setCookie(c, AUTH_COOKIE, session.secret, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 24 * 30,
-      });
+      const origin = headers().get("origin") ?? "";
+
+      await account.createMagicURLToken(
+        user.$id,
+        email,
+        `${origin}/verify-magic-link`,
+      );
 
       return c.json({ success: true });
     } catch (error: unknown) {
@@ -169,58 +170,31 @@ const app = new Hono()
       );
     }
   })
-  .post("/verify", async (c) => {
-    const { account } = await createSessionClient();
-    const origin = headers().get("origin") ?? "";
-    // console.log(origin);
-    await account.createVerification(`${origin}/verify-user`);
-    return c.json({ success: true });
-  })
-  .post("/verify-user", zValidator("json", verifyUserSchema), async (c) => {
-    const { userId, secret } = c.req.valid("json");
+  .post("/verify-magic-link", async (c) => {
+    const { userId, secret } = await c.req.json();
+    const { account } = await createAdminClient();
 
     try {
-      const { account } = await createSessionClient();
-      await account.updateVerification(userId, secret);
-      return c.json({
-        success: true,
-        message: "User verified successfully",
+      const session = await account.updateMagicURLSession(userId, secret);
+      setCookie(c, AUTH_COOKIE, session.secret, {
+        path: "/",
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 30,
       });
+      return c.json({ success: true });
     } catch (error: unknown) {
-      console.error("Verification error:", error);
-
-      // Type guard for error object
-      const err = error as { code?: number; type?: string; message?: string };
-
-      // Handle specific error cases
-      if (err.code === 401) {
-        return c.json(
-          {
-            success: false,
-            message: "Invalid verification link or token expired",
-          },
-          401,
-        );
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 401) {
+        return c.json({ error: "Invalid magic link or expired" }, 401);
       }
-
-      if (err.code === 404) {
-        return c.json(
-          {
-            success: false,
-            message: "User not found",
-          },
-          404,
-        );
-      }
-
-      // Default error response
-      return c.json(
-        {
-          success: false,
-          message: err.message || "Failed to verify user",
-        },
-        400,
-      );
+      console.error("Verification error:", appwriteError);
+      return c.json({ error: "Failed to verify magic link" }, 400);
     }
   })
   .post("/logout", sessionMiddleware, async (c) => {
