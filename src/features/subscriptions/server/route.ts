@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
 import { getSubscription } from "@/features/subscriptions/queries";
 
 const app = new Hono();

@@ -43,11 +43,11 @@ const SubscriptionClient = () => {
             <CardFooter>
               <Button
                 onClick={() => handleSubscribe(plan.name as Plan)}
-                disabled={plan.name === "Free" || createSubscription.isLoading}
+                disabled={plan.name === "Free" || createSubscription.isPending}
               >
                 {plan.name === "Free"
                   ? "Current Plan"
-                  : createSubscription.isLoading
+                  : createSubscription.isPending
                   ? "Redirecting..."
                   : "Subscribe"}
               </Button>

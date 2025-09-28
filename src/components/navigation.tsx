@@ -14,7 +14,12 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useIsMember } from "@/features/workspaces/api/use-is-member";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
-import { RiBillFill, RiBillLine, RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
+import {
+  RiBillFill,
+  RiBillLine,
+  RiSettings2Fill,
+  RiSettings2Line,
+} from "react-icons/ri";
 import { FaUsers, FaUsersCog } from "react-icons/fa";
 
 const navItems = [
@@ -44,6 +49,7 @@ const navItems = [
   },
   {
     label: "Subscription",
+    // Workspace-scoped subscription path (will be prefixed with /workspaces/[workspaceId])
     href: "/subscription",
     icon: RiBillLine,
     aciveIcon: RiBillFill,
@@ -92,8 +98,6 @@ export const Navigation = () => {
         const absoluteHref =
           label === "Contributions"
             ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
-            : label === "Subscription"
-            ? href ?? ""
             : `/workspaces/${workspaceId}${href ?? ""}`;
 
         // Determine if we're in the contributions workspace
@@ -101,7 +105,7 @@ export const Navigation = () => {
           `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
         );
 
-        // Check if path is active, with special cases for Home and Contributions
+        // Active logic
         const isActive =
           label === "Home"
             ? pathname === absoluteHref ||
@@ -109,7 +113,6 @@ export const Navigation = () => {
             : label === "Contributions"
               ? inContributionsWorkspace &&
                 dynamicRedirect === true &&
-                // Don't mark Contributions as active if we're just in the contributions workspace home
                 pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}` &&
                 pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/`
               : pathname === absoluteHref;
@@ -125,7 +128,7 @@ export const Navigation = () => {
               className={cn(
                 "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
                 isLoading && "cursor-not-allowed opacity-60",
               )}
             >
@@ -147,8 +150,8 @@ export const Navigation = () => {
               className={cn(
                 "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
-                "cursor-pointer"
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                "cursor-pointer",
               )}
             >
               <Icon className="size-5" />
@@ -163,7 +166,7 @@ export const Navigation = () => {
               className={cn(
                 "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
               )}
             >
               <Icon className="size-5" />

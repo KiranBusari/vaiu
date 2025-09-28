@@ -147,7 +147,7 @@ const app = new Hono()
       if (projects.total >= subscription.projectLimit) {
         return c.json(
           { error: "Upgrade your plan to create more projects." },
-          403
+          403,
         );
       }
 

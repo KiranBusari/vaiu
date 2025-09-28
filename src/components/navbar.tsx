@@ -6,7 +6,7 @@ import { UserButton } from "@/features/auth/components/user-button";
 // import { MobileSidebar } from "./mobile-sidebar";
 import { ModeToggle } from "./ui/ModeToggle";
 import { SidebarTrigger } from "./ui/sidebar";
-import { SidebarComponent } from "./sidebar";
+import { SidebarComponent } from "./Sidebar";
 
 const pathnameMap = {
   tasks: {

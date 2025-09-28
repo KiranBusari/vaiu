@@ -32,7 +32,7 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: ["current"] });
     },
     onError: (e) => {
-      toast.error(e.message);
+      toast.error(e.message || "failed to login");
     },
   });
 

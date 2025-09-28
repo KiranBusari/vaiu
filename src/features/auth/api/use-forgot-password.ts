@@ -11,7 +11,9 @@ export const useForgotPassword = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? String(errorData.error) : "Failed to login",
+          "error" in errorData
+            ? String(errorData.error)
+            : "Failed to forgot password",
         );
       }
       return response.json();

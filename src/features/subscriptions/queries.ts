@@ -2,7 +2,6 @@ import { Query } from "node-appwrite";
 
 import { DATABASE_ID, SUBSCRIPTIONS_ID } from "@/config";
 import { createSessionClient } from "@/lib/appwrite";
-import { subscriptionSchema } from "./schemas";
 import { plans } from "./plans";
 
 export const getSubscription = async () => {

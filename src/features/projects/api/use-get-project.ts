@@ -14,7 +14,7 @@ export const useGetProject = ({ projectId }: useGetProjectProps) => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
+          "error" in errorData ? errorData.error : "Failed to fetch project",
         );
       }
       const { data } = await response.json();

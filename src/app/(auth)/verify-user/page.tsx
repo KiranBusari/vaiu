@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -21,19 +22,15 @@ const VerifyUserPage = () => {
     const secret = searchParams.get("secret");
 
     if (!userId || !secret) {
+      toast.error("Invalid verification link. Please check your email and try again.");
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
       return;
     }
 
-    verifyUser(
-      { json: { userId, secret } },
-      {
-        onSuccess: () => {
-          setTimeout(() => {
-            router.push("/sign-in");
-          }, 2000);
-        },
-      },
-    );
+    // Call the verification mutation
+    verifyUser({ json: { userId, secret } });
   }, [searchParams, router, verifyUser]);
 
   return (
@@ -61,7 +58,7 @@ const VerifyUserPage = () => {
         )}
         {isSuccess && (
           <div className="text-center text-green-500">
-            Your email has been verified successfully! Redirecting to login...
+            Your email has been verified successfully! Redirecting...
           </div>
         )}
       </CardContent>

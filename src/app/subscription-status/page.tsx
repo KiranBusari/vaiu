@@ -16,7 +16,7 @@ const SubscriptionPage = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">My Subscription</h1>
-      {subscription && (
+      {subscription ? (
         <Card>
           <CardHeader>
             <CardTitle>Current Plan: {subscription.plan}</CardTitle>
@@ -29,6 +29,15 @@ const SubscriptionPage = () => {
             <p>End Date: {new Date(subscription.endDate).toLocaleDateString()}</p>
             <Button onClick={() => router.push("/pricing")} className="mt-4">
               Upgrade Plan
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent>
+            <p>Subscription information is currently unavailable.</p>
+            <Button onClick={() => router.push("/pricing")} className="mt-4">
+              View Plans
             </Button>
           </CardContent>
         </Card>
