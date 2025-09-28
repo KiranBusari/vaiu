@@ -1,12 +1,15 @@
 import { Plan } from "./types";
 
-export const plans: Record<Plan, {
-  name: string;
-  workspaceLimit: number;
-  projectLimit: number;
-  roomLimit: number;
-  durationInDays: number;
-}> = {
+export const plans: Record<
+  Plan,
+  {
+    name: string;
+    workspaceLimit: number;
+    projectLimit: number;
+    roomLimit: number;
+    durationInDays: number;
+  }
+> = {
   Free: {
     name: "Free",
     workspaceLimit: 1,

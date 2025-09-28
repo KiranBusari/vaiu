@@ -8,9 +8,7 @@ export const useGetProjectInfo = ({ projectId }: useGetProjectInfo) => {
   const query = useQuery({
     queryKey: ["project-info", projectId],
     queryFn: async () => {
-      const response = await client.api.v1.projects[":projectId"][
-        "info"
-      ].$get({
+      const response = await client.api.v1.projects[":projectId"]["info"].$get({
         param: { projectId },
       });
       if (!response.ok) {

@@ -25,9 +25,9 @@ const SubscriptionClient = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <h1 className="text-4xl font-bold mb-8">Pricing</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <h1 className="mb-8 text-4xl font-bold">Pricing</h1>
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {Object.values(plans).map((plan) => (
           <Card key={plan.name}>
             <CardHeader>
@@ -37,7 +37,9 @@ const SubscriptionClient = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-4xl font-bold">$ {plan.name === "Free" ? 0 : (plan.name === "Pro" ? 10 : 50)}</p>
+              <p className="text-4xl font-bold">
+                $ {plan.name === "Free" ? 0 : plan.name === "Pro" ? 10 : 50}
+              </p>
               <p className="text-gray-500">per month</p>
             </CardContent>
             <CardFooter>
@@ -48,8 +50,8 @@ const SubscriptionClient = () => {
                 {plan.name === "Free"
                   ? "Current Plan"
                   : createSubscription.isPending
-                  ? "Redirecting..."
-                  : "Subscribe"}
+                    ? "Redirecting..."
+                    : "Subscribe"}
               </Button>
             </CardFooter>
           </Card>

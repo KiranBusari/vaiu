@@ -26,7 +26,7 @@ export const useGetSubscription = () => {
       // }
       // const { data } = await response.json();
       // return data;
-      
+
       // Temporary fallback until API endpoint is fixed
       return null;
     },

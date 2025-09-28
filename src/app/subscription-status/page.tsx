@@ -15,7 +15,7 @@ const SubscriptionPage = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">My Subscription</h1>
+      <h1 className="mb-4 text-2xl font-bold">My Subscription</h1>
       {subscription ? (
         <Card>
           <CardHeader>
@@ -26,7 +26,9 @@ const SubscriptionPage = () => {
             <p>Workspace Limit: {subscription.workspaceLimit}</p>
             <p>Project Limit: {subscription.projectLimit}</p>
             <p>Room Limit: {subscription.roomLimit}</p>
-            <p>End Date: {new Date(subscription.endDate).toLocaleDateString()}</p>
+            <p>
+              End Date: {new Date(subscription.endDate).toLocaleDateString()}
+            </p>
             <Button onClick={() => router.push("/pricing")} className="mt-4">
               Upgrade Plan
             </Button>

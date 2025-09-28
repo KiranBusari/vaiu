@@ -7,8 +7,8 @@ export const PageError = ({
   message = "Something went wrong",
 }: PageErrorProps) => {
   return (
-    <div className="flex items-center justify-center flex-col h-full">
-      <AlertTriangle className="size-6 text-muted-foreground mb-2" />
+    <div className="flex h-full flex-col items-center justify-center">
+      <AlertTriangle className="mb-2 size-6 text-muted-foreground" />
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   );

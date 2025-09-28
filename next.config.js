@@ -1,8 +1,7 @@
 module.exports = {
-webpack: (config) => {
+  webpack: (config) => {
     // Example webpack configuration
     return config;
-},
-// Add any required Next.js configuration here
+  },
+  // Add any required Next.js configuration here
 };
-

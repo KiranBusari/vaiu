@@ -28,9 +28,7 @@ export const useResendVerification = () => {
     },
     onError: (error) => {
       console.error("Resend verification error:", error);
-      toast.error(
-        error.message || "Failed to resend verification email",
-      );
+      toast.error(error.message || "Failed to resend verification email");
     },
   });
 

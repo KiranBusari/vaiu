@@ -1,11 +1,11 @@
-import PaymentPage from "@/components/PaymentPage"
+import PaymentPage from "@/components/PaymentPage";
 
 function page() {
-    return (
-        <div>
-            <PaymentPage />
-        </div>
-    )
+  return (
+    <div>
+      <PaymentPage />
+    </div>
+  );
 }
 
-export default page
+export default page;

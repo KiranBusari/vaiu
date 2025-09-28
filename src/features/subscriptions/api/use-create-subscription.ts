@@ -22,7 +22,7 @@ export const useCreateSubscription = () => {
         throw new Error(
           "error" in errorData && typeof errorData.error === "string"
             ? errorData.error
-            : "Failed to create subscription"
+            : "Failed to create subscription",
         );
       }
 

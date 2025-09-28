@@ -46,14 +46,14 @@ export const EditProjectForm = ({
   const [DeleteWorkspaceDialog, confirmDelete] = useConfirm(
     "Delete project",
     "Are you sure you want to delete this project?",
-    "destructive"
+    "destructive",
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   console.log("initialValues", initialValues);
 
-  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}/join/${initialValues.inviteCode}`
+  const absoluteInviteLink = `${window.location.origin}/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}/join/${initialValues.inviteCode}`;
 
   const { mutate: resetInviteCode, isPending: resetingInviteCode } =
     useResetInviteCode();
@@ -61,7 +61,7 @@ export const EditProjectForm = ({
   const [ResetDialog, confirmReset] = useConfirm(
     "Reset invite link",
     "This will invalidate the current invite link",
-    "destructive"
+    "destructive",
   );
 
   const form = useForm<UpdateProjectSchema>({
@@ -100,7 +100,7 @@ export const EditProjectForm = ({
           // Hard refresh to clear cache
           window.location.href = `/workspaces/${initialValues.workspaceId}`;
         },
-      }
+      },
     );
   };
 
@@ -108,7 +108,10 @@ export const EditProjectForm = ({
     const ok = await confirmReset();
     if (!ok) return;
     resetInviteCode({
-      param: { workspaceId: initialValues.workspaceId, projectId: initialValues.$id },
+      param: {
+        workspaceId: initialValues.workspaceId,
+        projectId: initialValues.$id,
+      },
     });
   };
 
@@ -124,12 +127,12 @@ export const EditProjectForm = ({
               onCancel
                 ? onCancel
                 : () =>
-                  router.push(
-                    `/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`
-                  )
+                    router.push(
+                      `/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`,
+                    )
             }
           >
-            <ArrowLeft className="size-4 mr-2" />
+            <ArrowLeft className="mr-2 size-4" />
             Back
           </Button>
           <CardTitle className="text-xl font-bold">
@@ -163,7 +166,7 @@ export const EditProjectForm = ({
                     <div className="flex flex-col gap-y-2">
                       <div className="flex items-center gap-x-5">
                         {field.value ? (
-                          <div className="size-[72px] relative rounded-md overflow-hidden">
+                          <div className="relative size-[72px] overflow-hidden rounded-md">
                             <Image
                               fill
                               src={
@@ -200,7 +203,7 @@ export const EditProjectForm = ({
                               size="sm"
                               type="button"
                               variant="destructive"
-                              className="w-fit mt-2"
+                              className="mt-2 w-fit"
                               disabled={isPending}
                               onClick={() => {
                                 field.onChange(null);
@@ -215,7 +218,7 @@ export const EditProjectForm = ({
                               size="sm"
                               type="button"
                               variant="secondary"
-                              className="w-fit mt-2"
+                              className="mt-2 w-fit"
                               disabled={isPending}
                               onClick={() => inputRef.current?.click()}
                             >
@@ -263,7 +266,7 @@ export const EditProjectForm = ({
                     navigator.clipboard
                       .writeText(absoluteInviteLink)
                       .then(() =>
-                        toast.success("Invite Link Copied to clipboard")
+                        toast.success("Invite Link Copied to clipboard"),
                       );
                   }}
                   variant="secondary"
@@ -275,7 +278,7 @@ export const EditProjectForm = ({
             </div>
             <DottedSeparator className="py-7" />
             <Button
-              className="mt-6 w-fit ml-auto"
+              className="ml-auto mt-6 w-fit"
               size="sm"
               variant="destructive"
               disabled={isPending || resetingInviteCode}
@@ -296,7 +299,7 @@ export const EditProjectForm = ({
             </p>
             <DottedSeparator className="py-7" />
             <Button
-              className="mt-6 w-fit ml-auto"
+              className="ml-auto mt-6 w-fit"
               size="sm"
               variant="destructive"
               disabled={isPending || deletingProject}

@@ -45,7 +45,6 @@
 //   );
 // };
 
-
 "use client";
 
 import { MediaRoom } from "@/components/media-room";
@@ -90,7 +89,7 @@ export const RoomId = () => {
   }
 
   return (
-    <div className="bg-white dark:bg-[#14171A] flex flex-col h-[80vh]">
+    <div className="flex h-[80vh] flex-col bg-white dark:bg-[#14171A]">
       {room.roomType === "AUDIO" && (
         <MediaRoom audio={true} video={false} chatId={room.$id} />
       )}

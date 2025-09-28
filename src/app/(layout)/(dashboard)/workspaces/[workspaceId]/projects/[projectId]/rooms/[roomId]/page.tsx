@@ -12,7 +12,7 @@ const RoomIdPage = async () => {
     <div>
       <RoomId />
     </div>
-  )
+  );
 };
 
 export default RoomIdPage;

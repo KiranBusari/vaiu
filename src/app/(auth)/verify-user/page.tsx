@@ -22,7 +22,9 @@ const VerifyUserPage = () => {
     const secret = searchParams.get("secret");
 
     if (!userId || !secret) {
-      toast.error("Invalid verification link. Please check your email and try again.");
+      toast.error(
+        "Invalid verification link. Please check your email and try again.",
+      );
       setTimeout(() => {
         router.push("/sign-in");
       }, 2000);

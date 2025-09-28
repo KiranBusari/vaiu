@@ -39,8 +39,8 @@ export const ForgotPasswordCard = () => {
   };
 
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200">
-      <CardHeader className="flex flex-col items-center text-center p-7">
+    <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
+      <CardHeader className="flex flex-col items-center p-7 text-center">
         <CardTitle className="text-2xl">Forgot Password</CardTitle>
         <CardDescription>
           Enter your email address and we&apos;ll send you a recovery link
@@ -83,10 +83,10 @@ export const ForgotPasswordCard = () => {
       <div className="px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex items-center justify-center">
+      <CardContent className="flex items-center justify-center p-7">
         <Link href="/sign-in">
           <Button variant="ghost" size="sm">
-            <ArrowLeft className="size-4 mr-2" />
+            <ArrowLeft className="mr-2 size-4" />
             Back to Sign In
           </Button>
         </Link>

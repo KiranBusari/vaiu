@@ -16,9 +16,9 @@ export const useResetInviteCode = () => {
   const queryClient = useQueryClient();
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.v1.projects[":workspaceId"]["projects"][":projectId"][
-        "reset-invite-code"
-      ].$post({
+      const response = await client.api.v1.projects[":workspaceId"]["projects"][
+        ":projectId"
+      ]["reset-invite-code"].$post({
         param,
       });
       if (!response.ok) throw new Error("Failed to reset invite code");

@@ -20,8 +20,8 @@ export function Steps({ steps, currentStep, onStepClick }: StepsProps) {
         <div
           key={index}
           className={cn(
-            "flex items-center space-x-4 cursor-pointer",
-            currentStep === index && "text-primary"
+            "flex cursor-pointer items-center space-x-4",
+            currentStep === index && "text-primary",
           )}
           onClick={() => onStepClick(index)}
         >
@@ -31,7 +31,7 @@ export function Steps({ steps, currentStep, onStepClick }: StepsProps) {
             <Circle
               className={cn(
                 "h-6 w-6",
-                currentStep === index && "fill-primary/20"
+                currentStep === index && "fill-primary/20",
               )}
             />
           )}

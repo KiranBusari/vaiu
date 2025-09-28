@@ -62,12 +62,14 @@ export async function POST(req: NextRequest) {
       const subscriptions = await databases.listDocuments(
         DATABASE_ID,
         SUBSCRIPTIONS_ID,
-        [Query.equal("userId", userId)]
+        [Query.equal("userId", userId)],
       );
 
       // Convert Infinity to a large number for Appwrite compatibility
-      const workspaceLimit = plan.workspaceLimit === Infinity ? 999999 : plan.workspaceLimit;
-      const projectLimit = plan.projectLimit === Infinity ? 999999 : plan.projectLimit;
+      const workspaceLimit =
+        plan.workspaceLimit === Infinity ? 999999 : plan.workspaceLimit;
+      const projectLimit =
+        plan.projectLimit === Infinity ? 999999 : plan.projectLimit;
       const roomLimit = plan.roomLimit === Infinity ? 999999 : plan.roomLimit;
 
       if (subscriptions.total > 0) {
@@ -83,7 +85,7 @@ export async function POST(req: NextRequest) {
             workspaceLimit: workspaceLimit,
             projectLimit: projectLimit,
             roomLimit: roomLimit,
-          }
+          },
         );
       } else {
         await databases.createDocument(
@@ -99,17 +101,23 @@ export async function POST(req: NextRequest) {
             workspaceLimit: workspaceLimit,
             projectLimit: projectLimit,
             roomLimit: roomLimit,
-          }
+          },
         );
       }
 
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/success`, {
-        status: 301,
-      });
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/success`,
+        {
+          status: 301,
+        },
+      );
     } else {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/failed`, {
-        status: 301,
-      });
+      return NextResponse.redirect(
+        `${process.env.NEXT_PUBLIC_APP_URL}/failed`,
+        {
+          status: 301,
+        },
+      );
     }
   } catch (error) {
     const err = error as Error;
@@ -117,7 +125,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: "Payment check failed", details: err.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

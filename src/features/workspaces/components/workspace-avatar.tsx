@@ -16,7 +16,7 @@ export const WorkspaceAvatar = ({
   if (image) {
     return (
       <div
-        className={cn("size-10 relative rounded-md overflow-hidden", className)}
+        className={cn("relative size-10 overflow-hidden rounded-md", className)}
       >
         <Image src={image} alt={name} fill className="object-cover" />
       </div>
@@ -24,7 +24,7 @@ export const WorkspaceAvatar = ({
   }
   return (
     <Avatar className={cn("size-10 rounded-md", className)}>
-      <AvatarFallback className="text-white bg-gray-600 font-semibold text-lg uppercase rounded-md">
+      <AvatarFallback className="rounded-md bg-gray-600 text-lg font-semibold uppercase text-white">
         {name[0]}
       </AvatarFallback>
     </Avatar>

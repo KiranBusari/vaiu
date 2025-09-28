@@ -12,7 +12,7 @@ import { useState } from "react";
 export const useConfirm = (
   title: string,
   message: string,
-  variant: ButtonProps["variant"] = "secondary"
+  variant: ButtonProps["variant"] = "secondary",
 ): [() => JSX.Element, () => Promise<unknown>] => {
   const [promise, setPromise] = useState<{
     resolve: (value: boolean) => void;
@@ -46,7 +46,7 @@ export const useConfirm = (
             <CardTitle>{title}</CardTitle>
             <CardDescription>{message}</CardDescription>
           </CardHeader>
-          <div className="pt-4 w-full flex flex-col gap-y-2 lg:flex-row gap-x-2 items-center justify-end">
+          <div className="flex w-full flex-col items-center justify-end gap-x-2 gap-y-2 pt-4 lg:flex-row">
             <Button
               variant="outline"
               className="w-full lg:w-auto"

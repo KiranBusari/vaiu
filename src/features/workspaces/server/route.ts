@@ -141,13 +141,13 @@ const app = new Hono()
         const workspaces = await databases.listDocuments(
           DATABASE_ID,
           WORKSPACE_ID,
-          [Query.equal("userId", user.$id)]
+          [Query.equal("userId", user.$id)],
         );
 
         if (workspaces.total >= subscription.workspaceLimit) {
           return c.json(
             { error: "Upgrade your plan to create more workspaces." },
-            403
+            403,
           );
         }
 

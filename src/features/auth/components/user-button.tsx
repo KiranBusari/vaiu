@@ -17,7 +17,7 @@ export const UserButton = () => {
   const { data: user, isLoading } = useCurrent();
   if (isLoading) {
     return (
-      <div className="size-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
+      <div className="flex size-10 items-center justify-center rounded-full border border-gray-300 bg-slate-200 dark:border-gray-700 dark:bg-gray-800">
         <Loader className="size-4 animate-spin text-muted-foreground" />
       </div>
     );
@@ -26,13 +26,13 @@ export const UserButton = () => {
   const { name, email } = user;
   const avatarFallback = name
     ? name.charAt(0).toUpperCase()
-    : email.charAt(0).toUpperCase() ?? "U";
+    : (email.charAt(0).toUpperCase() ?? "U");
 
   return (
     <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="outline-none relative">
-        <Avatar className="size-10 hover:opacity-75 transition border border-gray-300 dark:border-gray-700">
-          <AvatarFallback className="bg-slate-200 dark:bg-gray-800 font-medium text-gray-500 dark:text-gray-400 flex items-center justify-center">
+      <DropdownMenuTrigger className="relative outline-none">
+        <Avatar className="size-10 border border-gray-300 transition hover:opacity-75 dark:border-gray-700">
+          <AvatarFallback className="flex items-center justify-center bg-slate-200 font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
             {avatarFallback}
           </AvatarFallback>
         </Avatar>
@@ -45,7 +45,7 @@ export const UserButton = () => {
       >
         <div className="flex flex-col items-center justify-center gap-2 px-2.5 py-4">
           <Avatar className="size-[52px] border border-gray-300 dark:border-gray-700">
-            <AvatarFallback className="bg-gray-300 dark:bg-gray-800 text-xl font-medium text-gray-500 dark:text-gray-400  flex items-center justify-center">
+            <AvatarFallback className="flex items-center justify-center bg-gray-300 text-xl font-medium text-gray-500 dark:bg-gray-800 dark:text-gray-400">
               {avatarFallback}
             </AvatarFallback>
           </Avatar>
@@ -59,9 +59,9 @@ export const UserButton = () => {
         <DottedSeparator className="mb-1" />
         <DropdownMenuItem
           onClick={() => logout()}
-          className="h-10 flex items-center justify-center text-amber-700 font-medium cursor-pointer"
+          className="flex h-10 cursor-pointer items-center justify-center font-medium text-amber-700"
         >
-          <LogOut className="size-4 mr-2" />
+          <LogOut className="mr-2 size-4" />
           Log Out
         </DropdownMenuItem>
       </DropdownMenuContent>

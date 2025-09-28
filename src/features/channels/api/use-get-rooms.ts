@@ -12,7 +12,7 @@ export const useGetRooms = ({ workspaceId, projectId }: useGetRoomsProps) => {
       const response = await client.api.v1.rooms.$get({
         query: { workspaceId, projectId },
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(

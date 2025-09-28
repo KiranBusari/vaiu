@@ -12,7 +12,7 @@ export const getSubscription = async () => {
     const subscriptions = await databases.listDocuments(
       DATABASE_ID,
       SUBSCRIPTIONS_ID,
-      [Query.equal("userId", user.$id)]
+      [Query.equal("userId", user.$id)],
     );
 
     if (subscriptions.total > 0) {
@@ -42,7 +42,7 @@ export const getSubscription = async () => {
         workspaceLimit: freePlan.workspaceLimit,
         projectLimit: freePlan.projectLimit,
         roomLimit: 1, // Assuming 1 room for free plan
-      }
+      },
     );
 
     return newSubscription;

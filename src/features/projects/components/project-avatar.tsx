@@ -18,7 +18,7 @@ export const ProjectAvatar = ({
   if (image) {
     return (
       <div
-        className={cn("size-5 relative rounded-md overflow-hidden", className)}
+        className={cn("relative size-5 overflow-hidden rounded-md", className)}
       >
         <Image src={image} alt={name} fill className="object-cover" />
       </div>
@@ -28,8 +28,8 @@ export const ProjectAvatar = ({
     <Avatar className={cn("size-10 rounded-md", className)}>
       <AvatarFallback
         className={cn(
-          "bg-slate-200 dark:bg-gray-800 font-semibold text-gray-500 dark:text-gray-300 flex items-center justify-center text-sm uppercase rounded-md",
-          fallbackClassName
+          "flex items-center justify-center rounded-md bg-slate-200 text-sm font-semibold uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-300",
+          fallbackClassName,
         )}
       >
         {name.charAt(0).toUpperCase()}

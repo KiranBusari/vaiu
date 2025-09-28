@@ -15,9 +15,9 @@ export const useResetInviteCode = () => {
 
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ param }) => {
-      const response = await client.api.v1.workspaces[
-        ":workspaceId"
-      ]["reset-invite-code"]["$post"]({ param });
+      const response = await client.api.v1.workspaces[":workspaceId"][
+        "reset-invite-code"
+      ]["$post"]({ param });
 
       if (!response.ok) {
         throw new Error("Failed to reset invite code");

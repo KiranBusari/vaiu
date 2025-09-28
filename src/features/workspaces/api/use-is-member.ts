@@ -11,7 +11,9 @@ export const useIsMember = (workspaceId: string) => {
   const query = useQuery({
     queryKey: ["is-workspace-member", workspaceId],
     queryFn: async () => {
-      const response = await client.api.v1.workspaces[":workspaceId"]["isworkspacemember"].$get({
+      const response = await client.api.v1.workspaces[":workspaceId"][
+        "isworkspacemember"
+      ].$get({
         param: { workspaceId },
       });
 

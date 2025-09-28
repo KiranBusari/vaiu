@@ -13,7 +13,8 @@ import { useResendVerification } from "../api/use-resend-verification";
 
 export const VerifyUserCard = () => {
   const { mutate: verify, isPending, error } = useVerify();
-  const { mutate: resendVerification, isPending: isResending } = useResendVerification();
+  const { mutate: resendVerification, isPending: isResending } =
+    useResendVerification();
 
   const onSubmit = () => {
     verify();
@@ -28,7 +29,8 @@ export const VerifyUserCard = () => {
       <CardHeader>
         <CardTitle>Verify Your Account</CardTitle>
         <CardDescription>
-          Please check your email for a verification link, or send a new verification email
+          Please check your email for a verification link, or send a new
+          verification email
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -43,10 +45,10 @@ export const VerifyUserCard = () => {
           <Button onClick={onSubmit} disabled={isPending} className="w-full">
             {isPending ? "Verifying..." : "Verify Account"}
           </Button>
-          <Button 
-            onClick={onResend} 
-            disabled={isResending || isPending} 
-            variant="outline" 
+          <Button
+            onClick={onResend}
+            disabled={isResending || isPending}
+            variant="outline"
             className="w-full"
           >
             {isResending ? "Sending..." : "Resend Verification Email"}
