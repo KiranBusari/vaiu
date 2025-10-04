@@ -157,7 +157,7 @@ export const ProjectIdClient = () => {
             className="size-8"
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
-          <a
+          <Link
             href={`https://github.com/${project.owner}/${project.name}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -165,7 +165,7 @@ export const ProjectIdClient = () => {
             title="View on GitHub"
           >
             <FaGithub className="size-5" />
-          </a>
+          </Link>
         </div>
 
         <div className="mt-2 flex">
@@ -234,10 +234,20 @@ export const ProjectIdClient = () => {
 
       {analytics && <Analytics data={analytics} />}
 
-            <Tabs defaultValue="issues" className="w-full">
+      <Tabs defaultValue="issues" className="w-full">
         <TabsList>
-          <TabsTrigger value="issues">Issues</TabsTrigger>
-          <TabsTrigger value="pull-requests">Pull Requests</TabsTrigger>
+          <TabsTrigger
+            value="issues"
+            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+          >
+            Issues
+          </TabsTrigger>
+          <TabsTrigger
+            value="pull-requests"
+            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+          >
+            Pull Requests
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="issues">
           <TaskViewSwitcher hideProjectFilter />
@@ -489,9 +499,7 @@ export const MembersList = ({ data }: MembersListProps) => {
             ))}
           </>
         ) : (
-          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
-            
-          </li>
+          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block"></li>
         )}
       </ul>
     </div>
