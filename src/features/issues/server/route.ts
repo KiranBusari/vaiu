@@ -240,6 +240,10 @@ const app = new Hono()
                 if (gitIssue.state === "open" && dbIssue.status === "DONE") {
                   return true;
                 }
+                // If DB issue is missing the number, update it
+                if (!dbIssue.number && gitIssue.number) {
+                  return true;
+                }
               }
               return false;
             });
@@ -254,8 +258,10 @@ const app = new Hono()
 
                   if (gitIssue) {
                     const newStatus = gitIssue.state === "closed" ? "DONE" : "TODO";
+                    const newNumber = dbIssue.number || gitIssue.number;
                     return databases.updateDocument(DATABASE_ID, ISSUES_ID, dbIssue.$id, {
                       status: newStatus,
+                      number: newNumber,
                     });
                   }
                 })
@@ -532,6 +538,7 @@ const app = new Hono()
             projectId,
             assigneeId,
             position: newPosition,
+            number: issueInGit.data.number,
           },
         );
 

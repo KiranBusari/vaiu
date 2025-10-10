@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Bot, ExternalLink, Loader2 } from "lucide-react";
+import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -18,6 +18,9 @@ import { PullRequest } from "../types";
 import { useGenerateAIReview } from "../api/use-ai-review";
 import { AIReviewResults } from "./ai-review-results";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { useGenerateAISummary } from "@/features/ai-summaries/api/use-generate-ai-summary";
+import { AISummaryCard } from "@/features/ai-summaries/components/ai-summary-card";
 
 interface PRActionsCellProps {
   pr: PullRequest;
@@ -25,7 +28,9 @@ interface PRActionsCellProps {
 
 export function PRActionsCell({ pr }: PRActionsCellProps) {
   const [showAIReview, setShowAIReview] = useState(false);
+  const [showAISummary, setShowAISummary] = useState(false);
   const projectId = useProjectId();
+  const workspaceId = useWorkspaceId();
   
   const {
     generateReview,
@@ -50,6 +55,12 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const handleCloseReview = () => {
     setShowAIReview(false);
     reset(); // Clear the review data when closing
+  };
+
+  const { mutate: generateSummary, isPending: isSummaryPending } = useGenerateAISummary();
+
+  const handleAISummary = () => {
+    setShowAISummary(true);
   };
 
   return (
@@ -88,6 +99,18 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
             )}
             {isLoading ? "Analyzing..." : "AI Review"}
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleAISummary}
+            disabled={isSummaryPending}
+            className="flex items-center"
+          >
+            {isSummaryPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Brain className="mr-2 h-4 w-4" />
+            )}
+            {isSummaryPending ? "Analyzing..." : "AI Summary"}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -114,6 +137,22 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
               <p>No review data available.</p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Summary Dialog */}
+      <Dialog open={showAISummary} onOpenChange={setShowAISummary}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>AI Summary</DialogTitle>
+          </DialogHeader>
+          <AISummaryCard
+            workspaceId={workspaceId}
+            projectId={projectId}
+            type="pr"
+            identifier={pr.number}
+            title={pr.title}
+          />
         </DialogContent>
       </Dialog>
     </>

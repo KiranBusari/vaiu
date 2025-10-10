@@ -5,7 +5,7 @@ import { GEMINI_API_KEY } from "@/config";
 const client = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
 });
-const MODEL_NAME = "gemini-1.5-flash";
+const MODEL_NAME = "gemini-2.5-flash";
 
 export interface PRAnalysisInput {
   prTitle: string;
