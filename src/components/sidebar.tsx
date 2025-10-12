@@ -22,12 +22,64 @@ import { useCreateProjectModal } from "@/features/projects/hooks/use-create-proj
 import { useCreateRoomModal } from "@/features/channels/hooks/use-create-room-modal";
 import { RoomSwitcher } from "./room-switcher";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import { Button } from "./ui/button";
+
+/**
+ * AddButton Component - Reusable button for adding items
+ */
+interface AddButtonProps {
+  onClick: () => void;
+  label: string;
+}
+
+const AddButton = ({ onClick, label }: AddButtonProps) => (
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={onClick}
+    className="h-5 w-5 shrink-0 hover:bg-muted"
+    aria-label={label}
+  >
+    <RiAddCircleFill className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
+  </Button>
+);
+
+/**
+ * SidebarSection Component - Reusable section with header
+ */
+interface SidebarSectionProps {
+  title: string;
+  onAdd?: () => void;
+  addLabel?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const SidebarSection = ({
+  title,
+  onAdd,
+  addLabel,
+  children,
+  className,
+}: SidebarSectionProps) => (
+  <SidebarGroup className={className}>
+    <SidebarGroupLabel>
+      <div className="flex w-full items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </span>
+        {onAdd && addLabel && <AddButton onClick={onAdd} label={addLabel} />}
+      </div>
+    </SidebarGroupLabel>
+    <SidebarGroupContent>{children}</SidebarGroupContent>
+  </SidebarGroup>
+);
 
 export const SidebarComponent = () => {
   const workspaceId = useWorkspaceId();
   const projectId = useProjectId();
-  const { open } = useCreateWorkspaceModal();
+  const { open: openWorkspace } = useCreateWorkspaceModal();
   const { open: openProject } = useCreateProjectModal();
   const { open: openRoom } = useCreateRoomModal();
 
@@ -36,79 +88,83 @@ export const SidebarComponent = () => {
     return workspaceId ? `/workspaces/${workspaceId}` : "/";
   }, [workspaceId]);
 
+  // Memoize callbacks to prevent unnecessary re-renders
+  const handleOpenWorkspace = useCallback(() => {
+    openWorkspace();
+  }, [openWorkspace]);
+
+  const handleOpenProject = useCallback(() => {
+    openProject();
+  }, [openProject]);
+
+  const handleOpenRoom = useCallback(() => {
+    openRoom();
+  }, [openRoom]);
+
+  // Check if rooms should be shown
+  const showRooms = workspaceId && projectId;
+
   return (
     <Sidebar collapsible="offcanvas" side="left" variant="floating">
-      <SidebarContent className="p-2">
-        <SidebarGroup>
+      <SidebarContent className="flex flex-col gap-4 p-3">
+        {/* Logo Header */}
+        <SidebarGroup className="pb-2">
           <SidebarHeader>
-            <div className="flex items-center justify-center">
-              <Link href={homeLink}>
-                <Logo className="dark:hidden" />
-                <Logo2 className="hidden dark:block" />
-              </Link>
-            </div>
+            <Link
+              href={homeLink}
+              className="flex items-center justify-center transition-opacity hover:opacity-80"
+              aria-label="Home"
+            >
+              <Logo className="dark:hidden" />
+              <Logo2 className="hidden dark:block" />
+            </Link>
           </SidebarHeader>
         </SidebarGroup>
-        <Separator className="bg-slate-700" />
-        <SidebarGroup>
-          <SidebarGroupLabel>
-            <div className="mb-4 flex w-full items-center justify-between">
-              Workspaces
-              <RiAddCircleFill
-                onClick={open}
-                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
-                aria-label="Add workspace"
-              />
-            </div>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <WorkspaceSwitcher />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <Navigation />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
-            <div className="mb-4 flex w-full items-center justify-between">
-              Projects
-              <RiAddCircleFill
-                onClick={openProject}
-                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
-                aria-label="Add project"
-              />
-            </div>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <ProjectSwitcher />
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel>
-            <div className="mb-4 flex w-full items-center justify-between">
-              Rooms
-              <RiAddCircleFill
-                onClick={openRoom}
-                className="size-5 cursor-pointer text-gray-500 transition hover:opacity-75 dark:text-gray-400"
-                aria-label="Add room"
-              />
-            </div>
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <div className="min-h-[40px]">
-              {workspaceId && projectId ? (
-                <RoomSwitcher workspaceId={workspaceId} projectId={projectId} />
-              ) : (
-                <div className="px-2 py-1.5 text-xs text-muted-foreground">
+
+        <Separator className="bg-border" />
+
+        {/* Workspaces Section */}
+        <SidebarSection
+          title="Workspaces"
+          onAdd={handleOpenWorkspace}
+          addLabel="Add workspace"
+        >
+          <WorkspaceSwitcher />
+        </SidebarSection>
+
+        {/* Navigation Section */}
+        <SidebarSection title="Navigation">
+          <Navigation />
+        </SidebarSection>
+
+        {/* Projects Section */}
+        <SidebarSection
+          title="Projects"
+          onAdd={handleOpenProject}
+          addLabel="Add project"
+        >
+          <ProjectSwitcher />
+        </SidebarSection>
+
+        {/* Rooms Section */}
+        <SidebarSection
+          title="Rooms"
+          onAdd={handleOpenRoom}
+          addLabel="Add room"
+          className="flex-1"
+        >
+          <div className="min-h-[60px]">
+            {showRooms ? (
+              <RoomSwitcher workspaceId={workspaceId} projectId={projectId} />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 px-3 py-4">
+                <p className="text-center text-xs text-muted-foreground">
                   Select a project to view rooms
-                </div>
-              )}
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                </p>
+              </div>
+            )}
+          </div>
+        </SidebarSection>
       </SidebarContent>
     </Sidebar>
   );
