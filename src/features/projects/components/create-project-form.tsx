@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
   CardContent,
@@ -158,7 +158,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
             </CardTitle>
           </CardHeader>
           <div className="px-7">
-            <DottedSeparator />
+            <Separator />
           </div>
           <CardContent className="p-7">
             <Form {...form1}>
@@ -387,7 +387,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   />
                 </div>
 
-                <DottedSeparator className="my-7" />
+                <Separator className="my-7" />
 
                 <div className="flex items-center justify-between">
                   <Button
@@ -420,7 +420,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
             </CardDescription>
           </CardHeader>
           <div className="px-7">
-            <DottedSeparator />
+            <Separator />
           </div>
           <CardContent className="p-7">
             <Form {...form2}>
@@ -650,7 +650,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                     />
                   </div>
                 </div>
-                <DottedSeparator className="my-7" />
+                <Separator className="my-7" />
                 <div className="flex items-center justify-between">
                   <Button
                     type="button"

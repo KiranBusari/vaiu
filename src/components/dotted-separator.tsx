@@ -9,7 +9,7 @@ interface DottedSeparatorProps {
   direction?: "horizontal" | "vertical";
 }
 
-export const DottedSeparator = ({
+export const Separator = ({
   className,
   color = "#D4D4D8",
   height = "2px",
@@ -22,9 +22,9 @@ export const DottedSeparator = ({
     <div
       className={cn(
         isHorizontal
-          ? "w-full flex items-center"
-          : "h-full flex flex-col items-center",
-        className
+          ? "flex w-full items-center"
+          : "flex h-full flex-col items-center",
+        className,
       )}
     >
       <div

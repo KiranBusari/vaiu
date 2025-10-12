@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -51,7 +51,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
           form.reset();
           router.push(`/workspaces/${data.$id}`);
         },
-      }
+      },
     );
   };
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +69,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
         </CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -82,7 +82,11 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                   <FormItem>
                     <FormLabel>Workspace name</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter workspace name" className="border border-slate-200"/>
+                      <Input
+                        {...field}
+                        placeholder="Enter workspace name"
+                        className="border border-slate-200"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -95,7 +99,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                   <div className="flex flex-col gap-y-2">
                     <div className="flex items-center gap-x-5">
                       {field.value ? (
-                        <div className="size-[72px] relative rounded-md overflow-hidden">
+                        <div className="relative size-[72px] overflow-hidden rounded-md">
                           <Image
                             fill
                             src={
@@ -108,7 +112,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                           />
                         </div>
                       ) : (
-                        <Avatar className="size-[72px] ">
+                        <Avatar className="size-[72px]">
                           <AvatarFallback className="bg-slate-200 dark:bg-gray-800">
                             <ImageIcon className="size-[36px] text-black dark:text-gray-200" />
                           </AvatarFallback>
@@ -132,7 +136,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                             size="sm"
                             type="button"
                             variant="destructive"
-                            className="w-fit mt-2 dark:bg-gray-800 dark:gray-200 bg-slate-200 hover:bg-slate-300"
+                            className="dark:gray-200 mt-2 w-fit bg-slate-200 hover:bg-slate-300 dark:bg-gray-800"
                             disabled={isPending}
                             onClick={() => {
                               field.onChange(null);
@@ -146,7 +150,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                             size="sm"
                             type="button"
                             variant="secondary"
-                            className="w-fit mt-2 dark:bg-gray-800 dark:gray-200 bg-slate-200 hover:bg-slate-300"
+                            className="dark:gray-200 mt-2 w-fit bg-slate-200 hover:bg-slate-300 dark:bg-gray-800"
                             disabled={isPending}
                             onClick={() => inputRef.current?.click()}
                           >
@@ -159,7 +163,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 )}
               />
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"
@@ -167,11 +171,19 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")+ "dark:bg-gray-800 dark:text-gray-100 text-black" }
+                className={
+                  cn(!onCancel && "invisible") +
+                  "text-black dark:bg-gray-800 dark:text-gray-100"
+                }
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg" className="dark:bg-gray-800 dark:text-gray-100 bg-slate-200 text-black hover:bg-slate-300">
+              <Button
+                disabled={isPending}
+                type="submit"
+                size="lg"
+                className="bg-slate-200 text-black hover:bg-slate-300 dark:bg-gray-800 dark:text-gray-100"
+              >
                 Create workspace
               </Button>
             </div>

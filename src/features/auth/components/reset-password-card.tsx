@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { type ResetPasswordSchema, resetPasswordSchema } from "../schemas";
 import { useResetPassword } from "../api/use-reset-password";
 
@@ -50,13 +50,13 @@ export const ResetPasswordCard = () => {
   };
 
   return (
-    <Card className="size-full md:w-[487px] border-none shadow-none dark:bg-zinc-800 bg-slate-200">
-      <CardHeader className="flex flex-col items-center text-center p-7">
+    <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
+      <CardHeader className="flex flex-col items-center p-7 text-center">
         <CardTitle className="text-2xl">Reset Password</CardTitle>
         <CardDescription>Enter your new password</CardDescription>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>

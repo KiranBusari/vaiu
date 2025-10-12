@@ -5,7 +5,6 @@ import { Fragment } from "react";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DottedSeparator } from "@/components/dotted-separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -65,7 +64,7 @@ export const MembersList = () => {
         <CardTitle className="text-xl font-bold">Members List</CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         {data?.documents.map((member, idx) => (

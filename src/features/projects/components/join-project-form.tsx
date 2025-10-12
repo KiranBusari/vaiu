@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
   CardContent,
@@ -55,7 +55,7 @@ export const JoinProjectForm = ({
         </CardDescription>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <div className="flex flex-col items-center justify-between gap-2 lg:flex-row">

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -63,7 +63,7 @@ export const SignUpCard = () => {
         </CardDescription>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -141,7 +141,7 @@ export const SignUpCard = () => {
         </Form>
       </CardContent>
       <div className="hidden px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="hidden flex-col gap-y-2 p-7">
         <Button
@@ -156,7 +156,7 @@ export const SignUpCard = () => {
         </Button>
       </CardContent>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="flex items-center justify-center p-7">
         <p>

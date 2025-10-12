@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
   CardContent,
@@ -77,7 +77,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
         </CardDescription>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -149,7 +149,9 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex justify-between">
-                        <div className="flex items-center">Base Branch name</div>
+                        <div className="flex items-center">
+                          Base Branch name
+                        </div>
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -185,7 +187,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                 />
               </div>
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"
@@ -204,7 +206,7 @@ export const CreatePrForm = ({ onCancel }: CreatePrProps) => {
                 disabled={isPending}
                 type="submit"
                 size="lg"
-                className="bg-slate-200 text-black hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white"
+                className="bg-slate-200 text-black hover:bg-slate-300 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               >
                 Create Pull Request
               </Button>

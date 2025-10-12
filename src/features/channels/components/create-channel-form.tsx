@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { RoomSchema } from "../schemas";
 import { useCreateRoom } from "../api/use-create-room";
 import { cn } from "@/lib/utils";
@@ -77,9 +77,11 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
         {
           onSuccess: () => {
             form.reset();
-            router.push(`/workspaces/${workspaceId}/projects/${values.projectId}`);
+            router.push(
+              `/workspaces/${workspaceId}/projects/${values.projectId}`,
+            );
           },
-        }
+        },
       );
     } catch (error) {
       console.log(error);
@@ -92,7 +94,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
         <CardTitle className="text-xl font-bold">Create new Room</CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -124,7 +126,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="bg-zinc-300 border-0 focus:ring-0 text-black ring-offset-0 focus-visible:ring-offset-0 capitalize outline-none">
+                        <SelectTrigger className="border-0 bg-zinc-300 capitalize text-black outline-none ring-offset-0 focus:ring-0 focus-visible:ring-offset-0">
                           <SelectValue placeholder="Select a room type" />
                         </SelectTrigger>
                       </FormControl>
@@ -134,7 +136,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                           <SelectItem
                             key={type}
                             value={type}
-                            className="capitalize cursor-pointer"
+                            className="cursor-pointer capitalize"
                           >
                             {type.toLowerCase()}
                           </SelectItem>
@@ -158,7 +160,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="bg-zinc-300 border-0 focus:ring-0 text-black ring-offset-0 focus-visible:ring-offset-0 capitalize outline-none">
+                        <SelectTrigger className="border-0 bg-zinc-300 capitalize text-black outline-none ring-offset-0 focus:ring-0 focus-visible:ring-offset-0">
                           <SelectValue placeholder="Select a project" />
                         </SelectTrigger>
                       </FormControl>
@@ -166,7 +168,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                       <SelectContent>
                         {projectOptions?.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
-                            <div className="flex items-center gap-x-2 cursor-pointer">
+                            <div className="flex cursor-pointer items-center gap-x-2">
                               <ProjectAvatar
                                 image={project.imageUrl}
                                 className="size-6"
@@ -183,7 +185,7 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                 )}
               />
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"

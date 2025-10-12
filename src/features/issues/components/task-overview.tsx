@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 
 import { MemberAvatar } from "@/features/members/components/members-avatar";
 import { useEditTaskModal } from "@/features/issues/hooks/use-update-task-modal";
@@ -27,7 +27,7 @@ export const TaskOverview = ({ issue }: TaskOverviewProps) => {
             Edit
           </Button>
         </div>
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4" />
         <div className="flex flex-col gap-y-4">
           <OverviewProperty label="Assignee">
             <MemberAvatar name={issue.assignee.name} className="size-6" />

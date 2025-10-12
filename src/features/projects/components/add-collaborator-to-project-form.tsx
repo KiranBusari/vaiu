@@ -2,7 +2,7 @@ import React from "react";
 import { useProjectId } from "../hooks/use-projectId";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -50,19 +50,19 @@ export const AddCollaboratorToProjectForm = ({
           form.reset();
           router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
         },
-      }
+      },
     );
   };
 
   return (
-    <Card className="size-full border-none shadow-none dark:bg-slate-900 bg-white">
+    <Card className="size-full border-none bg-white shadow-none dark:bg-slate-900">
       <CardHeader className="flex p-7">
         <CardTitle className="text-xl font-bold">
           Add New Collaborator
         </CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -87,7 +87,7 @@ export const AddCollaboratorToProjectForm = ({
                 )}
               />
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"
@@ -95,11 +95,19 @@ export const AddCollaboratorToProjectForm = ({
                 variant="secondary"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible") + " bg-slate-200 text-black dark:bg-slate-800 dark:text-white"}
+                className={
+                  cn(!onCancel && "invisible") +
+                  " bg-slate-200 text-black dark:bg-slate-800 dark:text-white"
+                }
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg" className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white">
+              <Button
+                disabled={isPending}
+                type="submit"
+                size="lg"
+                className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white"
+              >
                 Add Collaborator
               </Button>
             </div>
