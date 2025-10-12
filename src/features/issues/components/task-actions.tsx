@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { ExternalLinkIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { ExternalLinkIcon, PencilIcon, TrashIcon, Brain, Loader2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -12,6 +12,11 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 import { useDeleteTask } from "../api/use-delete-task";
 import { useEditTaskModal } from "../hooks/use-update-task-modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AISummaryCard } from "@/features/ai-summaries/components/ai-summary-card";
+import { useGenerateAISummary } from "@/features/ai-summaries/api/use-generate-ai-summary";
+import { useGetTask } from "../api/use-get-task";
+import { useState } from "react";
 interface TaskActionsProps {
   id: string;
   projectId: string;
@@ -19,6 +24,14 @@ interface TaskActionsProps {
 }
 
 export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
+  const [showAISummary, setShowAISummary] = useState(false);
+  const { data: taskData } = useGetTask({ issueId: id });
+  const { isPending: isSummaryPending } = useGenerateAISummary();
+
+  const handleAISummary = () => {
+    setShowAISummary(true);
+  };
+
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const { open } = useEditTaskModal();
@@ -75,8 +88,34 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
             <TrashIcon className="sroke-2 mr-2 size-4" />
             Delete Task
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleAISummary}
+            disabled={isSummaryPending}
+            className="p-[10px] font-medium"
+          >
+            {isSummaryPending ? (
+              <Loader2 className="sroke-2 mr-2 size-4 animate-spin" />
+            ) : (
+              <Brain className="sroke-2 mr-2 size-4" />
+            )}
+            AI Summary
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      <Dialog open={showAISummary} onOpenChange={setShowAISummary}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>AI Summary</DialogTitle>
+          </DialogHeader>
+          <AISummaryCard
+            workspaceId={workspaceId}
+            projectId={projectId}
+            type="issue"
+            identifier={taskData?.number || 0}
+            title={taskData?.name || ""}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

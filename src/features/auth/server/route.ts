@@ -18,7 +18,6 @@ import { headers } from "next/headers";
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
-    console.log(user);
 
     return c.json({ data: user });
   })

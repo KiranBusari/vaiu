@@ -1,5 +1,5 @@
 "use client";
-import { Loader, LogOut } from "lucide-react";
+import { Loader, LogOut, Navigation } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -7,14 +7,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+
+import { Separator } from "@/components/dotted-separator";
 
 import { useCurrent } from "../api/use-curent";
 import { useLogout } from "../api/use-logout";
+import { useRouter } from "next/navigation";
 
 export const UserButton = () => {
   const { mutate: logout } = useLogout();
   const { data: user, isLoading } = useCurrent();
+
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <div className="flex size-10 items-center justify-center rounded-full border border-gray-300 bg-slate-200 dark:border-gray-700 dark:bg-gray-800">
@@ -57,13 +62,21 @@ export const UserButton = () => {
           </div>
         </div>
         <Separator className="mb-1" />
-        <DropdownMenuItem
-          onClick={() => logout()}
-          className="flex h-10 cursor-pointer items-center justify-center font-medium text-amber-700"
-        >
-          <LogOut className="mr-2 size-4" />
-          Log Out
-        </DropdownMenuItem>
+        <div className="flex">
+          <DropdownMenuItem onClick={() => {
+            router.push(`/profile/${user.name}`); 
+          }} className="h-10 flex items-center justify-center text-gray-900 dark:text-gray-100 font-medium cursor-pointer">
+            <Navigation className="size-4 mr-2" />
+            View Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => logout()}
+            className="h-10 flex items-center justify-center text-amber-700 font-medium cursor-pointer"
+          >
+            <LogOut className="size-4 mr-2" />
+            Log Out
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

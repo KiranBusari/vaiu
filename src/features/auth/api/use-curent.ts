@@ -6,7 +6,6 @@ export const useCurrent = () => {
     queryKey: ["current"],
     queryFn: async () => {
       const response = await client.api.v1.auth.current.$get();
-      // console.log("Response", response);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(

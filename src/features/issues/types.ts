@@ -9,6 +9,7 @@ export type Issue = Models.Document & {
   position: number;
   dueDate: string;
   description?: string;
+  number?: number;
 };
 
 export enum IssueStatus {
