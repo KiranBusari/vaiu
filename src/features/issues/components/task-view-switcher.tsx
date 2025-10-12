@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { useQueryState } from "nuqs";
 import { Loader, PlusIcon } from "lucide-react";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
@@ -69,7 +69,7 @@ export const TaskViewSwitcher = ({
     >
       <div className="flex h-full flex-col overflow-auto p-4">
         <div className="flex flex-col justify-between gap-y-2 lg:flex-row">
-          <p className="flex items-center text-center text-xl font-bold">
+          <p className="ml-1 flex items-center text-center text-xl font-bold">
             Issues
           </p>
           <div className="flex items-center space-x-4">
@@ -109,9 +109,9 @@ export const TaskViewSwitcher = ({
             </TabsTrigger>
           </TabsList>
         </div>
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4" />
         <DataFilters hideProjectFilter={hideProjectFilter} />
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4" />
         {tasksLoading ? (
           <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">
             <Loader className="size-5 animate-spin text-muted-foreground" />

@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -79,7 +79,7 @@ export const CreateTaskForm = ({
         <CardTitle className="text-xl font-bold">Create new issue</CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -267,7 +267,7 @@ export const CreateTaskForm = ({
                 )}
               />
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"

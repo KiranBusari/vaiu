@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGetRooms } from "@/features/channels/api/use-get-rooms";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
-import { DottedSeparator } from "./dotted-separator";
+import { Separator } from "./ui/separator";
 import { cn } from "@/lib/utils";
 
 const Rooms = () => {
@@ -81,7 +81,7 @@ const Rooms = () => {
             </div>
           </div>
         )}
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4" />
       </ScrollArea>
     </div>
   );

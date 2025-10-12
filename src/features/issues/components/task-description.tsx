@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pencil, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 
 import { Issue } from "../types";
 import { useUpdateTask } from "../api/use-update-task";
@@ -45,7 +45,7 @@ export const TaskDescription = ({ issue }: TaskDescriptionProps) => {
           {isEditing ? "Cancel" : "Edit"}
         </Button>
       </div>
-      <DottedSeparator className="my-4" />
+      <Separator className="my-4" />
       {isEditing ? (
         <div className="flex flex-col gap-y-4">
           <Textarea

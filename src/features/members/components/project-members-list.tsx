@@ -5,7 +5,7 @@ import { Fragment } from "react";
 import { ArrowLeft, MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -37,7 +37,8 @@ export const ProjectMembersList = () => {
   const { data } = useGetProjectMembers({ workspaceId, projectId });
   const { data: project } = useGetProject({ projectId });
 
-  const { mutate: removeProjectMember, isPending: removingMember } = useRemoveProjectMember();
+  const { mutate: removeProjectMember, isPending: removingMember } =
+    useRemoveProjectMember();
   const { mutate: updateMember, isPending: updatingMember } = useUpdateMember();
 
   const handleUpdateMember = (memberId: string, role: MemberRole) => {
@@ -64,7 +65,7 @@ export const ProjectMembersList = () => {
         </CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         {data?.documents.map((member, idx) => {
@@ -86,7 +87,7 @@ export const ProjectMembersList = () => {
                       {member.role}
                     </p>
                     {isProjectAdmin && (
-                      <p className="text-xs font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md dark:bg-yellow-900 dark:text-yellow-200">
+                      <p className="rounded-md bg-yellow-100 px-2 py-1 text-xs font-semibold text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
                         Project Admin
                       </p>
                     )}
@@ -100,8 +101,9 @@ export const ProjectMembersList = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" align="end">
                     <DropdownMenuItem
-                      className={`font-medium ${member.role === MemberRole.ADMIN && "hidden"
-                        }`}
+                      className={`font-medium ${
+                        member.role === MemberRole.ADMIN && "hidden"
+                      }`}
                       onClick={() =>
                         handleUpdateMember(member.$id, MemberRole.ADMIN)
                       }

@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { useIsMember } from "@/features/workspaces/api/use-is-member";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
 import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
@@ -22,30 +21,30 @@ const navItems = [
     label: "Home",
     href: "/",
     icon: GoHome,
-    aciveIcon: GoHomeFill,
+    activeIcon: GoHomeFill,
   },
   {
     label: "Issues",
     href: "/tasks",
     icon: GoCheckCircle,
-    aciveIcon: GoCheckCircleFill,
+    activeIcon: GoCheckCircleFill,
   },
   {
     label: "Settings",
     href: "/settings",
     icon: RiSettings2Line,
-    aciveIcon: RiSettings2Fill,
+    activeIcon: RiSettings2Fill,
   },
   {
     label: "Members",
     href: "/members",
     icon: FaUsersCog,
-    aciveIcon: FaUsers,
+    activeIcon: FaUsers,
   },
   {
     label: "Contributions",
     icon: Code2,
-    aciveIcon: Code2,
+    activeIcon: Code2,
     dynamicRedirect: true,
   },
 ];
@@ -53,7 +52,6 @@ const navItems = [
 export const Navigation = () => {
   const workspaceId = useWorkspaceId();
   const pathname = usePathname();
-  const router = useRouter();
 
   // const OPEN_CONTRIBUTION_WORKSPACE_ID = process.env.OPEN_CONTRIBUTION_WORKSPACE_ID || "";
 
@@ -70,26 +68,21 @@ export const Navigation = () => {
   const isLoading =
     isOpenContributionMemberLoading || openContributionInfoLoading;
 
-  const handleContributeClick = () => {
-    if (isOpenContributionMember) {
-      router.push(`/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`);
-    } else if (openContributionInfo?.inviteCode) {
-      router.push(
-        `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`,
-      );
-    }
-  };
+  // Don't render navigation if workspaceId is not available
+  if (!workspaceId) {
+    return null;
+  }
 
   return (
     <ul className="flex flex-col">
-      {navItems.map(({ aciveIcon, href, icon, label, dynamicRedirect }) => {
+      {navItems.map(({ activeIcon, href, icon, label, dynamicRedirect }) => {
         const absoluteHref =
           label === "Contributions"
             ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
             : `/workspaces/${workspaceId}${href ?? ""}`;
 
         // Determine if we're in the contributions workspace
-        const inContributionsWorkspace = pathname.includes(
+        const inContributionsWorkspace = pathname.startsWith(
           `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`,
         );
 
@@ -97,71 +90,65 @@ export const Navigation = () => {
         const isActive =
           label === "Home"
             ? pathname === absoluteHref ||
-              pathname === `/workspaces/${workspaceId}`
+              pathname === `/workspaces/${workspaceId}` ||
+              pathname === `/workspaces/${workspaceId}/`
             : label === "Contributions"
-              ? inContributionsWorkspace &&
-                dynamicRedirect === true &&
-                // Don't mark Contributions as active if we're just in the contributions workspace home
-                pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}` &&
-                pathname !== `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/`
-              : pathname === absoluteHref;
-        const Icon = isActive ? aciveIcon : icon;
+              ? inContributionsWorkspace
+              : pathname === absoluteHref ||
+                pathname.startsWith(`${absoluteHref}/`);
+        const Icon = isActive ? activeIcon : icon;
 
         if (dynamicRedirect) {
-          return (
-            <button
-              key={label}
-              type="button"
-              onClick={handleContributeClick}
-              disabled={isLoading}
-              className={cn(
-                "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
-                isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
-                isLoading && "cursor-not-allowed opacity-60",
-              )}
-            >
-              {isLoading ? (
-                <Loader2 className="size-5 animate-spin" />
-              ) : (
-                Icon && <Icon className="size-5" />
-              )}
-              {label}
-            </button>
-          );
-        }
+          // Use Link instead of button to prevent reload issues
+          const contributionHref = isOpenContributionMember
+            ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`
+            : openContributionInfo?.inviteCode
+              ? `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}/join/${openContributionInfo?.inviteCode}`
+              : `/workspaces/${OPEN_CONTRIBUTION_WORKSPACE_ID}`;
 
-        if (label === "Home") {
           return (
-            <div
-              key={href}
-              onClick={() => router.push(`/workspaces/${workspaceId}`)}
-              className={cn(
-                "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
-                isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
-                "cursor-pointer"
+            <li key={label}>
+              {isLoading ? (
+                <div
+                  className={cn(
+                    "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 dark:text-slate-200",
+                    "cursor-not-allowed opacity-60",
+                  )}
+                >
+                  <Loader2 className="size-5 animate-spin" />
+                  {label}
+                </div>
+              ) : (
+                <Link
+                  href={contributionHref}
+                  className={cn(
+                    "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
+                    isActive &&
+                      "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                  )}
+                >
+                  <Icon className="size-5" />
+                  {label}
+                </Link>
               )}
-            >
-              <Icon className="size-5" />
-              {label}
-            </div>
+            </li>
           );
         }
 
         return (
-          <Link key={href} href={absoluteHref}>
-            <div
+          <li key={href}>
+            <Link
+              href={absoluteHref}
               className={cn(
                 "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                 isActive &&
-                "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
               )}
             >
               <Icon className="size-5" />
               {label}
-            </div>
-          </Link>
+            </Link>
+          </li>
         );
       })}
     </ul>
