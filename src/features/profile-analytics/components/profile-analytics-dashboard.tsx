@@ -29,7 +29,10 @@ interface ProfileAnalyticsDashboardProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export const ProfileAnalyticsDashboard = ({ username }: ProfileAnalyticsDashboardProps) => {
-  // Add validation for username
+  const { data: analytics, isLoading, error } = useGetProfileAnalytics({
+    username: username || "",
+  });
+
   if (!username || username === 'undefined') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -44,10 +47,6 @@ export const ProfileAnalyticsDashboard = ({ username }: ProfileAnalyticsDashboar
       </div>
     );
   }
-
-  const { data: analytics, isLoading, error } = useGetProfileAnalytics({
-    username,
-  });
 
   if (isLoading) {
     return <ProfileAnalyticsLoading />;
