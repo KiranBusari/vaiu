@@ -29,6 +29,22 @@ interface ProfileAnalyticsDashboardProps {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export const ProfileAnalyticsDashboard = ({ username }: ProfileAnalyticsDashboardProps) => {
+  // Add validation for username
+  if (!username || username === 'undefined') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Invalid Username
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Please provide a valid GitHub username to view analytics.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const { data: analytics, isLoading, error } = useGetProfileAnalytics({
     username,
   });
@@ -57,8 +73,8 @@ export const ProfileAnalyticsDashboard = ({ username }: ProfileAnalyticsDashboar
     }));
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">   
+    <div className="p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Developer Analytics
@@ -291,7 +307,7 @@ export const ProfileAnalyticsDashboard = ({ username }: ProfileAnalyticsDashboar
 };
 
 const ProfileAnalyticsLoading = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+  <div className="p-6">
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="animate-pulse">
         <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-8"></div>
@@ -319,7 +335,7 @@ const ProfileAnalyticsLoading = () => (
 );
 
 const ProfileAnalyticsError = ({ onRetry }: { onRetry: () => void }) => (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+  <div className="flex items-center justify-center min-h-96">
     <Card className="p-8 max-w-md">
       <div className="text-center">
         <h3 className="text-lg font-semibold mb-2">Failed to load profile</h3>

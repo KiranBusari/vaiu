@@ -1,10 +1,5 @@
 import { client } from "@/lib/rpc";
 import { useQuery } from "@tanstack/react-query";
-import { InferResponseType } from "hono";
-
-type ResponseType = InferResponseType<
-  (typeof client.api.v1)["profile-analytics"][":username"]["$get"]
->;
 
 interface UseGetProfileAnalyticsProps {
   username: string;
@@ -19,7 +14,7 @@ export const useGetProfileAnalytics = ({
       const response = await client.api.v1["profile-analytics"][":username"].$get({
         param: { username },
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch profile analytics");
       }

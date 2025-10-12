@@ -75,8 +75,12 @@ const app = new Hono()
             context: {
               repoName: `${project.owner}/${project.name}`,
               assignee: pr.assignee?.login,
-              labels: pr.labels?.map((label: any) => 
-                typeof label === 'string' ? label : label.name
+              labels: pr.labels?.map((label: unknown) =>
+                typeof label === 'string'
+                  ? label
+                  : typeof label === 'object' && label !== null && 'name' in label
+                    ? (label as { name: string }).name
+                    : ''
               ),
               comments: comments.slice(-5).map(comment => ({
                 user: comment.user?.login || "unknown",
@@ -107,8 +111,12 @@ const app = new Hono()
             context: {
               repoName: `${project.owner}/${project.name}`,
               assignee: issue.assignee?.login,
-              labels: issue.labels?.map((label: any) => 
-                typeof label === 'string' ? label : label.name
+              labels: issue.labels?.map((label: unknown) =>
+                typeof label === 'string'
+                  ? label
+                  : typeof label === 'object' && label !== null && 'name' in label
+                    ? (label as { name: string }).name
+                    : ''
               ),
               comments: comments.slice(-5).map(comment => ({
                 user: comment.user?.login || "unknown",

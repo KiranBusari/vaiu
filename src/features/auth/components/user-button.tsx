@@ -1,5 +1,5 @@
 "use client";
-import { Loader, LogOut } from "lucide-react";
+import { Loader, LogOut, Navigation } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,10 +11,14 @@ import { DottedSeparator } from "@/components/dotted-separator";
 
 import { useCurrent } from "../api/use-curent";
 import { useLogout } from "../api/use-logout";
+import { useRouter } from "next/navigation";
 
 export const UserButton = () => {
   const { mutate: logout } = useLogout();
   const { data: user, isLoading } = useCurrent();
+
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <div className="size-10 rounded-full flex items-center justify-center bg-slate-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700">
@@ -57,13 +61,21 @@ export const UserButton = () => {
           </div>
         </div>
         <DottedSeparator className="mb-1" />
-        <DropdownMenuItem
-          onClick={() => logout()}
-          className="h-10 flex items-center justify-center text-amber-700 font-medium cursor-pointer"
-        >
-          <LogOut className="size-4 mr-2" />
-          Log Out
-        </DropdownMenuItem>
+        <div className="flex">
+          <DropdownMenuItem onClick={() => {
+            router.push(`/profile/${user.name}`); 
+          }} className="h-10 flex items-center justify-center text-gray-900 dark:text-gray-100 font-medium cursor-pointer">
+            <Navigation className="size-4 mr-2" />
+            View Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => logout()}
+            className="h-10 flex items-center justify-center text-amber-700 font-medium cursor-pointer"
+          >
+            <LogOut className="size-4 mr-2" />
+            Log Out
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

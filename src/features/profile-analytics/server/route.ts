@@ -20,6 +20,11 @@ const app = new Hono()
     async (c) => {
       const { username } = c.req.valid("param");
 
+      // Additional validation to prevent undefined username
+      if (!username || username === 'undefined' || username.trim() === '') {
+        return c.json({ error: "Username is required" }, 400);
+      }
+
       const octokit = new Octokit();
 
       try {
@@ -33,7 +38,20 @@ const app = new Hono()
         ]);
 
         const user = userResponse.data;
-        const repositories = reposResponse.data;
+        const rawRepositories = reposResponse.data;
+
+        // Map repositories to match GitHubRepository interface
+        const repositories: GitHubRepository[] = rawRepositories.map(repo => ({
+          name: repo.name,
+          description: repo.description ?? undefined,
+          html_url: repo.html_url,
+          language: repo.language ?? undefined,
+          stargazers_count: repo.stargazers_count || 0,
+          forks_count: repo.forks_count || 0,
+          fork: repo.fork || false,
+          created_at: repo.created_at || new Date().toISOString(),
+          pushed_at: repo.pushed_at || repo.created_at || new Date().toISOString(),
+        }));
 
         const languageStats = calculateLanguageStatsFromRepos(repositories);
 
@@ -46,7 +64,7 @@ const app = new Hono()
             .sort((a, b) => (b.forks_count || 0) - (a.forks_count || 0))
             .slice(0, 5),
           recentlyActive: repositories
-            .sort((a, b) => new Date(b.pushed_at || b.updated_at || 0).getTime() - new Date(a.pushed_at || a.updated_at || 0).getTime())
+            .sort((a, b) => new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime())
             .slice(0, 5),
         };
 
@@ -63,13 +81,9 @@ const app = new Hono()
             following: user.following,
             created_at: user.created_at,
           } as GitHubUser,
-          repositories: repositories as GitHubRepository[],
+          repositories,
           languageStats,
-          topRepositories: {
-            mostStarred: topRepositories.mostStarred as GitHubRepository[],
-            mostForked: topRepositories.mostForked as GitHubRepository[],
-            recentlyActive: topRepositories.recentlyActive as GitHubRepository[],
-          },
+          topRepositories,
           collaborationStats,
           totalStars: repositories.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0),
           totalForks: repositories.reduce((sum, repo) => sum + (repo.forks_count || 0), 0),
@@ -78,28 +92,36 @@ const app = new Hono()
         return c.json({
           data: analytics,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to fetch profile analytics:", error);
 
-        if (error.status === 404) {
-          return c.json({ error: `GitHub user '${username}' not found` }, 404);
+        if (typeof error === 'object' && error !== null && 'status' in error) {
+          const httpError = error as { status: number };
+
+          if (httpError.status === 404) {
+            return c.json({ error: `GitHub user '${username}' not found` }, 404);
+          }
+
+          if (httpError.status === 403) {
+            return c.json({
+              error: "GitHub API rate limit exceeded. Please provide an access token for higher limits."
+            }, 403);
+          }
         }
 
-        if (error.status === 403) {
-          return c.json({
-            error: "GitHub API rate limit exceeded. Please provide an access token for higher limits."
-          }, 403);
-        }
+        const errorMessage = typeof error === 'object' && error !== null && 'message' in error
+          ? (error as { message: string }).message
+          : 'Unknown error';
 
         return c.json({
           error: "Failed to fetch profile analytics",
-          details: error.message
+          details: errorMessage
         }, 500);
       }
     }
   );
 
-function calculateLanguageStatsFromRepos(repositories: any[]): LanguageStats {
+function calculateLanguageStatsFromRepos(repositories: GitHubRepository[]): LanguageStats {
   const languageStats: LanguageStats = {};
 
   repositories.forEach(repo => {
@@ -120,7 +142,7 @@ function calculateLanguageStatsFromRepos(repositories: any[]): LanguageStats {
   return languageStats;
 }
 
-function calculateBasicCollaborationStats(repositories: any[]): ProfileAnalytics['collaborationStats'] {
+function calculateBasicCollaborationStats(repositories: GitHubRepository[]): ProfileAnalytics['collaborationStats'] {
   const forksOfOthers = repositories.filter(repo => repo.fork).length;
 
   return {

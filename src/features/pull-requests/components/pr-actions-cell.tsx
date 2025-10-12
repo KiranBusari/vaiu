@@ -31,7 +31,7 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const [showAISummary, setShowAISummary] = useState(false);
   const projectId = useProjectId();
   const workspaceId = useWorkspaceId();
-  
+
   const {
     generateReview,
     isLoading,
@@ -57,7 +57,7 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
     reset(); // Clear the review data when closing
   };
 
-  const { mutate: generateSummary, isPending: isSummaryPending } = useGenerateAISummary();
+  const { isPending: isSummaryPending } = useGenerateAISummary();
 
   const handleAISummary = () => {
     setShowAISummary(true);
@@ -84,9 +84,9 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
               View on GitHub
             </Link>
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuItem
             onClick={handleAIReview}
             disabled={isLoading}

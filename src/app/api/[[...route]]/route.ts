@@ -9,6 +9,8 @@ import issues from "@/features/issues/server/route";
 import rooms from "@/features/channels/server/route";
 import pullRequests from "@/features/pull-requests/server/route";
 import notifications from "@/features/notifications/server/route";
+import aiSummaries from "@/features/ai-summaries/server/route";
+import profileAnalytics from "@/features/profile-analytics/server/route";
 
 const app = new Hono().basePath("/api/v1");
 
@@ -21,7 +23,9 @@ const routes = app
   .route("/issues", issues)
   .route("/rooms", rooms)
   .route("/pull-requests", pullRequests)
-  .route("/notifications", notifications);
+  .route("/notifications", notifications)
+  .route("/ai-summaries", aiSummaries)
+  .route("/profile-analytics", profileAnalytics);
 
 export const GET = handle(app);
 export const POST = handle(app);

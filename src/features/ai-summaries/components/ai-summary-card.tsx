@@ -19,7 +19,7 @@ interface AISummaryCardProps {
   className?: string;
 }
 
-const getImpactColor = (level: string) => {
+const getImpactColor = (level: string): "destructive" | "default" | "secondary" => {
   switch (level) {
     case "high":
       return "destructive";
@@ -32,7 +32,7 @@ const getImpactColor = (level: string) => {
   }
 };
 
-const getUrgencyColor = (level: string) => {
+const getUrgencyColor = (level: string): "destructive" | "default" | "secondary" => {
   switch (level) {
     case "high":
       return "destructive";
@@ -50,12 +50,10 @@ export const AISummaryCard = ({
   projectId,
   type,
   identifier,
-  title,
   className,
 }: AISummaryCardProps) => {
   const [summary, setSummary] = useState<SummaryOutput | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const { mutate: generateSummary, isPending } = useGenerateAISummary();
 
   const handleGenerateSummary = () => {
@@ -72,7 +70,6 @@ export const AISummaryCard = ({
         onSuccess: (response) => {
           if ("data" in response) {
             setSummary(response.data);
-            setIsExpanded(true);
             toast.success("AI summary generated successfully!");
           }
         },
@@ -127,14 +124,14 @@ export const AISummaryCard = ({
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span className="text-sm font-medium">Impact:</span>
-              <Badge variant={getImpactColor(summary.impactLevel) as any}>
+              <Badge variant={getImpactColor(summary.impactLevel)}>
                 {summary.impactLevel.toUpperCase()}
               </Badge>
             </div>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <span className="text-sm font-medium">Urgency:</span>
-              <Badge variant={getUrgencyColor(summary.urgency) as any}>
+              <Badge variant={getUrgencyColor(summary.urgency)}>
                 {summary.urgency.toUpperCase()}
               </Badge>
             </div>

@@ -26,7 +26,7 @@ interface TaskActionsProps {
 export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
   const [showAISummary, setShowAISummary] = useState(false);
   const { data: taskData } = useGetTask({ issueId: id });
-  const { mutate: generateSummary, isPending: isSummaryPending } = useGenerateAISummary();
+  const { isPending: isSummaryPending } = useGenerateAISummary();
 
   const handleAISummary = () => {
     setShowAISummary(true);
