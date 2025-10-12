@@ -316,8 +316,30 @@ const PullRequestAnalytics = () => {
                   startAngle={90}
                   endAngle={-270}
                 >
-                  <RadialBar background dataKey="value" />
-                  <Tooltip content={<ChartTooltipContent />} />
+                  <RadialBar
+                    background
+                    dataKey="value"
+                    label={{ position: "middle", fill: "#fff" }}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <div className="flex space-x-2">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                {payload[0].payload.name}
+                              </span>
+                              <span className="font-bold text-muted-foreground">
+                                {payload[0].value}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
                   <Legend />
                 </RadialBarChart>
               </ResponsiveContainer>
