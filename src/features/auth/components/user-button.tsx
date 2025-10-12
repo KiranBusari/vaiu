@@ -7,7 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+
+import { Separator } from "@/components/dotted-separator";
 
 import { useCurrent } from "../api/use-curent";
 import { useLogout } from "../api/use-logout";
@@ -60,7 +61,7 @@ export const UserButton = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400">{email}</p>
           </div>
         </div>
-        <DottedSeparator className="mb-1" />
+        <Separator className="mb-1" />
         <div className="flex">
           <DropdownMenuItem onClick={() => {
             router.push(`/profile/${user.name}`); 
