@@ -2,7 +2,7 @@
 import { useQueryState } from "nuqs";
 import { Loader, PlusIcon } from "lucide-react";
 
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
@@ -40,7 +40,7 @@ export const PrViewSwitcher = () => {
       );
     }
   };
-  
+
   return (
     <Tabs
       defaultValue={view}
@@ -73,7 +73,7 @@ export const PrViewSwitcher = () => {
             </TabsTrigger>
           </TabsList>
         </div>
-        <DottedSeparator className="my-4" />
+        <Separator className="my-4" />
         {prsLoading ? (
           <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">
             <Loader className="size-5 animate-spin text-muted-foreground" />
@@ -81,7 +81,7 @@ export const PrViewSwitcher = () => {
         ) : (
           <>
             <TabsContent value="table" className="mt-0">
-              <DataTable columns={columns} data={(prs?.documents ?? [])} />
+              <DataTable columns={columns} data={prs?.documents ?? []} />
             </TabsContent>
           </>
         )}

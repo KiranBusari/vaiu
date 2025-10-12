@@ -8,7 +8,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 import { signUpWithGithub } from "@/lib/oauth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,7 +43,7 @@ export const SignInCard = () => {
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -120,7 +120,7 @@ export const SignInCard = () => {
         </Form>
       </CardContent>
       <div className="hidden px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="hidden flex-col gap-y-4 p-7">
         <Button
@@ -135,7 +135,7 @@ export const SignInCard = () => {
         </Button>
       </CardContent>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="flex items-center justify-center p-7">
         <p>

@@ -3,9 +3,15 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { DottedSeparator } from "@/components/dotted-separator";
+import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -102,7 +108,7 @@ export const EditTaskForm = ({
         <CardTitle className="text-xl font-bold">Edit a task</CardTitle>
       </CardHeader>
       <div className="px-7">
-        <DottedSeparator />
+        <Separator />
       </div>
       <CardContent className="p-7">
         <Form {...form}>
@@ -264,7 +270,7 @@ export const EditTaskForm = ({
                 )}
               />
             </div>
-            <DottedSeparator className="py-7" />
+            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"
@@ -293,21 +299,32 @@ export const EditTaskForm = ({
               onChange={(e) => setDoneComment(e.target.value)}
             />
             <DialogFooter>
-              <Button onClick={() => setIsDoneDialogOpen(false)} variant="secondary">
+              <Button
+                onClick={() => setIsDoneDialogOpen(false)}
+                variant="secondary"
+              >
                 Cancel
               </Button>
-              <Button onClick={() => {
-                form.setValue("status", initialValues.status);
-                setIsDoneDialogOpen(false);
-              }}>Back</Button>
-              <Button onClick={() => {
-                if (doneComment.trim()) {
-                  form.handleSubmit(onSubmit)();
+              <Button
+                onClick={() => {
+                  form.setValue("status", initialValues.status);
                   setIsDoneDialogOpen(false);
-                } else {
-                  alert("Comment is required when moving to Done");
-                }
-              }}>Submit</Button>
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={() => {
+                  if (doneComment.trim()) {
+                    form.handleSubmit(onSubmit)();
+                    setIsDoneDialogOpen(false);
+                  } else {
+                    alert("Comment is required when moving to Done");
+                  }
+                }}
+              >
+                Submit
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

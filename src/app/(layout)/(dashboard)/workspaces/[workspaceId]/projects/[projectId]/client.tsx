@@ -28,6 +28,9 @@ import { useAddCollaboratorToProjectModal } from "@/features/projects/hooks/use-
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useFileUploadModal } from "@/features/projects/hooks/use-file-upload";
@@ -157,7 +160,7 @@ export const ProjectIdClient = () => {
             className="size-8"
           />
           <p className="text-lg font-semibold capitalize">{project.name}</p>
-          <a
+          <Link
             href={`https://github.com/${project.owner}/${project.name}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -165,7 +168,7 @@ export const ProjectIdClient = () => {
             title="View on GitHub"
           >
             <FaGithub className="size-5" />
-          </a>
+          </Link>
         </div>
 
         <div className="mt-2 flex">
@@ -178,55 +181,39 @@ export const ProjectIdClient = () => {
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 p-2">
-              <div className="flex flex-col items-stretch space-y-2">
-                <Button
-                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  onClick={handleFileUpload}
-                  variant="default"
-                >
-                  <UploadIcon className="mr-2 size-4" />
-                  Upload Readme
-                </Button>
-                <Button
-                  className="w-full justify-start"
-                  variant="outline"
-                  onClick={openCollaboratorModal}
-                >
-                  <UserPlus2 className="mr-2 size-4" />
-                  Add Collaborator
-                </Button>
-                <Button
-                  className="w-full justify-start"
-                  variant="secondary"
-                  asChild
-                >
-                  <Link href={userManagementUrl}>
-                    <UserPlus2 className="mr-2 size-4" />
-                    User Management
-                  </Link>
-                </Button>
-                <Button
-                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  variant="default"
-                  asChild
-                >
-                  <Link href={analyticsUrl}>
-                    <BarChartHorizontal className="mr-2 size-4" />
-                    Analytics
-                  </Link>
-                </Button>
-                <Button
-                  className="w-full justify-start bg-slate-200 text-black hover:bg-slate-300"
-                  variant="default"
-                  asChild
-                >
-                  <Link href={settingsUrl}>
-                    <Settings className="mr-2 size-4" />
-                    Settings
-                  </Link>
-                </Button>
-              </div>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Quick actions</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleFileUpload} className="gap-2">
+                <UploadIcon className="h-4 w-4" />
+                Upload README
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={openCollaboratorModal}
+                className="gap-2"
+              >
+                <UserPlus2 className="h-4 w-4" />
+                Add collaborator
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild className="gap-2">
+                <Link href={userManagementUrl}>
+                  <UserPlus2 className="h-4 w-4" />
+                  User management
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="gap-2">
+                <Link href={analyticsUrl}>
+                  <BarChartHorizontal className="h-4 w-4" />
+                  Analytics
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="gap-2">
+                <Link href={settingsUrl}>
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -234,10 +221,20 @@ export const ProjectIdClient = () => {
 
       {analytics && <Analytics data={analytics} />}
 
-            <Tabs defaultValue="issues" className="w-full">
+      <Tabs defaultValue="issues" className="w-full">
         <TabsList>
-          <TabsTrigger value="issues">Issues</TabsTrigger>
-          <TabsTrigger value="pull-requests">Pull Requests</TabsTrigger>
+          <TabsTrigger
+            value="issues"
+            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+          >
+            Issues
+          </TabsTrigger>
+          <TabsTrigger
+            value="pull-requests"
+            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+          >
+            Pull Requests
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="issues">
           <TaskViewSwitcher hideProjectFilter />
@@ -489,9 +486,7 @@ export const MembersList = ({ data }: MembersListProps) => {
             ))}
           </>
         ) : (
-          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block">
-            
-          </li>
+          <li className="hidden text-center text-sm text-muted-foreground first-of-type:block"></li>
         )}
       </ul>
     </div>

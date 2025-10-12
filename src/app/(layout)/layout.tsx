@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import { SidebarComponent } from "@/components/sidebar";
+import { SidebarComponent } from "@/components/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import React from "react";
 

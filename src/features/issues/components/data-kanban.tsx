@@ -159,33 +159,44 @@ export const DataKanban = ({ data, onChange }: DataKanbanProps) => {
   );
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex overflow-x-auto">
+      <div className="flex h-full gap-4 overflow-x-auto pb-4">
         {boards.map((board) => (
           <div
             key={board}
-            className="mx-2 min-w-[200px] flex-1 rounded-md bg-muted-foreground/20 p-1.5"
+            className="flex min-w-[280px] max-w-[320px] flex-1 flex-col rounded-lg border bg-muted/50 shadow-sm"
           >
             <KanbanColumnHeader board={board} taskCount={tasks[board].length} />
             <Droppable key={board} droppableId={board}>
-              {(provided) => (
+              {(provided, snapshot) => (
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
-                  className="min-h-[200px] py-1.5"
+                  className={`flex-1 space-y-2 overflow-y-auto px-3 py-2 transition-colors ${
+                    snapshot.isDraggingOver ? "bg-muted/70" : ""
+                  }`}
+                  style={{ maxHeight: "calc(100vh - 280px)" }}
                 >
+                  {tasks[board].length === 0 && (
+                    <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 text-sm text-muted-foreground">
+                      No tasks
+                    </div>
+                  )}
                   {tasks[board].map((task, index) => (
                     <Draggable
                       key={task.$id}
                       draggableId={task.$id}
                       index={index}
                     >
-                      {(provided) => (
+                      {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                         >
-                          <KanbanCard issue={task} />
+                          <KanbanCard
+                            issue={task}
+                            isDragging={snapshot.isDragging}
+                          />
                         </div>
                       )}
                     </Draggable>
