@@ -1,6 +1,7 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,25 +75,35 @@ export const CreateTaskForm = ({
   };
 
   return (
-    <Card className="size-full border-none shadow-none">
-      <CardHeader className="flex p-7">
+    <Card className="size-full border-none shadow-none dark:bg-slate-800">
+      <CardHeader className="flex p-5">
         <CardTitle className="text-xl font-bold">Create new issue</CardTitle>
+        {/* Keep header descriptions consistent with other forms */}
+        <p className="text-sm text-muted-foreground">
+          Create a new issue and assign it to a project
+        </p>
       </CardHeader>
-      <div className="px-7">
+      <div className="px-5">
         <Separator />
       </div>
-      <CardContent className="p-7">
+      <CardContent className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Issue name</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Issue name <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter issue name" />
+                      <Input
+                        {...field}
+                        placeholder="Enter issue name"
+                        className="border border-gray-200 dark:border-gray-400"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -102,10 +113,17 @@ export const CreateTaskForm = ({
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Issue Description</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Issue Description{" "}
+                      <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter Description" />
+                      <Input
+                        {...field}
+                        placeholder="Enter Description"
+                        className="border border-gray-200 dark:border-gray-400"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,8 +151,10 @@ export const CreateTaskForm = ({
                 control={form.control}
                 name="dueDate"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Due Date <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <input
                         type="date"
@@ -150,7 +170,7 @@ export const CreateTaskForm = ({
                               : undefined,
                           )
                         }
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                        className="flex h-10 w-full rounded-md border border-gray-200 bg-background px-3 py-2 text-sm dark:border-gray-400"
                       />
                     </FormControl>
                     <FormMessage />
@@ -161,21 +181,22 @@ export const CreateTaskForm = ({
                 control={form.control}
                 name="assigneeId"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Assignee</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Assignee <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border border-gray-200 dark:border-gray-400">
                           <SelectValue
                             className="text-muted-foreground"
                             placeholder="Select an assignee"
                           />
                         </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
                       <SelectContent>
                         {memberOptions.map((member) => (
                           <SelectItem key={member.id} value={member.id}>
@@ -188,9 +209,9 @@ export const CreateTaskForm = ({
                             </div>
                           </SelectItem>
                         ))}
-                        <FormMessage />
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -198,21 +219,22 @@ export const CreateTaskForm = ({
                 control={form.control}
                 name="status"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Status <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border border-gray-200 dark:border-gray-400">
                           <SelectValue
                             className="text-muted-foreground"
                             placeholder="Select status"
                           />
                         </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
                       <SelectContent>
                         {Object.entries(IssueStatus).map(([key, value]) => (
                           <SelectItem key={value} value={value.toUpperCase()}>
@@ -222,9 +244,9 @@ export const CreateTaskForm = ({
                               .replace(/\b\w/g, (char) => char.toUpperCase())}
                           </SelectItem>
                         ))}
-                        <FormMessage />
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -232,21 +254,22 @@ export const CreateTaskForm = ({
                 control={form.control}
                 name="projectId"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Project</FormLabel>
+                  <FormItem className="md:col-span-1">
+                    <FormLabel>
+                      Project <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border border-gray-200 dark:border-gray-400">
                           <SelectValue
                             className="text-muted-foreground"
                             placeholder="Select a project"
                           />
                         </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
                       <SelectContent>
                         {projectOptions.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
@@ -260,27 +283,38 @@ export const CreateTaskForm = ({
                             </div>
                           </SelectItem>
                         ))}
-                        <FormMessage />
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            <Separator className="py-7" />
-            <div className="flex items-center justify-between">
+            <Separator className="my-4" />
+            <div className="mt-4 flex w-full items-center justify-between gap-4">
               <Button
                 type="button"
                 size="lg"
-                variant="secondary"
+                variant="destructive"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")}
+                className={cn(!onCancel && "invisible", "w-1/2")}
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg">
-                Create Issue
+              <Button
+                disabled={isPending}
+                type="submit"
+                className="w-1/2"
+                size="lg"
+              >
+                {isPending ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" /> Creating...
+                  </span>
+                ) : (
+                  "Create Issue"
+                )}
               </Button>
             </div>
           </form>

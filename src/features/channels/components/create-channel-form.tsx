@@ -4,7 +4,13 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   Select,
@@ -25,6 +31,7 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
@@ -89,14 +96,17 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
   };
 
   return (
-    <Card className="size-full border-none shadow-none">
-      <CardHeader className="flex p-7">
+    <Card className="size-full border-none shadow-none dark:bg-slate-800">
+      <CardHeader className="flex p-5">
         <CardTitle className="text-xl font-bold">Create new Room</CardTitle>
+        <CardDescription>
+          Create a new room and assign it to a project
+        </CardDescription>
       </CardHeader>
-      <div className="px-7">
+      <div className="px-5">
         <Separator />
       </div>
-      <CardContent className="p-7">
+      <CardContent className="p-5">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-y-4">
@@ -105,9 +115,16 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Room name</FormLabel>
+                    <FormLabel>
+                      Room name <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter room name" />
+                      <Input
+                        {...field}
+                        placeholder="Enter room name"
+                        disabled={isPending}
+                        className="border border-gray-200 dark:border-gray-400"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,15 +136,20 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                 name="roomType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Room Type</FormLabel>
+                    <FormLabel>
+                      Room Type <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       disabled={isPending}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="border-0 bg-zinc-300 capitalize text-black outline-none ring-offset-0 focus:ring-0 focus-visible:ring-offset-0">
-                          <SelectValue placeholder="Select a room type" />
+                        <SelectTrigger className="border border-gray-200 dark:border-gray-400">
+                          <SelectValue
+                            className="text-muted-foreground"
+                            placeholder="Select a room type"
+                          />
                         </SelectTrigger>
                       </FormControl>
 
@@ -153,15 +175,21 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                 name="projectId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Select a project</FormLabel>
+                    <FormLabel>
+                      Select a project
+                      <span className="ml-0.5 text-red-500">*</span>
+                    </FormLabel>
                     <Select
                       disabled={isPending}
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="border-0 bg-zinc-300 capitalize text-black outline-none ring-offset-0 focus:ring-0 focus-visible:ring-offset-0">
-                          <SelectValue placeholder="Select a project" />
+                        <SelectTrigger className="border border-gray-200 dark:border-gray-400">
+                          <SelectValue
+                            className="text-muted-foreground"
+                            placeholder="Select a project"
+                          />
                         </SelectTrigger>
                       </FormControl>
 
@@ -185,20 +213,30 @@ const CreateChannelForm = ({ onCancel }: CreateRoomFormProps) => {
                 )}
               />
             </div>
-            <Separator className="py-7" />
-            <div className="flex items-center justify-between">
+            <div className="mt-4 flex w-full items-center justify-between gap-4">
               <Button
                 type="button"
                 size="lg"
-                variant="secondary"
+                variant="destructive"
                 onClick={onCancel}
                 disabled={isPending}
-                className={cn(!onCancel && "invisible")}
+                className={cn(!onCancel && "invisible", "w-1/2")}
               >
                 Cancel
               </Button>
-              <Button disabled={isPending} type="submit" size="lg">
-                Create Room
+              <Button
+                disabled={isPending}
+                className="w-1/2"
+                type="submit"
+                size="lg"
+              >
+                {isPending ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="size-4 animate-spin" /> Creating...
+                  </span>
+                ) : (
+                  "Create Room"
+                )}
               </Button>
             </div>
           </form>

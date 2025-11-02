@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import Image from "next/image";
-import { ImageIcon, Info } from "lucide-react";
+import { ImageIcon, Info, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +60,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const router = useRouter();
   const { mutate, isPending } = useCreateProject();
   const { mutate: mutateEP, isPending: isPendingEP } = useAddExistingProject();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const newIconInputRef = useRef<HTMLInputElement>(null);
+  const existingIconInputRef = useRef<HTMLInputElement>(null);
   const form1 = useForm<CreateProjectSchema>({
     resolver: zodResolver(createProjectSchema.omit({ workspaceId: true })),
     defaultValues: {
@@ -127,13 +128,14 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   };
 
   return (
-    <Tabs defaultValue="create-new-project" className="w-full px-4 py-8">
-      <TabsList className="grid grid-cols-2">
+    <Tabs defaultValue="create-new-project" className="w-full px-6 py-8">
+      <TabsList className="grid grid-cols-2 gap-2">
         <TabsTrigger
           className={cn(
             "h-8 w-full dark:text-gray-100 lg:w-auto",
             "data-[state=active]:bg-slate-200 data-[state=active]:text-gray-900 data-[state=active]:dark:bg-slate-800",
             "outline-none data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950",
+            "focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:dark:ring-slate-700 focus-visible:dark:ring-offset-slate-900",
           )}
           value="create-new-project"
         >
@@ -144,6 +146,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
             "h-8 w-full dark:text-gray-100 lg:w-auto",
             "data-[state=active]:bg-slate-200 data-[state=active]:text-gray-900 data-[state=active]:dark:bg-slate-800",
             "outline-none data-[state=inactive]:bg-slate-100 data-[state=inactive]:dark:bg-gray-950",
+            "focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:dark:ring-slate-700 focus-visible:dark:ring-offset-slate-900",
           )}
           value="add-existing-project"
         >
@@ -156,6 +159,9 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
             <CardTitle className="text-xl font-bold">
               Create new project
             </CardTitle>
+            <CardDescription>
+              Create a new project and connect it to your workspace
+            </CardDescription>
           </CardHeader>
           <div className="px-7">
             <Separator />
@@ -181,7 +187,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                       </FormItem>
                     )}
                   />
-                  <div className="">
+                  <div>
                     <FormField
                       control={form1.control}
                       name="accessToken"
@@ -343,12 +349,12 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                           <div className="flex flex-col">
                             <p className="text-sm">Project Icon</p>
                             <p className="text-sm text-muted-foreground">
-                              JPEG, PNG, SVG, or JPEG, max 1 mb
+                              PNG, JPG, JPEG, or SVG, max 1MB
                             </p>
                             <input
                               hidden
                               type="file"
-                              ref={inputRef}
+                              ref={newIconInputRef}
                               disabled={isPending}
                               onChange={handleImageChange}
                               accept=".jpg, .jpeg, .png, .svg"
@@ -362,8 +368,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 disabled={isPending}
                                 onClick={() => {
                                   field.onChange(null);
-                                  if (inputRef.current)
-                                    inputRef.current.value = "";
+                                  if (newIconInputRef.current)
+                                    newIconInputRef.current.value = "";
                                 }}
                               >
                                 Remove Icon
@@ -375,7 +381,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                 variant="secondary"
                                 className="mt-2 w-fit"
                                 disabled={isPending}
-                                onClick={() => inputRef.current?.click()}
+                                onClick={() => newIconInputRef.current?.click()}
                               >
                                 Upload Icon
                               </Button>
@@ -389,19 +395,30 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
 
                 <Separator className="my-7" />
 
-                <div className="flex items-center justify-between">
+                <div className="mt-6 flex w-full items-center justify-between gap-4">
                   <Button
                     type="button"
                     size="lg"
-                    variant="secondary"
+                    variant="destructive"
                     onClick={onCancel}
                     disabled={isPending}
-                    className={cn(!onCancel && "invisible")}
+                    className={cn(!onCancel && "invisible", "w-1/2")}
                   >
                     Cancel
                   </Button>
-                  <Button disabled={isPending} type="submit">
-                    Create project
+                  <Button
+                    disabled={isPending}
+                    size="lg"
+                    className="w-1/2"
+                    type="submit"
+                  >
+                    {isPending ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" /> Creating...
+                      </span>
+                    ) : (
+                      "Create project"
+                    )}
                   </Button>
                 </div>
               </form>
@@ -443,7 +460,7 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                       </FormItem>
                     )}
                   />
-                  <div className="">
+                  <div>
                     <FormField
                       control={form2.control}
                       name="accessToken"
@@ -606,13 +623,13 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                             <div className="flex flex-col">
                               <p className="text-sm">Project Icon</p>
                               <p className="text-sm text-muted-foreground">
-                                JPEG, PNG, SVG, or JPEG, max 1 mb
+                                PNG, JPG, JPEG, or SVG, max 1MB
                               </p>
                               <input
                                 hidden
                                 type="file"
-                                ref={inputRef}
-                                disabled={isPending}
+                                ref={existingIconInputRef}
+                                disabled={isPendingEP}
                                 onChange={handleImageChangeForEp}
                                 accept=".jpg, .jpeg, .png, .svg"
                               />
@@ -622,11 +639,11 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                   type="button"
                                   variant="destructive"
                                   className="mt-2 w-fit"
-                                  disabled={isPending}
+                                  disabled={isPendingEP}
                                   onClick={() => {
                                     field.onChange(null);
-                                    if (inputRef.current)
-                                      inputRef.current.value = "";
+                                    if (existingIconInputRef.current)
+                                      existingIconInputRef.current.value = "";
                                   }}
                                 >
                                   Remove Icon
@@ -637,8 +654,10 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                                   type="button"
                                   variant="secondary"
                                   className="mt-2 w-fit"
-                                  disabled={isPending}
-                                  onClick={() => inputRef.current?.click()}
+                                  disabled={isPendingEP}
+                                  onClick={() =>
+                                    existingIconInputRef.current?.click()
+                                  }
                                 >
                                   Upload Icon
                                 </Button>
@@ -651,19 +670,30 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                   </div>
                 </div>
                 <Separator className="my-7" />
-                <div className="flex items-center justify-between">
+                <div className="mt-6 flex w-full items-center justify-between gap-4">
                   <Button
                     type="button"
                     size="lg"
-                    variant="secondary"
+                    variant="destructive"
                     onClick={onCancel}
                     disabled={isPendingEP}
-                    className={cn(!onCancel && "invisible")}
+                    className={cn(!onCancel && "invisible", "w-1/2")}
                   >
                     Cancel
                   </Button>
-                  <Button disabled={isPendingEP} type="submit">
-                    Add project
+                  <Button
+                    size="lg"
+                    disabled={isPendingEP}
+                    className="w-1/2"
+                    type="submit"
+                  >
+                    {isPendingEP ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" /> Adding...
+                      </span>
+                    ) : (
+                      "Add project"
+                    )}
                   </Button>
                 </div>
               </form>

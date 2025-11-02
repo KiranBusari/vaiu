@@ -164,7 +164,7 @@ export const ProjectIdClient = () => {
             href={`https://github.com/${project.owner}/${project.name}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-1 text-gray-500 hover:text-white"
+            className="ml-1 text-gray-500"
             title="View on GitHub"
           >
             <FaGithub className="size-5" />

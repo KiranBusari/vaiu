@@ -15,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -201,19 +200,13 @@ export const EditWorkspaceForm = ({
                   )}
                 />
               </div>
-              <Separator className="py-7" />
-              <div className="flex items-center justify-between">
+              <div className="mt-6 flex w-full items-center justify-center">
                 <Button
-                  type="button"
-                  size="lg"
-                  variant="secondary"
-                  onClick={onCancel}
                   disabled={isPending}
-                  className={cn(!onCancel && "invisible")}
+                  className="w-full"
+                  type="submit"
+                  size="lg"
                 >
-                  Cancel
-                </Button>
-                <Button disabled={isPending} type="submit" size="lg">
                   Save Changes
                 </Button>
               </div>
@@ -222,17 +215,16 @@ export const EditWorkspaceForm = ({
         </CardContent>
       </Card>
       <Card className="size-full border-none shadow-none">
-        <CardContent className="p-7">
+        <CardContent className="">
           <div className="flex flex-col">
             <h3 className="font-bold">Delete Workspace</h3>
             <p className="text-sm text-muted-foreground">
               Deleting a workspace is irreversible and will remove all
               associated data
             </p>
-            <Separator className="py-7" />
             <Button
-              className="ml-auto mt-6 w-fit"
-              size="sm"
+              className="ml-auto mt-6 w-full"
+              size="lg"
               variant="destructive"
               disabled={isPending || deletingWorkspace}
               onClick={handleDelete}
