@@ -164,7 +164,7 @@ export const ProjectIdClient = () => {
             href={`https://github.com/${project.owner}/${project.name}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-1 text-gray-500 hover:text-white"
+            className="ml-1 text-gray-500"
             title="View on GitHub"
           >
             <FaGithub className="size-5" />
@@ -222,16 +222,16 @@ export const ProjectIdClient = () => {
       {analytics && <Analytics data={analytics} />}
 
       <Tabs defaultValue="issues" className="w-full">
-        <TabsList>
+        <TabsList className="h-8 w-full overflow-hidden rounded-md border border-gray-200 bg-transparent p-0 dark:border-gray-400 lg:w-auto">
           <TabsTrigger
             value="issues"
-            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+            className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/15 data-[state=active]:bg-slate-200 data-[state=active]:text-[#1e1e1e] dark:bg-transparent dark:text-gray-200 dark:focus-visible:outline-white/20 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
           >
             Issues
           </TabsTrigger>
           <TabsTrigger
             value="pull-requests"
-            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+            className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/15 data-[state=active]:bg-slate-200 data-[state=active]:text-[#1e1e1e] dark:bg-transparent dark:text-gray-200 dark:focus-visible:outline-white/20 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
           >
             Pull Requests
           </TabsTrigger>

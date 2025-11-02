@@ -6,7 +6,14 @@ import { zValidator } from "@hono/zod-validator";
 import { getMember, isSuperAdmin } from "@/features/members/utilts";
 import { sessionMiddleware } from "@/lib/session-middleware";
 
-import { DATABASE_ID, MEMBERS_ID, PROJECTS_ID, ISSUES_ID, COMMENTS_ID, IMAGES_BUCKET_ID } from "@/config";
+import {
+  DATABASE_ID,
+  MEMBERS_ID,
+  PROJECTS_ID,
+  ISSUES_ID,
+  COMMENTS_ID,
+  IMAGES_BUCKET_ID,
+} from "@/config";
 import { createAdminClient } from "@/lib/appwrite";
 
 import { createCommentSchema, createTaskSchema } from "../schemas";
@@ -29,7 +36,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -164,7 +171,7 @@ const app = new Hono()
           PROJECTS_ID,
           [Query.equal("workspaceId", workspaceId)],
         );
-        userProjectIds = allProjects.documents.map(project => project.$id);
+        userProjectIds = allProjects.documents.map((project) => project.$id);
       }
 
       // If user is not a member of any projects, return empty result
@@ -217,18 +224,21 @@ const app = new Hono()
             );
 
             // Check for new issues to create
-            const openIssuesFromGit = issuesFromGit.data.filter(issue => issue.state === "open");
+            const openIssuesFromGit = issuesFromGit.data.filter(
+              (issue) => issue.state === "open",
+            );
             const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
-              // Check if issue already exists in DB by matching title
               return !issuesFromDb.documents.some(
-                (dbIssue) => dbIssue.name === gitIssue.title,
+                (dbIssue) =>
+                  dbIssue.number === gitIssue.number ||
+                  dbIssue.name === gitIssue.title,
               );
             });
 
             // Check for status updates (GitHub issues that were closed should be marked as DONE)
             const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
               const gitIssue = issuesFromGit.data.find(
-                (issue) => issue.title === dbIssue.name
+                (issue) => issue.title === dbIssue.name,
               );
 
               if (gitIssue) {
@@ -253,24 +263,32 @@ const app = new Hono()
               await Promise.all(
                 issuesToUpdate.map(async (dbIssue) => {
                   const gitIssue = issuesFromGit.data.find(
-                    (issue) => issue.title === dbIssue.name
+                    (issue) => issue.title === dbIssue.name,
                   );
 
                   if (gitIssue) {
-                    const newStatus = gitIssue.state === "closed" ? "DONE" : "TODO";
+                    const newStatus =
+                      gitIssue.state === "closed" ? "DONE" : "TODO";
                     const newNumber = dbIssue.number || gitIssue.number;
-                    return databases.updateDocument(DATABASE_ID, ISSUES_ID, dbIssue.$id, {
-                      status: newStatus,
-                      number: newNumber,
-                    });
+                    return databases.updateDocument(
+                      DATABASE_ID,
+                      ISSUES_ID,
+                      dbIssue.$id,
+                      {
+                        status: newStatus,
+                        number: newNumber,
+                      },
+                    );
                   }
-                })
+                }),
               );
             }
 
             // Create new issues if any
             if (issuesToCreate.length > 0) {
-              const findMemberByGithubUsername = async (githubUsername: string) => {
+              const findMemberByGithubUsername = async (
+                githubUsername: string,
+              ) => {
                 return githubUsername;
               };
 
@@ -278,20 +296,40 @@ const app = new Hono()
                 issuesToCreate.map(async (issue) => {
                   let assigneeId = null;
                   if (issue.assignee?.login) {
-                    assigneeId = await findMemberByGithubUsername(issue.assignee.login);
+                    assigneeId = await findMemberByGithubUsername(
+                      issue.assignee.login,
+                    );
                   }
 
-                  return databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
-                    name: issue.title,
-                    status: IssueStatus.TODO,
-                    workspaceId: project.workspaceId,
-                    projectId: projectId,
-                    assigneeId: assigneeId,
-                    dueDate: getRandomFutureDate(),
-                    position: 1000,
-                    description: issue.body || "",
-                  });
-                })
+                  // Re-check existence by projectId + number to avoid races
+                  const existingWithNumber = await databases
+                    .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+                      Query.equal("projectId", projectId),
+                      Query.equal("number", issue.number),
+                    ])
+                    .catch(() => ({ documents: [] as Issue[] }));
+
+                  if (existingWithNumber.documents.length > 0) {
+                    return existingWithNumber.documents[0];
+                  }
+
+                  return databases.createDocument(
+                    DATABASE_ID,
+                    ISSUES_ID,
+                    ID.unique(),
+                    {
+                      name: issue.title,
+                      status: IssueStatus.TODO,
+                      workspaceId: project.workspaceId,
+                      projectId: projectId,
+                      assigneeId: assigneeId,
+                      dueDate: getRandomFutureDate(),
+                      position: 1000,
+                      description: issue.body || "",
+                      number: issue.number,
+                    },
+                  );
+                }),
               );
             }
           }
@@ -493,7 +531,10 @@ const app = new Hono()
           // Check if user is a member of the project they're trying to create an issue for
           const userProjectIds = member.projectId || [];
           if (!userProjectIds.includes(projectId)) {
-            return c.json({ error: "Unauthorized access to this project" }, 403);
+            return c.json(
+              { error: "Unauthorized access to this project" },
+              403,
+            );
           }
 
           if (projects.documents[0].projectAdmin !== member.$id) {
@@ -524,6 +565,21 @@ const app = new Hono()
           title: name,
           body: description || "",
         });
+
+        // Idempotency guard: if an issue with the same GitHub number already exists for this project, return it
+        const existingByNumber = await databases
+          .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+            Query.equal("projectId", projectId),
+            Query.equal("number", issueInGit.data.number),
+          ])
+          .catch(() => ({ documents: [] as Issue[] }));
+
+        if (existingByNumber.documents.length > 0) {
+          return c.json({
+            data: existingByNumber.documents[0],
+            issue: issueInGit,
+          });
+        }
 
         const issue = await databases.createDocument<Issue>(
           DATABASE_ID,
@@ -559,8 +615,15 @@ const app = new Hono()
     async (c) => {
       const databases = c.get("databases");
       const user = c.get("user");
-      const { name, status, dueDate, projectId, assigneeId, description, comment } =
-        c.req.valid("json");
+      const {
+        name,
+        status,
+        dueDate,
+        projectId,
+        assigneeId,
+        description,
+        comment,
+      } = c.req.valid("json");
       const { issueId } = c.req.param();
 
       const exisistingTask = await databases.getDocument<Issue>(
@@ -622,16 +685,11 @@ const app = new Hono()
 
       // Create comment when moving to IN_REVIEW or DONE
       if ((status === "IN_REVIEW" || status === "DONE") && comment) {
-        await databases.createDocument(
-          DATABASE_ID,
-          COMMENTS_ID,
-          ID.unique(),
-          {
-            text: comment,
-            issueId,
-            userId: user.$id,
-          }
-        );
+        await databases.createDocument(DATABASE_ID, COMMENTS_ID, ID.unique(), {
+          text: comment,
+          issueId,
+          userId: user.$id,
+        });
       }
 
       const issue = await databases.updateDocument<Issue>(
@@ -687,7 +745,9 @@ const app = new Hono()
                 issue_number: githubIssue.number,
                 state: newState,
               });
-              console.log(`Updated GitHub issue #${githubIssue.number} state to ${newState}`);
+              console.log(
+                `Updated GitHub issue #${githubIssue.number} state to ${newState}`,
+              );
             }
           }
         }
@@ -778,7 +838,9 @@ const app = new Hono()
       }
     } catch {
       // If member not found by ID, it might be a GitHub username from fetched issues
-      console.log(`Member not found by ID ${issue.assigneeId}, treating as GitHub username`);
+      console.log(
+        `Member not found by ID ${issue.assigneeId}, treating as GitHub username`,
+      );
 
       // Create a fallback assignee object for GitHub usernames
       assignee = {
@@ -917,9 +979,13 @@ const app = new Hono()
         // Note: Moving to IN_REVIEW doesn't require admin permissions, but it would require
         // a comment in the individual PATCH route. Bulk update doesn't support comments.
         if (isMovingToReview) {
-          return c.json({
-            error: "Moving to In Review requires a comment. Please add a comment."
-          }, 400);
+          return c.json(
+            {
+              error:
+                "Moving to In Review requires a comment. Please add a comment.",
+            },
+            400,
+          );
         }
 
         if (isMovingToDone && (isSuper || member?.role === "ADMIN")) {
@@ -1015,7 +1081,10 @@ const app = new Hono()
           // Check if user is a member of the project
           const userProjectIds = member.projectId || [];
           if (!userProjectIds.includes(projectId)) {
-            return c.json({ error: "Unauthorized access to this project" }, 403);
+            return c.json(
+              { error: "Unauthorized access to this project" },
+              403,
+            );
           }
 
           // Only project admins can fetch issues from GitHub
@@ -1052,11 +1121,11 @@ const app = new Hono()
           // Only process open issues from GitHub
           if (gitIssue.state !== "open") return false;
 
-          // TODO: Need to discuss if same issue need to be allowed to create again
-
-          // Check if issue already exists in DB by matching title
+          // Prefer matching by GitHub issue number; fallback to title for older records
           return !issuesFromDb.documents.some(
-            (dbIssue) => dbIssue.name === gitIssue.title,
+            (dbIssue) =>
+              dbIssue.number === gitIssue.number ||
+              dbIssue.name === gitIssue.title,
           );
         });
 
@@ -1074,23 +1143,43 @@ const app = new Hono()
           issuesToCreate.map(async (issue) => {
             let assigneeId = null;
             if (issue.assignee?.login) {
-              assigneeId = await findMemberByGithubUsername(issue.assignee.login);
+              assigneeId = await findMemberByGithubUsername(
+                issue.assignee.login,
+              );
             }
 
-            return databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
-              name: issue.title,
-              status: IssueStatus.TODO,
-              workspaceId: project.workspaceId,
-              projectId: projectId,
-              assigneeId: assigneeId,
-              dueDate: getRandomFutureDate(),
-              position: 1000,
-              description: issue.body || "",
-            });
-          })
+            // Re-check existence by projectId + number to avoid race duplicates
+            const existingWithNumber = await databases
+              .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+                Query.equal("projectId", projectId),
+                Query.equal("number", issue.number),
+              ])
+              .catch(() => ({ documents: [] as Issue[] }));
+
+            if (existingWithNumber.documents.length > 0) {
+              return existingWithNumber.documents[0];
+            }
+
+            return databases.createDocument(
+              DATABASE_ID,
+              ISSUES_ID,
+              ID.unique(),
+              {
+                name: issue.title,
+                description: issue.body || "",
+                status: IssueStatus.TODO,
+                dueDate: getRandomFutureDate(),
+                workspaceId: project.workspaceId,
+                projectId: projectId,
+                assigneeId: assigneeId,
+                position: 1000,
+                number: issue.number,
+              },
+            );
+          }),
         );
 
-        console.log("New Issues:", newIssues);
+        // console.log("New Issues:", newIssues);
 
         return c.json({
           data: issuesFromGit,
@@ -1106,11 +1195,10 @@ const app = new Hono()
     const databases = c.get("databases");
     const { issueId } = c.req.param();
 
-    const comments = await databases.listDocuments(
-      DATABASE_ID,
-      COMMENTS_ID,
-      [Query.equal("issueId", issueId), Query.orderDesc("$createdAt")]
-    );
+    const comments = await databases.listDocuments(DATABASE_ID, COMMENTS_ID, [
+      Query.equal("issueId", issueId),
+      Query.orderDesc("$createdAt"),
+    ]);
 
     return c.json({ data: comments });
   })
@@ -1133,17 +1221,17 @@ const app = new Hono()
           const file = await storage.createFile(
             IMAGES_BUCKET_ID,
             ID.unique(),
-            attachment
-          )
+            attachment,
+          );
 
           const buffer: ArrayBuffer = await storage.getFilePreview(
             IMAGES_BUCKET_ID,
-            file.$id
-          )
+            file.$id,
+          );
 
           uploadedImage = `data:image/png;base64,${Buffer.from(buffer).toString(
-            "base64"
-          )}`
+            "base64",
+          )}`;
         }
 
         const comment = await databases.createDocument(
@@ -1156,7 +1244,7 @@ const app = new Hono()
             userId: user.$id,
             username: user.name,
             attachment: uploadedImage,
-          }
+          },
         );
 
         return c.json({ data: comment });
@@ -1164,7 +1252,7 @@ const app = new Hono()
         console.error("Error creating comment:", error);
         return c.json({ error: "Failed to create comment" }, 500);
       }
-    }
+    },
   );
 
 export default app;

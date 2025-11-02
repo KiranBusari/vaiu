@@ -201,16 +201,16 @@ export default function AnalyticsDashboard() {
     <div className="space-y-6 p-4 md:p-8">
       <h1 className="text-3xl font-bold tracking-tight">Project Analytics</h1>
       <Tabs defaultValue="pull-requests">
-        <TabsList>
+        <TabsList className="h-8 w-full overflow-hidden rounded-md border border-border bg-transparent p-0 lg:w-auto">
           <TabsTrigger
             value="pull-requests"
-            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+            className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[state=active]:bg-muted data-[state=active]:text-foreground lg:w-auto"
           >
             Pull Requests
           </TabsTrigger>
           <TabsTrigger
             value="issues"
-            className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+            className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[state=active]:bg-muted data-[state=active]:text-foreground lg:w-auto"
           >
             Issues
           </TabsTrigger>
@@ -271,7 +271,13 @@ const PullRequestAnalytics = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{}} className="h-[300px] w-full">
+            <ChartContainer
+              config={{
+                opened: { label: "Opened", color: "hsl(var(--chart-2))" },
+                merged: { label: "Merged", color: "hsl(var(--chart-1))" },
+              }}
+              className="h-[300px] w-full"
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={velocity}>
                   <CartesianGrid vertical={false} />
@@ -317,9 +323,11 @@ const PullRequestAnalytics = () => {
                   endAngle={-270}
                 >
                   <RadialBar
-                    background
                     dataKey="value"
-                    label={{ position: "middle", fill: "#fff" }}
+                    label={{
+                      position: "middle",
+                      fill: "hsl(var(--foreground))",
+                    }}
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -354,7 +362,12 @@ const PullRequestAnalytics = () => {
             <CardDescription>Top 10 authors by PR count.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{}} className="h-[300px] w-full">
+            <ChartContainer
+              config={{
+                count: { label: "PRs", color: "hsl(var(--chart-4))" },
+              }}
+              className="h-[300px] w-full"
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={authors} layout="vertical">
                   <CartesianGrid horizontal={false} />
@@ -539,7 +552,7 @@ export const DashboardSkeleton = () => (
 );
 
 const DashboardError = () => (
-  <div className="p-4 text-center text-red-500 md:p-8">
+  <div className="p-4 text-center text-destructive md:p-8">
     <h2 className="text-xl font-semibold">Failed to load analytics data.</h2>
     <p>
       Please ensure the project is correctly configured and try again later.
