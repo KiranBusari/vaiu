@@ -1,8 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Clock, AlertTriangle, CheckCircle, Lightbulb, Target } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Brain,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  Lightbulb,
+  Target,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +32,9 @@ interface AISummaryCardProps {
   className?: string;
 }
 
-const getImpactColor = (level: string): "destructive" | "default" | "secondary" => {
+const getImpactColor = (
+  level: string,
+): "destructive" | "default" | "secondary" => {
   switch (level) {
     case "high":
       return "destructive";
@@ -32,7 +47,9 @@ const getImpactColor = (level: string): "destructive" | "default" | "secondary" 
   }
 };
 
-const getUrgencyColor = (level: string): "destructive" | "default" | "secondary" => {
+const getUrgencyColor = (
+  level: string,
+): "destructive" | "default" | "secondary" => {
   switch (level) {
     case "high":
       return "destructive";
@@ -76,19 +93,19 @@ export const AISummaryCard = ({
         onError: () => {
           toast.error("Failed to generate AI summary");
         },
-      }
+      },
     );
   };
 
   return (
-    <Card className={`border-2 border-dashed border-gray-200 dark:border-gray-700 ${className}`}>
+    <Card
+      className={`border-2 border-dashed border-gray-200 dark:border-gray-700 ${className}`}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <CardTitle className="text-lg font-semibold">
-              AI Summary
-            </CardTitle>
+            <CardTitle className="text-lg font-semibold">AI Summary</CardTitle>
             <Badge variant="outline" className="text-xs">
               {type.toUpperCase()}
             </Badge>
@@ -98,7 +115,7 @@ export const AISummaryCard = ({
               onClick={handleGenerateSummary}
               disabled={isPending}
               size="sm"
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
             >
               {isPending ? "Analyzing..." : "Generate Summary"}
             </Button>
@@ -110,9 +127,9 @@ export const AISummaryCard = ({
       </CardHeader>
 
       {summary && (
-        <CardContent className="space-y-4">
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg border">
-            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <CardContent className="min-h-[70vh] w-full space-y-4">
+          <div className="rounded-lg border bg-gradient-to-r from-purple-50 to-blue-50 p-4 dark:from-purple-900/20 dark:to-blue-900/20">
+            <h4 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">
               Executive Summary
             </h4>
             <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -156,8 +173,10 @@ export const AISummaryCard = ({
             <ul className="space-y-1">
               {summary.keyPoints.map((point, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">{point}</span>
+                  <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {point}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -173,8 +192,10 @@ export const AISummaryCard = ({
             <ul className="space-y-1">
               {summary.recommendations.map((recommendation, index) => (
                 <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 mt-2 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">{recommendation}</span>
+                  <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-yellow-500" />
+                  <span className="text-gray-700 dark:text-gray-300">
+                    {recommendation}
+                  </span>
                 </li>
               ))}
             </ul>

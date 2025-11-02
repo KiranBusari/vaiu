@@ -635,7 +635,13 @@ const app = new Hono()
         existingProject.projectAdmin === member.$id; // Project admin
 
       if (!canDelete) {
-        return c.json({ error: "Only workspace admins or project admins can delete projects" }, 403);
+        return c.json(
+          {
+            error:
+              "Only workspace admins or project admins can delete projects",
+          },
+          403,
+        );
       }
     }
 
@@ -666,7 +672,8 @@ const app = new Hono()
         if (!canDeleteWithMembers) {
           return c.json(
             {
-              error: "You must be a workspace admin, project admin, or super admin to delete a project with members"
+              error:
+                "You must be a workspace admin, project admin, or super admin to delete a project with members",
             },
             400,
           );
@@ -676,16 +683,11 @@ const app = new Hono()
       // If super admin, workspace admin, or project admin is deleting, remove all members from project first
       for (const member of projectMembers.documents) {
         const updatedProjectIds = member.projectId.filter(
-          (id: string) => id !== projectId
+          (id: string) => id !== projectId,
         );
-        await databases.updateDocument(
-          DATABASE_ID,
-          MEMBERS_ID,
-          member.$id,
-          {
-            projectId: updatedProjectIds,
-          },
-        );
+        await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
+          projectId: updatedProjectIds,
+        });
       }
     }
 
@@ -699,7 +701,8 @@ const app = new Hono()
     if (projectIssues.total > 0) {
       return c.json(
         {
-          error: "Cannot delete project that has issues. Please delete all issues first."
+          error:
+            "Cannot delete project that has issues. Please delete all issues first.",
         },
         400,
       );
@@ -964,7 +967,13 @@ const app = new Hono()
           project.projectAdmin === currentMember.$id; // Project admin
 
         if (!canRemove) {
-          return c.json({ error: "Only workspace admins or project admins can remove members" }, 403);
+          return c.json(
+            {
+              error:
+                "Only workspace admins or project admins can remove members",
+            },
+            403,
+          );
         }
       }
 
@@ -976,7 +985,10 @@ const app = new Hono()
       );
 
       // Check if member is part of this project
-      if (!memberToRemove.projectId || !memberToRemove.projectId.includes(projectId)) {
+      if (
+        !memberToRemove.projectId ||
+        !memberToRemove.projectId.includes(projectId)
+      ) {
         return c.json({ error: "Member is not part of this project" }, 400);
       }
 
@@ -989,32 +1001,31 @@ const app = new Hono()
 
       // Prevent removing the project admin - they must transfer admin role first
       if (project.projectAdmin === memberId) {
-        return c.json({
-          error: "Cannot remove the project admin. Please transfer admin role to another member first or delete the entire project."
-        }, 400);
+        return c.json(
+          {
+            error:
+              "Cannot remove the project admin. Please transfer admin role to another member first or delete the entire project.",
+          },
+          400,
+        );
       }
 
       // Remove the project from member's projectId array
       const updatedProjectIds = memberToRemove.projectId.filter(
-        (id: string) => id !== projectId
+        (id: string) => id !== projectId,
       );
 
       // Update member with new project list
-      await databases.updateDocument(
-        DATABASE_ID,
-        MEMBERS_ID,
-        memberId,
-        {
-          projectId: updatedProjectIds,
-        },
-      );
+      await databases.updateDocument(DATABASE_ID, MEMBERS_ID, memberId, {
+        projectId: updatedProjectIds,
+      });
 
       return c.json({
         data: {
           message: "Member removed from project successfully",
           memberId,
           projectId,
-        }
+        },
       });
     } catch (error) {
       console.error("Failed to remove member from project:", error);

@@ -83,26 +83,26 @@ export const TaskViewSwitcher = ({
             </Button>
           </div>
         </div>
-        <div className="mt-4 flex w-full items-center justify-start gap-y-2 lg:flex-row">
-          <TabsList className="w-full lg:w-auto">
+        <div className="mt-4 flex w-full flex-col items-center justify-start gap-2 lg:flex-row">
+          <TabsList className="h-8 w-full overflow-hidden rounded-md border border-gray-200 bg-transparent p-0 dark:border-gray-400 lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+              className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/15 data-[state=active]:bg-slate-200 data-[state=active]:text-[#1e1e1e] dark:bg-transparent dark:text-gray-200 dark:focus-visible:outline-white/20 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="table"
             >
               Table
             </TabsTrigger>
           </TabsList>
-          <TabsList className="w-full lg:w-auto">
+          <TabsList className="h-8 w-full overflow-hidden rounded-md border border-gray-200 bg-transparent p-0 dark:border-gray-400 lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+              className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/15 data-[state=active]:bg-slate-200 data-[state=active]:text-[#1e1e1e] dark:bg-transparent dark:text-gray-200 dark:focus-visible:outline-white/20 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="kanban"
             >
               Kanban
             </TabsTrigger>
           </TabsList>
-          <TabsList className="w-full lg:w-auto">
+          <TabsList className="h-8 w-full overflow-hidden rounded-md border border-gray-200 bg-transparent p-0 dark:border-gray-400 lg:w-auto">
             <TabsTrigger
-              className="h-8 w-full bg-slate-200 dark:bg-gray-800 dark:text-gray-200 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
+              className="h-8 w-full rounded-none bg-transparent px-3 text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black/15 data-[state=active]:bg-slate-200 data-[state=active]:text-[#1e1e1e] dark:bg-transparent dark:text-gray-200 dark:focus-visible:outline-white/20 dark:data-[state=active]:bg-slate-200 dark:data-[state=active]:text-[#1e1e1e] lg:w-auto"
               value="calendar"
             >
               Calendar

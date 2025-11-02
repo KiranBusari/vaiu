@@ -228,9 +228,10 @@ const app = new Hono()
               (issue) => issue.state === "open",
             );
             const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
-              // Check if issue already exists in DB by matching title
               return !issuesFromDb.documents.some(
-                (dbIssue) => dbIssue.name === gitIssue.title,
+                (dbIssue) =>
+                  dbIssue.number === gitIssue.number ||
+                  dbIssue.name === gitIssue.title,
               );
             });
 
@@ -300,6 +301,18 @@ const app = new Hono()
                     );
                   }
 
+                  // Re-check existence by projectId + number to avoid races
+                  const existingWithNumber = await databases
+                    .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+                      Query.equal("projectId", projectId),
+                      Query.equal("number", issue.number),
+                    ])
+                    .catch(() => ({ documents: [] as Issue[] }));
+
+                  if (existingWithNumber.documents.length > 0) {
+                    return existingWithNumber.documents[0];
+                  }
+
                   return databases.createDocument(
                     DATABASE_ID,
                     ISSUES_ID,
@@ -313,6 +326,7 @@ const app = new Hono()
                       dueDate: getRandomFutureDate(),
                       position: 1000,
                       description: issue.body || "",
+                      number: issue.number,
                     },
                   );
                 }),
@@ -551,6 +565,21 @@ const app = new Hono()
           title: name,
           body: description || "",
         });
+
+        // Idempotency guard: if an issue with the same GitHub number already exists for this project, return it
+        const existingByNumber = await databases
+          .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+            Query.equal("projectId", projectId),
+            Query.equal("number", issueInGit.data.number),
+          ])
+          .catch(() => ({ documents: [] as Issue[] }));
+
+        if (existingByNumber.documents.length > 0) {
+          return c.json({
+            data: existingByNumber.documents[0],
+            issue: issueInGit,
+          });
+        }
 
         const issue = await databases.createDocument<Issue>(
           DATABASE_ID,
@@ -1092,11 +1121,11 @@ const app = new Hono()
           // Only process open issues from GitHub
           if (gitIssue.state !== "open") return false;
 
-          // TODO: Need to discuss if same issue need to be allowed to create again
-
-          // Check if issue already exists in DB by matching title
+          // Prefer matching by GitHub issue number; fallback to title for older records
           return !issuesFromDb.documents.some(
-            (dbIssue) => dbIssue.name === gitIssue.title,
+            (dbIssue) =>
+              dbIssue.number === gitIssue.number ||
+              dbIssue.name === gitIssue.title,
           );
         });
 
@@ -1117,6 +1146,18 @@ const app = new Hono()
               assigneeId = await findMemberByGithubUsername(
                 issue.assignee.login,
               );
+            }
+
+            // Re-check existence by projectId + number to avoid race duplicates
+            const existingWithNumber = await databases
+              .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+                Query.equal("projectId", projectId),
+                Query.equal("number", issue.number),
+              ])
+              .catch(() => ({ documents: [] as Issue[] }));
+
+            if (existingWithNumber.documents.length > 0) {
+              return existingWithNumber.documents[0];
             }
 
             return databases.createDocument(
