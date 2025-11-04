@@ -180,7 +180,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 disabled={isPending}
                 type="submit"
                 size="lg"
-                className="w-1/2 bg-slate-200 text-black hover:bg-slate-300 dark:bg-gray-800 dark:text-gray-100"
+                className="w-1/2 bg-slate-200 text-black dark:bg-[#000] dark:text-gray-100"
               >
                 Create workspace
               </Button>
