@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -231,19 +230,13 @@ export const EditProjectForm = ({
                   )}
                 />
               </div>
-              <Separator className="py-7" />
-              <div className="flex items-center justify-between">
+              <div className="mt-6 flex items-center justify-between">
                 <Button
-                  type="button"
-                  size="lg"
-                  variant="secondary"
-                  onClick={onCancel}
                   disabled={isPending}
-                  className={cn(!onCancel && "invisible")}
+                  className="w-full"
+                  type="submit"
+                  size="lg"
                 >
-                  Cancel
-                </Button>
-                <Button disabled={isPending} type="submit" size="lg">
                   Save Changes
                 </Button>
               </div>
@@ -276,10 +269,9 @@ export const EditProjectForm = ({
                 </Button>
               </div>
             </div>
-            <Separator className="py-7" />
             <Button
-              className="ml-auto mt-6 w-fit"
-              size="sm"
+              className="ml-auto mt-6 w-full"
+              size="lg"
               variant="destructive"
               disabled={isPending || resetingInviteCode}
               onClick={handleResetInviteCode}
@@ -297,10 +289,9 @@ export const EditProjectForm = ({
               Deleting a project is irreversible and will remove all associated
               data
             </p>
-            <Separator className="py-7" />
             <Button
-              className="ml-auto mt-6 w-fit"
-              size="sm"
+              className="ml-auto mt-6 w-full"
+              size="lg"
               variant="destructive"
               disabled={isPending || deletingProject}
               onClick={handleDelete}

@@ -1,13 +1,22 @@
+"use client";
+
 import Footer from "@/components/Footer";
 import { SidebarComponent } from "@/components/Sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import React from "react";
+import { usePathname } from "next/navigation";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+
+  // Hide sidebar when creating workspace or joining a project
+  const hideSidebar =
+    pathname.includes("/workspaces/create") || pathname.includes("/join/");
+
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <SidebarComponent />
+        {!hideSidebar && <SidebarComponent />}
         <main className="flex-1 overflow-auto">
           {children}
           <Footer />
@@ -17,4 +26,4 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default layout;
+export default Layout;

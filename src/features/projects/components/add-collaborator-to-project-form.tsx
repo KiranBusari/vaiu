@@ -87,18 +87,14 @@ export const AddCollaboratorToProjectForm = ({
                 )}
               />
             </div>
-            <Separator className="py-7" />
-            <div className="flex items-center justify-between">
+            <div className="mt-6 flex w-full items-center justify-between gap-6">
               <Button
                 type="button"
                 size="lg"
-                variant="secondary"
+                variant="destructive"
                 onClick={onCancel}
                 disabled={isPending}
-                className={
-                  cn(!onCancel && "invisible") +
-                  " bg-slate-200 text-black dark:bg-slate-800 dark:text-white"
-                }
+                className={cn(!onCancel && "invisible") + "w-1/2"}
               >
                 Cancel
               </Button>
@@ -106,7 +102,7 @@ export const AddCollaboratorToProjectForm = ({
                 disabled={isPending}
                 type="submit"
                 size="lg"
-                className="bg-slate-200 text-black hover:hidden dark:bg-slate-800 dark:text-white"
+                className="w-1/2 bg-slate-200 text-black hover:bg-slate-300 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
               >
                 Add Collaborator
               </Button>

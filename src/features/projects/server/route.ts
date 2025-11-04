@@ -200,12 +200,13 @@ const app = new Hono()
         await databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
           name: issue.title,
           description: issue.body,
+          status,
+          dueDate: issue.created_at,
           workspaceId,
           projectId: project.$id,
           assigneeId: issue?.assignee?.login,
-          status,
           position: newPosition,
-          dueDate: issue.created_at,
+          number: issue.number,
         });
       });
 
