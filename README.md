@@ -34,6 +34,15 @@ RepoX is a collaborative platform for managing GitHub repositories, tracking iss
 - **Risk Assessment**: Automatic risk level evaluation and merge recommendations
 - **Context-Aware**: Analysis considers project patterns and team conventions
 
+### AI-Powered Test Generation
+
+- **Automated Test Creation**: AI generates comprehensive test cases based on PR changes
+- **Multiple Test Types**: Unit, integration, E2E, security, performance, accessibility, API, and component tests
+- **Smart Analysis**: Considers changed files, commit messages, PR description, and code context
+- **Ready-to-Use Code**: Copy-paste test code with proper syntax and framework recommendations
+- **Prioritized Testing**: Tests marked as critical, high, medium, or low priority
+- **Coverage Insights**: Identifies testing focus areas and provides testing strategy recommendations
+
 ### Communication
 
 - Audio and video rooms for team collaboration

@@ -10,7 +10,8 @@ import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
 import { ID } from "node-appwrite";
 import { AIReview } from "../types-ai";
-import { analyzeWithGemini, PRAnalysisInput } from "@/lib/ai-service";
+import { AITestGeneration } from "../types-tests";
+import { analyzeWithGemini, PRAnalysisInput, generateTestCases } from "@/lib/ai-service";
 
 const app = new Hono()
   .get(
@@ -295,6 +296,59 @@ const app = new Hono()
         return c.json({ error: "Failed to generate AI review" }, 500);
       }
     }
+  )
+  .post(
+    "/:projectId/generate-tests/:prNumber",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, prNumber } = c.req.param();
+
+      try {
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        const octokit = new Octokit({
+          auth: project.accessToken,
+        });
+
+        // Generate AI test cases
+        const testGeneration = await generateAITests({
+          projectId,
+          prNumber: parseInt(prNumber),
+          project,
+          octokit,
+        });
+
+        return c.json({ success: true, tests: testGeneration });
+      } catch (error) {
+        console.error("Test generation failed:", error);
+        return c.json({ error: "Failed to generate test cases" }, 500);
+      }
+    }
   );
 
 async function generateAIReview({
@@ -387,6 +441,97 @@ async function generateAIReview({
     return aiReview;
   } catch (error) {
     console.error("Failed to generate AI review:", error);
+    throw error;
+  }
+}
+
+async function generateAITests({
+  projectId,
+  prNumber,
+  project,
+  octokit,
+}: {
+  projectId: string;
+  prNumber: number;
+  project: Project;
+  octokit: Octokit;
+}): Promise<AITestGeneration> {
+  try {
+    // Fetch PR details
+    const { data: pr } = await octokit.rest.pulls.get({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Fetch PR files and changes
+    const { data: files } = await octokit.rest.pulls.listFiles({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Fetch commit messages for context
+    const { data: commits } = await octokit.rest.pulls.listCommits({
+      owner: project.owner,
+      repo: project.name,
+      pull_number: prNumber,
+    });
+
+    // Get repository context
+    const { data: repo } = await octokit.rest.repos.get({
+      owner: project.owner,
+      repo: project.name,
+    });
+
+    const testGenerationInput = {
+      prTitle: pr.title,
+      prDescription: pr.body || "No description provided",
+      prUrl: pr.html_url,
+      files: files.map(file => ({
+        filename: file.filename,
+        status: file.status as "added" | "modified" | "removed",
+        additions: file.additions,
+        deletions: file.deletions,
+        patch: file.patch,
+      })),
+      commitMessages: commits.map(commit => commit.commit.message),
+      author: pr.user?.login || "unknown",
+      repoInfo: {
+        language: repo.language,
+        name: `${project.owner}/${project.name}`,
+      },
+    };
+
+    const testGeneration = await generateTestCases(testGenerationInput);
+
+    const aiTestGeneration: AITestGeneration = {
+      id: ID.unique(),
+      prNumber: pr.number,
+      prTitle: pr.title,
+      prUrl: pr.html_url,
+      projectId,
+      summary: testGeneration.summary,
+      scenarios: testGeneration.scenarios,
+      context: {
+        filesChanged: files.map(file => ({
+          filename: file.filename,
+          status: file.status as "added" | "modified" | "removed",
+          additions: file.additions,
+          deletions: file.deletions,
+        })),
+        commitMessages: commits.map(commit => commit.commit.message),
+        prDescription: pr.body || "No description provided",
+        author: pr.user?.login || "unknown",
+      },
+      testingStrategy: testGeneration.testingStrategy,
+      createdAt: new Date().toISOString(),
+      generationVersion: "1.0.0",
+    };
+
+    return aiTestGeneration;
+  } catch (error) {
+    console.error("Failed to generate AI tests:", error);
     throw error;
   }
 }

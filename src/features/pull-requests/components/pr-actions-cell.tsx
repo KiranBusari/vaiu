@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain } from "lucide-react";
+import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain, FlaskConical } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -21,6 +21,8 @@ import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useGenerateAISummary } from "@/features/ai-summaries/api/use-generate-ai-summary";
 import { AISummaryCard } from "@/features/ai-summaries/components/ai-summary-card";
+import { useGenerateTestCases } from "../api/use-generate-tests";
+import { TestGenerationResults } from "./test-generation-results";
 
 interface PRActionsCellProps {
   pr: PullRequest;
@@ -29,6 +31,7 @@ interface PRActionsCellProps {
 export function PRActionsCell({ pr }: PRActionsCellProps) {
   const [showAIReview, setShowAIReview] = useState(false);
   const [showAISummary, setShowAISummary] = useState(false);
+  const [showTestGeneration, setShowTestGeneration] = useState(false);
   const projectId = useProjectId();
   const workspaceId = useWorkspaceId();
 
@@ -61,6 +64,31 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
 
   const handleAISummary = () => {
     setShowAISummary(true);
+  };
+
+  const {
+    generateTests,
+    isLoading: isTestsLoading,
+    data: testsData,
+    reset: resetTests,
+  } = useGenerateTestCases();
+
+  const handleGenerateTests = async () => {
+    try {
+      resetTests();
+      setShowTestGeneration(true);
+      await generateTests({
+        projectId,
+        prNumber: pr.number,
+      });
+    } catch (error) {
+      console.error("Failed to generate tests:", error);
+    }
+  };
+
+  const handleCloseTests = () => {
+    setShowTestGeneration(false);
+    resetTests();
   };
 
   return (
@@ -111,6 +139,18 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
             )}
             {isSummaryPending ? "Analyzing..." : "AI Summary"}
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleGenerateTests}
+            disabled={isTestsLoading}
+            className="flex items-center"
+          >
+            {isTestsLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <FlaskConical className="mr-2 h-4 w-4" />
+            )}
+            {isTestsLoading ? "Generating..." : "Generate Tests"}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -153,6 +193,32 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
             identifier={pr.number}
             title={pr.title}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Generation Dialog */}
+      <Dialog open={showTestGeneration} onOpenChange={setShowTestGeneration}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="sr-only">
+            <DialogTitle>AI Test Generation Results</DialogTitle>
+          </DialogHeader>
+          {isTestsLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-4">Generating tests...</span>
+            </div>
+          ) : testsData?.tests ? (
+            <div>
+              <TestGenerationResults
+                testGeneration={testsData.tests}
+                onClose={handleCloseTests}
+              />
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <p>No test data available.</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
