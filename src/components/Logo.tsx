@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 export const Logo = ({ className }: { className?: string }) => {
   return (
     <div
-      className={cn(`flex h-200 w-20 items-center justify-center`, className)}
+      className={cn(
+        `flex w-full items-center justify-center object-cover`,
+        className,
+      )}
     >
       <Image
         src={"/logo.png"}
