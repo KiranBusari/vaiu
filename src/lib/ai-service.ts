@@ -378,3 +378,218 @@ function createFallbackAnalysis(input: PRAnalysisInput) {
     }
   };
 }
+
+// Test Generation Types
+export interface TestGenerationInput {
+  prTitle: string;
+  prDescription: string;
+  prUrl: string;
+  files: Array<{
+    filename: string;
+    status: "added" | "modified" | "removed";
+    additions: number;
+    deletions: number;
+    patch?: string;
+  }>;
+  commitMessages: string[];
+  author: string;
+  repoInfo: {
+    language: string | null;
+    name: string;
+  };
+}
+
+export async function generateTestCases(input: TestGenerationInput) {
+  const prompt = createTestGenerationPrompt(input);
+  
+  try {
+    const result = await client.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt
+    });
+
+    const text = result.text;
+    
+    if (!text) {
+      throw new Error('No response text from Gemini API');
+    }
+    
+    // Clean the response text to extract JSON from markdown code blocks
+    let cleanedText = text.trim();
+    
+    if (cleanedText.startsWith('```json')) {
+      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    const testGeneration = JSON.parse(cleanedText);
+    return testGeneration;
+  } catch (error) {
+    console.error("Test generation failed:", error);
+    return createFallbackTestGeneration(input);
+  }
+}
+
+function createTestGenerationPrompt(input: TestGenerationInput): string {
+  const filesInfo = input.files.map(file => {
+    const patchPreview = file.patch ? file.patch.substring(0, 500) : 'No patch available';
+    return `- **${file.filename}** (${file.status}): +${file.additions} -${file.deletions}\n  ${patchPreview}${file.patch && file.patch.length > 500 ? '...' : ''}`;
+  }).join('\n');
+
+  const commitInfo = input.commitMessages.map(msg => `  - ${msg}`).join('\n');
+
+  return `
+You are an expert software testing engineer specializing in automated test case generation.
+
+## Pull Request Context:
+- **Repository**: ${input.repoInfo.name}
+- **Language**: ${input.repoInfo.language || 'Unknown'}
+- **PR Title**: ${input.prTitle}
+- **PR Description**: ${input.prDescription}
+- **Author**: ${input.author}
+- **PR URL**: ${input.prUrl}
+
+## Files Changed (${input.files.length} files):
+${filesInfo}
+
+## Commit Messages:
+${commitInfo}
+
+Your task is to generate comprehensive test cases for this pull request. Analyze the code changes and generate test scenarios that cover:
+1. **Unit Tests**: Test individual functions, methods, and components
+2. **Integration Tests**: Test how components work together
+3. **End-to-End Tests**: Test complete user workflows
+4. **Edge Cases**: Test boundary conditions, error handling, and unusual inputs
+5. **Security Tests**: Test for potential security vulnerabilities
+6. **Performance Tests**: Test for performance regressions (if applicable)
+7. **Accessibility Tests**: Test for accessibility compliance (for UI changes)
+8. **API Tests**: Test API endpoints (for backend changes)
+
+Return a JSON response with this exact structure:
+
+{
+  "summary": {
+    "totalTestsGenerated": <number>,
+    "testsByType": {
+      "unit": <number>,
+      "integration": <number>,
+      "e2e": <number>,
+      "performance": <number>,
+      "security": <number>,
+      "accessibility": <number>,
+      "api": <number>,
+      "component": <number>
+    },
+    "criticalTests": <number>,
+    "filesWithTests": <number>,
+    "estimatedTestingTime": "<time estimate>",
+    "coverageAreas": ["<area1>", "<area2>"],
+    "recommendations": ["<recommendation1>", "<recommendation2>"]
+  },
+  "scenarios": [
+    {
+      "id": "<unique-id>",
+      "feature": "<feature name>",
+      "description": "<scenario description>",
+      "affectedFiles": ["<file1>", "<file2>"],
+      "riskLevel": "<low|medium|high>",
+      "testCases": [
+        {
+          "id": "<unique-id>",
+          "title": "<test title>",
+          "description": "<test description>",
+          "type": "<unit|integration|e2e|performance|security|accessibility|api|component>",
+          "targetFile": "<file being tested>",
+          "suggestedTestFile": "<suggested test file path>",
+          "testCode": "<actual test code>",
+          "prerequisites": ["<dependency1>", "<setup requirement1>"],
+          "priority": "<low|medium|high|critical>",
+          "reasoning": "<why this test is important>",
+          "edgeCases": ["<edge case 1>", "<edge case 2>"]
+        }
+      ]
+    }
+  ],
+  "testingStrategy": {
+    "approach": "<overall testing approach>",
+    "focusAreas": ["<area1>", "<area2>"],
+    "testingFramework": "<recommended framework>",
+    "runInstructions": "<how to run the tests>"
+  }
+}
+
+## Guidelines:
+1. **Be Specific**: Generate actual, runnable test code with proper syntax for the language
+2. **Be Practical**: Focus on tests that catch real bugs and regressions
+3. **Be Comprehensive**: Cover happy paths, edge cases, and error conditions
+4. **Prioritize**: Mark critical tests that must pass before merging
+5. **Context-Aware**: Consider the file changes and commit messages
+6. **Framework-Appropriate**: Use common testing frameworks for the language (Jest/Vitest for JS/TS, pytest for Python, JUnit for Java, etc.)
+7. **Realistic**: Generate tests that developers would actually write
+
+**IMPORTANT**: 
+- Return ONLY the raw JSON object, no markdown formatting, no code blocks.
+- Start directly with { and end with }.
+- Make sure test code is properly escaped in JSON strings.
+- Generate at least 3-5 test cases per scenario.
+- Focus on the most impactful tests first.
+`;
+}
+
+function createFallbackTestGeneration(input: TestGenerationInput) {
+  return {
+    summary: {
+      totalTestsGenerated: 0,
+      testsByType: {
+        unit: 0,
+        integration: 0,
+        e2e: 0,
+        performance: 0,
+        security: 0,
+        accessibility: 0,
+        api: 0,
+        component: 0,
+      },
+      criticalTests: 0,
+      filesWithTests: 0,
+      estimatedTestingTime: "Unknown",
+      coverageAreas: ["Manual test generation needed"],
+      recommendations: [
+        "AI test generation failed",
+        "Please manually create test cases",
+        "Review the changed files and write appropriate tests"
+      ]
+    },
+    scenarios: [
+      {
+        id: "fallback-1",
+        feature: "Manual Testing Required",
+        description: "AI-powered test generation is unavailable. Please manually review the PR and create appropriate test cases.",
+        affectedFiles: input.files.map(f => f.filename),
+        riskLevel: "high" as const,
+        testCases: [
+          {
+            id: "fallback-test-1",
+            title: "Manual test creation needed",
+            description: "Review the code changes and create appropriate tests manually",
+            type: "unit" as const,
+            targetFile: input.files[0]?.filename || "unknown",
+            suggestedTestFile: "tests/manual-tests.spec.ts",
+            testCode: "// AI generation failed - please write tests manually",
+            prerequisites: ["Testing framework"],
+            priority: "high" as const,
+            reasoning: "AI test generation is unavailable",
+            edgeCases: ["Manual review required"]
+          }
+        ]
+      }
+    ],
+    testingStrategy: {
+      approach: "Manual test creation recommended",
+      focusAreas: ["All changed files"],
+      testingFramework: "Use your project's testing framework",
+      runInstructions: "Follow your project's testing guidelines"
+    }
+  };
+}

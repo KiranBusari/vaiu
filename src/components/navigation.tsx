@@ -122,9 +122,10 @@ export const Navigation = () => {
                 <Link
                   href={contributionHref}
                   className={cn(
-                    "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
-                    isActive &&
-                      "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                    "m-0.5 flex w-full items-center gap-2.5 rounded-md p-2.5 text-left font-medium transition",
+                    isActive
+                      ? "bg-slate-200 text-primary hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
                   )}
                 >
                   <Icon className="size-5" />
@@ -140,9 +141,10 @@ export const Navigation = () => {
             <Link
               href={absoluteHref}
               className={cn(
-                "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
-                isActive &&
-                  "bg-slate-50 text-primary shadow-sm hover:opacity-100 dark:bg-slate-800",
+                "m-0.5 flex items-center gap-2.5 rounded-md p-2.5 font-medium transition",
+                isActive
+                  ? "bg-slate-200 text-primary hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
               )}
             >
               <Icon className="size-5" />
