@@ -522,13 +522,27 @@ function TestCard({ test, onEdit, onDelete }: TestCardProps) {
     );
 }
 
+interface TestFormData {
+    title: string;
+    description: string;
+    type: TestType;
+    targetFile: string;
+    suggestedTestFile: string;
+    testCode: string;
+    prerequisites: string[];
+    priority: "low" | "medium" | "high" | "critical";
+    reasoning: string;
+    edgeCases: string[];
+    scenarioId: string;
+}
+
 interface TestFormDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     test: PersistedTestCase | null;
     projectId: string;
     prNumber: number;
-    onSubmit: (data: any) => Promise<void>;
+    onSubmit: (data: TestFormData) => Promise<void>;
 }
 
 function TestFormDialog({

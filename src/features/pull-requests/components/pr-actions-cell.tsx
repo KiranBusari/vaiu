@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useState } from "react";
 import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain, FlaskConical, FileText } from "lucide-react";

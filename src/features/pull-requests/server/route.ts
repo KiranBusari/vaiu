@@ -8,7 +8,7 @@ import { Project } from "@/features/projects/types";
 import { Octokit, RequestError } from "octokit";
 import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
-import { ID, Query } from "node-appwrite";
+import { ID, Query, type Databases } from "node-appwrite";
 import { AIReview } from "../types-ai";
 import { AITestGeneration, PersistedTestCase, TestType } from "../types-tests";
 import { analyzeWithGemini, PRAnalysisInput, generateTestCases } from "@/lib/ai-service";
@@ -343,8 +343,11 @@ const app = new Hono()
           octokit,
         });
 
-        // Persist the generated tests to database
-        await persistGeneratedTests(databases, testGeneration, projectId, parseInt(prNumber));
+        // Persist the generated tests to database asynchronously (don't wait)
+        persistGeneratedTests(databases, testGeneration, projectId, parseInt(prNumber))
+          .catch(error => {
+            console.error("Failed to persist tests to database:", error);
+          });
 
         return c.json({ success: true, tests: testGeneration });
       } catch (error) {
@@ -609,37 +612,43 @@ async function generateAIReview({
   octokit: Octokit;
 }): Promise<AIReview> {
   try {
-    // Fetch PR details
-    const { data: pr } = await octokit.rest.pulls.get({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
+    // Fetch all GitHub data in parallel for faster response
+    const [
+      { data: pr },
+      { data: files },
+      { data: reviews },
+      { data: repo }
+    ] = await Promise.all([
+      octokit.rest.pulls.get({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.pulls.listFiles({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.pulls.listReviews({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.repos.get({
+        owner: project.owner,
+        repo: project.name,
+      })
+    ]);
 
-    // Fetch PR files and changes
-    const { data: files } = await octokit.rest.pulls.listFiles({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
-
-    // Fetch PR reviews and comments for context
-    const { data: reviews } = await octokit.rest.pulls.listReviews({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
-
-    // Get repository context
-    const { data: repo } = await octokit.rest.repos.get({
-      owner: project.owner,
-      repo: project.name,
-    });
+    // Optimize: Sort files by changes (most changed first) and limit to top 30
+    const sortedFiles = files
+      .sort((a, b) => b.changes - a.changes)
+      .slice(0, 30);
 
     const analysisInput: PRAnalysisInput = {
       prTitle: pr.title,
       prDescription: pr.body || "No description provided",
-      files: files.map(file => ({
+      files: sortedFiles.map(file => ({
         filename: file.filename,
         additions: file.additions,
         deletions: file.deletions,
@@ -651,10 +660,10 @@ async function generateAIReview({
       repoName: `${project.owner}/${project.name}`,
       baseBranch: pr.base.ref,
       headBranch: pr.head.ref,
-      existingReviews: reviews.map(review => ({
+      existingReviews: reviews.slice(0, 5).map(review => ({ // Limit to 5 most recent reviews
         user: review.user?.login || 'Unknown',
         state: review.state,
-        body: review.body || '',
+        body: review.body ? review.body.substring(0, 300) : '', // Limit review body to 300 chars
         submittedAt: review.submitted_at || new Date().toISOString()
       })),
       repoInfo: {
@@ -703,38 +712,44 @@ async function generateAITests({
   octokit: Octokit;
 }): Promise<AITestGeneration> {
   try {
-    // Fetch PR details
-    const { data: pr } = await octokit.rest.pulls.get({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
+    // Fetch all GitHub data in parallel for faster response
+    const [
+      { data: pr },
+      { data: files },
+      { data: commits },
+      { data: repo }
+    ] = await Promise.all([
+      octokit.rest.pulls.get({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.pulls.listFiles({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.pulls.listCommits({
+        owner: project.owner,
+        repo: project.name,
+        pull_number: prNumber,
+      }),
+      octokit.rest.repos.get({
+        owner: project.owner,
+        repo: project.name,
+      })
+    ]);
 
-    // Fetch PR files and changes
-    const { data: files } = await octokit.rest.pulls.listFiles({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
-
-    // Fetch commit messages for context
-    const { data: commits } = await octokit.rest.pulls.listCommits({
-      owner: project.owner,
-      repo: project.name,
-      pull_number: prNumber,
-    });
-
-    // Get repository context
-    const { data: repo } = await octokit.rest.repos.get({
-      owner: project.owner,
-      repo: project.name,
-    });
+    // Optimize: Sort files by changes (most changed first) and limit to top 30
+    const sortedFiles = files
+      .sort((a, b) => b.changes - a.changes)
+      .slice(0, 30);
 
     const testGenerationInput = {
       prTitle: pr.title,
       prDescription: pr.body || "No description provided",
       prUrl: pr.html_url,
-      files: files.map(file => ({
+      files: sortedFiles.map(file => ({
         filename: file.filename,
         status: file.status as "added" | "modified" | "removed",
         additions: file.additions,
@@ -784,7 +799,7 @@ async function generateAITests({
 
 // Helper to persist generated tests
 async function persistGeneratedTests(
-  databases: any,
+  databases: Databases,
   testGeneration: AITestGeneration,
   projectId: string,
   prNumber: number

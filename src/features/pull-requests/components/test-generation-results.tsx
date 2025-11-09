@@ -115,30 +115,23 @@ export function TestGenerationResults({
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">AI Test Generation</h2>
-            <Badge variant="outline" className="gap-1">
-              <Sparkles className="h-3 w-3" />
-              AI Powered
-            </Badge>
-          </div>
-          <Link
-            href={testGeneration.prUrl}
-            target="_blank"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-          >
-            PR #{testGeneration.prNumber}: {testGeneration.prTitle}
-            <ExternalLink className="h-3 w-3" />
-          </Link>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <FlaskConical className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold">AI Test Generation</h2>
+          <Badge variant="outline" className="gap-1">
+            <Sparkles className="h-3 w-3" />
+            AI Powered
+          </Badge>
         </div>
-        {onClose && (
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
-        )}
+        <Link
+          href={testGeneration.prUrl}
+          target="_blank"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+        >
+          PR #{testGeneration.prNumber}: {testGeneration.prTitle}
+          <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
 
       <Card>

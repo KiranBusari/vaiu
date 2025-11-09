@@ -209,7 +209,7 @@ function createAnalysisPrompt(input: PRAnalysisInput): string {
     additions: file.additions,
     deletions: file.deletions,
     changes: file.changes,
-    patch: file.patch?.substring(0, 2000), // Limit patch size
+    patch: file.patch?.substring(0, 1000), // Limit patch size
     status: file.status
   }));
 
