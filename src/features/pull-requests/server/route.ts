@@ -3,14 +3,14 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { getMember, isSuperAdmin } from "@/features/members/utilts";
-import { DATABASE_ID, PROJECTS_ID, PR_ID } from "@/config";
+import { DATABASE_ID, PROJECTS_ID, PR_ID, AI_TESTS_ID } from "@/config";
 import { Project } from "@/features/projects/types";
 import { Octokit, RequestError } from "octokit";
 import { PrStatus } from "../types";
 import { createPrSchema } from "../schemas";
-import { ID } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { AIReview } from "../types-ai";
-import { AITestGeneration } from "../types-tests";
+import { AITestGeneration, PersistedTestCase, TestType } from "../types-tests";
 import { analyzeWithGemini, PRAnalysisInput, generateTestCases } from "@/lib/ai-service";
 
 const app = new Hono()
@@ -343,10 +343,256 @@ const app = new Hono()
           octokit,
         });
 
+        // Persist the generated tests to database
+        await persistGeneratedTests(databases, testGeneration, projectId, parseInt(prNumber));
+
         return c.json({ success: true, tests: testGeneration });
       } catch (error) {
         console.error("Test generation failed:", error);
         return c.json({ error: "Failed to generate test cases" }, 500);
+      }
+    }
+  )
+  .get(
+    "/:projectId/tests/:prNumber",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, prNumber } = c.req.param();
+
+      try {
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        const tests = await databases.listDocuments<PersistedTestCase>(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          [
+            Query.equal("projectId", projectId),
+            Query.equal("prNumber", parseInt(prNumber)),
+            Query.equal("isDeleted", false),
+          ]
+        );
+
+        return c.json({ data: tests.documents });
+      } catch (error) {
+        console.error("Failed to fetch tests:", error);
+        return c.json({ error: "Failed to fetch tests" }, 500);
+      }
+    }
+  )
+  .post(
+    "/:projectId/tests/:prNumber",
+    sessionMiddleware,
+    zValidator("json", z.object({
+      title: z.string(),
+      description: z.string(),
+      type: z.nativeEnum(TestType),
+      targetFile: z.string(),
+      suggestedTestFile: z.string(),
+      testCode: z.string(),
+      prerequisites: z.array(z.string()),
+      priority: z.enum(["low", "medium", "high", "critical"]),
+      reasoning: z.string(),
+      edgeCases: z.array(z.string()),
+      scenarioId: z.string(),
+    })),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, prNumber } = c.req.param();
+      const testData = c.req.valid("json");
+
+      try {
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        const newTest = await databases.createDocument(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          ID.unique(),
+          {
+            projectId,
+            prNumber: parseInt(prNumber),
+            ...testData,
+            isCustom: true,
+            isDeleted: false,
+          }
+        );
+
+        return c.json({ data: newTest });
+      } catch (error) {
+        console.error("Failed to create test:", error);
+        return c.json({ error: "Failed to create test" }, 500);
+      }
+    }
+  )
+  .patch(
+    "/:projectId/tests/:testId",
+    sessionMiddleware,
+    zValidator("json", z.object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+      type: z.nativeEnum(TestType).optional(),
+      targetFile: z.string().optional(),
+      suggestedTestFile: z.string().optional(),
+      testCode: z.string().optional(),
+      prerequisites: z.array(z.string()).optional(),
+      priority: z.enum(["low", "medium", "high", "critical"]).optional(),
+      reasoning: z.string().optional(),
+      edgeCases: z.array(z.string()).optional(),
+    })),
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, testId } = c.req.param();
+      const updates = c.req.valid("json");
+
+      try {
+        const test = await databases.getDocument<PersistedTestCase>(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          testId
+        );
+
+        if (!test) {
+          return c.json({ error: "Test not found" }, 404);
+        }
+
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        const updatedTest = await databases.updateDocument(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          testId,
+          updates
+        );
+
+        return c.json({ data: updatedTest });
+      } catch (error) {
+        console.error("Failed to update test:", error);
+        return c.json({ error: "Failed to update test" }, 500);
+      }
+    }
+  )
+  .delete(
+    "/:projectId/tests/:testId",
+    sessionMiddleware,
+    async (c) => {
+      const databases = c.get("databases");
+      const user = c.get("user");
+      const { projectId, testId } = c.req.param();
+
+      try {
+        const test = await databases.getDocument<PersistedTestCase>(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          testId
+        );
+
+        if (!test) {
+          return c.json({ error: "Test not found" }, 404);
+        }
+
+        const project = await databases.getDocument<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          projectId
+        );
+
+        if (!project) {
+          return c.json({ error: "Project not found" }, 404);
+        }
+
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+        if (!isSuper) {
+          const member = await getMember({
+            databases,
+            workspaceId: project.workspaceId,
+            userId: user.$id,
+          });
+
+          if (!member) {
+            return c.json({ error: "Unauthorized" }, 401);
+          }
+        }
+
+        await databases.deleteDocument(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          testId
+        );
+
+        return c.json({ success: true });
+      } catch (error) {
+        console.error("Failed to delete test:", error);
+        return c.json({ error: "Failed to delete test" }, 500);
       }
     }
   );
@@ -534,6 +780,43 @@ async function generateAITests({
     console.error("Failed to generate AI tests:", error);
     throw error;
   }
+}
+
+// Helper to persist generated tests
+async function persistGeneratedTests(
+  databases: any,
+  testGeneration: AITestGeneration,
+  projectId: string,
+  prNumber: number
+) {
+  const testPromises = testGeneration.scenarios.flatMap(scenario =>
+    scenario.testCases.map(testCase =>
+      databases.createDocument(
+        DATABASE_ID,
+        AI_TESTS_ID,
+        ID.unique(),
+        {
+          projectId,
+          prNumber,
+          scenarioId: scenario.id,
+          title: testCase.title,
+          description: testCase.description,
+          type: testCase.type,
+          targetFile: testCase.targetFile,
+          suggestedTestFile: testCase.suggestedTestFile,
+          testCode: testCase.testCode,
+          prerequisites: testCase.prerequisites,
+          priority: testCase.priority,
+          reasoning: testCase.reasoning,
+          edgeCases: testCase.edgeCases,
+          isCustom: false,
+          isDeleted: false,
+        }
+      )
+    )
+  );
+
+  await Promise.all(testPromises);
 }
 
 

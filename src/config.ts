@@ -10,4 +10,5 @@ export const MESSAGE_ID = process.env.NEXT_PUBLIC_APPWRITE_MESSAGES_ID!;
 export const PR_ID = process.env.NEXT_PUBLIC_APPWRITE_PR_ID!;
 export const NOTIFICATIONS_ID = process.env.NEXT_PUBLIC_APPWRITE_NOTIFICATIONS_ID!;
 export const COMMENTS_ID = process.env.NEXT_PUBLIC_APPWRITE_COMMENTS_ID!;
+export const AI_TESTS_ID = process.env.NEXT_PUBLIC_APPWRITE_AI_TESTS_ID!;
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;

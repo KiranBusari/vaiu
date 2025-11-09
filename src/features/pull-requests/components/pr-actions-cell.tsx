@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain, FlaskConical } from "lucide-react";
+import { MoreHorizontal, Bot, ExternalLink, Loader2, Brain, FlaskConical, FileText } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -23,6 +23,7 @@ import { useGenerateAISummary } from "@/features/ai-summaries/api/use-generate-a
 import { AISummaryCard } from "@/features/ai-summaries/components/ai-summary-card";
 import { useGenerateTestCases } from "../api/use-generate-tests";
 import { TestGenerationResults } from "./test-generation-results";
+import { TestManagementTab } from "./test-management-tab";
 
 interface PRActionsCellProps {
   pr: PullRequest;
@@ -32,6 +33,7 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const [showAIReview, setShowAIReview] = useState(false);
   const [showAISummary, setShowAISummary] = useState(false);
   const [showTestGeneration, setShowTestGeneration] = useState(false);
+  const [showTestManagement, setShowTestManagement] = useState(false);
   const projectId = useProjectId();
   const workspaceId = useWorkspaceId();
 
@@ -151,6 +153,16 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
             )}
             {isTestsLoading ? "Generating..." : "Generate Tests"}
           </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onClick={() => setShowTestManagement(true)}
+            className="flex items-center"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            View Tests
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -219,6 +231,16 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
               <p>No test data available.</p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Test Management Dialog */}
+      <Dialog open={showTestManagement} onOpenChange={setShowTestManagement}>
+        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Test Management</DialogTitle>
+          </DialogHeader>
+          <TestManagementTab projectId={projectId} prNumber={pr.number} />
         </DialogContent>
       </Dialog>
     </>
