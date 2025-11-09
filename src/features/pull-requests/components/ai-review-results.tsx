@@ -31,7 +31,7 @@ interface AIReviewResultsProps {
   onClose?: () => void;
 }
 
-export function AIReviewResults({ review, onClose }: AIReviewResultsProps) {
+export function AIReviewResults({ review }: AIReviewResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
 
   const getRiskVariant = (

@@ -45,8 +45,7 @@ interface TestGenerationResultsProps {
 }
 
 export function TestGenerationResults({
-  testGeneration,
-  onClose,
+  testGeneration
 }: TestGenerationResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
   const [copiedId, setCopiedId] = useState<string | null>(null);
