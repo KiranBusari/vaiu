@@ -45,8 +45,7 @@ interface TestGenerationResultsProps {
 }
 
 export function TestGenerationResults({
-  testGeneration,
-  onClose,
+  testGeneration
 }: TestGenerationResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -115,30 +114,23 @@ export function TestGenerationResults({
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">AI Test Generation</h2>
-            <Badge variant="outline" className="gap-1">
-              <Sparkles className="h-3 w-3" />
-              AI Powered
-            </Badge>
-          </div>
-          <Link
-            href={testGeneration.prUrl}
-            target="_blank"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-          >
-            PR #{testGeneration.prNumber}: {testGeneration.prTitle}
-            <ExternalLink className="h-3 w-3" />
-          </Link>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <FlaskConical className="h-6 w-6 text-primary" />
+          <h2 className="text-2xl font-bold">AI Test Generation</h2>
+          <Badge variant="outline" className="gap-1">
+            <Sparkles className="h-3 w-3" />
+            AI Powered
+          </Badge>
         </div>
-        {onClose && (
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
-        )}
+        <Link
+          href={testGeneration.prUrl}
+          target="_blank"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+        >
+          PR #{testGeneration.prNumber}: {testGeneration.prTitle}
+          <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
 
       <Card>
@@ -208,18 +200,20 @@ export function TestGenerationResults({
 
           <Separator />
 
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Coverage Areas:</p>
-            <div className="flex flex-wrap gap-2">
-              {testGeneration.summary.coverageAreas.map((area, index) => (
-                <Badge key={index} variant="secondary">
-                  {area}
-                </Badge>
-              ))}
+          {testGeneration.summary.coverageAreas && Array.isArray(testGeneration.summary.coverageAreas) && testGeneration.summary.coverageAreas.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Coverage Areas:</p>
+              <div className="flex flex-wrap gap-2">
+                {testGeneration.summary.coverageAreas.map((area, index) => (
+                  <Badge key={index} variant="secondary">
+                    {area}
+                  </Badge>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {testGeneration.summary.recommendations.length > 0 && (
+          {testGeneration.summary.recommendations && Array.isArray(testGeneration.summary.recommendations) && testGeneration.summary.recommendations.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium">Recommendations:</p>
               <ul className="space-y-1">
@@ -261,14 +255,16 @@ export function TestGenerationResults({
                     {scenario.riskLevel.toUpperCase()} RISK
                   </Badge>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {scenario.affectedFiles.map((file, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      <FileCode className="mr-1 h-3 w-3" />
-                      {file}
-                    </Badge>
-                  ))}
-                </div>
+                {scenario.affectedFiles && Array.isArray(scenario.affectedFiles) && scenario.affectedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {scenario.affectedFiles.map((file, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        <FileCode className="mr-1 h-3 w-3" />
+                        {file}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <ScrollArea className="max-h-[600px]">
@@ -303,18 +299,20 @@ export function TestGenerationResults({
                 </p>
               </div>
 
-              <div>
-                <h3 className="mb-2 font-semibold">Focus Areas</h3>
-                <div className="flex flex-wrap gap-2">
-                  {testGeneration.testingStrategy.focusAreas.map(
-                    (area, index) => (
-                      <Badge key={index} variant="secondary">
-                        {area}
-                      </Badge>
-                    ),
-                  )}
+              {testGeneration.testingStrategy.focusAreas && Array.isArray(testGeneration.testingStrategy.focusAreas) && testGeneration.testingStrategy.focusAreas.length > 0 && (
+                <div>
+                  <h3 className="mb-2 font-semibold">Focus Areas</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {testGeneration.testingStrategy.focusAreas.map(
+                      (area, index) => (
+                        <Badge key={index} variant="secondary">
+                          {area}
+                        </Badge>
+                      ),
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <h3 className="mb-2 font-semibold">Recommended Framework</h3>
@@ -453,7 +451,7 @@ function TestCaseCard({
               </p>
             </div>
 
-            {testCase.prerequisites.length > 0 && (
+            {testCase.prerequisites && Array.isArray(testCase.prerequisites) && testCase.prerequisites.length > 0 && (
               <div>
                 <h4 className="mb-2 text-sm font-semibold">Prerequisites</h4>
                 <div className="flex flex-wrap gap-2">
@@ -466,7 +464,7 @@ function TestCaseCard({
               </div>
             )}
 
-            {testCase.edgeCases.length > 0 && (
+            {testCase.edgeCases && Array.isArray(testCase.edgeCases) && testCase.edgeCases.length > 0 && (
               <div>
                 <h4 className="mb-2 text-sm font-semibold">
                   Edge Cases Covered
@@ -502,9 +500,11 @@ function TestCaseCard({
                   )}
                 </Button>
               </div>
-              <ScrollArea className="max-h-[400px]">
-                <pre className="rounded-lg border border-border bg-muted p-4 text-xs">
-                  <code>{testCase.testCode}</code>
+              <ScrollArea className="h-[400px] w-full">
+                <pre className="max-w-full overflow-x-auto rounded-lg border border-border bg-muted p-4 pb-6 text-xs font-mono leading-relaxed">
+                  <code className="block whitespace-pre-wrap break-words">
+                    {testCase.testCode.replace(/\\n/g, '\n')}
+                  </code>
                 </pre>
               </ScrollArea>
             </div>

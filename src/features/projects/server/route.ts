@@ -201,7 +201,7 @@ const app = new Hono()
           name: issue.title,
           description: issue.body,
           status,
-          dueDate: issue.created_at,
+          dueDate: new Date().toISOString(),
           workspaceId,
           projectId: project.$id,
           assigneeId: issue?.assignee?.login,

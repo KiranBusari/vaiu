@@ -31,7 +31,7 @@ interface AIReviewResultsProps {
   onClose?: () => void;
 }
 
-export function AIReviewResults({ review, onClose }: AIReviewResultsProps) {
+export function AIReviewResults({ review }: AIReviewResultsProps) {
   const [activeTab, setActiveTab] = useState("summary");
 
   const getRiskVariant = (
@@ -71,26 +71,19 @@ export function AIReviewResults({ review, onClose }: AIReviewResultsProps) {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <GitPullRequest className="h-5 w-5 text-primary" />
-            <h2 className="text-2xl font-bold">AI Code Review</h2>
-          </div>
-          <Link
-            href={review.prUrl}
-            target="_blank"
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
-          >
-            PR #{review.prNumber}: {review.prTitle}
-            <ExternalLink className="h-3 w-3" />
-          </Link>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <GitPullRequest className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-bold">AI Code Review</h2>
         </div>
-        {onClose && (
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
-        )}
+        <Link
+          href={review.prUrl}
+          target="_blank"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary"
+        >
+          PR #{review.prNumber}: {review.prTitle}
+          <ExternalLink className="h-3 w-3" />
+        </Link>
       </div>
 
       {/* Summary Card */}

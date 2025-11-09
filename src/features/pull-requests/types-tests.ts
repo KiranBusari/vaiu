@@ -82,3 +82,24 @@ export interface TestGenerationStatus {
   message?: string;
   error?: string;
 }
+
+// Persisted test types
+export interface PersistedTestCase extends TestCase {
+  $id: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $collectionId: string;
+  $databaseId: string;
+  $permissions: string[];
+  projectId: string;
+  prNumber: number;
+  scenarioId: string;
+  isCustom: boolean; // User created vs AI generated
+  isDeleted: boolean;
+}
+
+export interface TestManagementData {
+  tests: PersistedTestCase[];
+  scenarios: TestScenario[];
+  summary: TestGenerationSummary;
+}
