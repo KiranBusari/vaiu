@@ -143,7 +143,7 @@ export const SignUpCard = () => {
       <div className="hidden px-7">
         <Separator />
       </div>
-      <CardContent className="hidden flex-col gap-y-2 p-7">
+      <CardContent className="flex-col gap-y-2 p-7">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
