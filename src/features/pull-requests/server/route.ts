@@ -10,8 +10,6 @@ import { PrStatus } from "../types";
 import {
   getAccessToken,
   listPullRequests,
-  getPullRequest,
-  listPullRequestFiles,
   createPullRequest,
 } from "@/lib/github-api";
 import { createPrSchema } from "../schemas";

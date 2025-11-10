@@ -55,9 +55,9 @@ export async function GET(request: NextRequest) {
             updatedAt: new Date().toISOString(),
           }
         );
-      } catch (error: any) {
+      } catch (error) {
         // If document already exists (code 409), update it instead
-        if (error.code === 409) {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 409) {
           await databases.updateDocument(
             DATABASE_ID,
             USER_PROFILES_ID,

@@ -53,7 +53,11 @@ export async function GET(request: NextRequest) {
             }),
         });
 
-        const tokenData = await tokenResponse.json();
+        const tokenData = await tokenResponse.json() as {
+            access_token?: string;
+            error?: string;
+            error_description?: string;
+        };
 
         if (tokenData.error) {
             console.error("GitHub token exchange error:", tokenData);
@@ -99,7 +103,7 @@ export async function GET(request: NextRequest) {
                 );
                 userId = newUser.$id;
                 isNewUser = true;
-                
+
                 // Mark email as verified since GitHub has already verified it
                 await users.updateEmailVerification(userId, true);
             }
@@ -157,9 +161,9 @@ export async function GET(request: NextRequest) {
                     profileData
                 );
             }
-        } catch (error: any) {
+        } catch (error) {
             // If document doesn't exist (for existing users), create it
-            if (error.code === 404) {
+            if (error && typeof error === 'object' && 'code' in error && error.code === 404) {
                 try {
                     await databases.createDocument(
                         DATABASE_ID,
