@@ -45,7 +45,8 @@ export const SignInCard = () => {
       <div className="px-7">
         <Separator />
       </div>
-      <CardContent className="p-7">
+      {/* Email/Password login - temporarily hidden */}
+      <CardContent className="hidden p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField

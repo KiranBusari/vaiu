@@ -20,7 +20,13 @@ import { createCommentSchema, createTaskSchema } from "../schemas";
 import { Issue, IssueStatus } from "../types";
 import { Project } from "@/features/projects/types";
 import { Member } from "@/features/members/types";
-import { Octokit } from "octokit";
+import {
+  getAccessToken,
+  getAuthenticatedUser,
+  listRepositoryIssues,
+  updateIssue,
+  createIssue,
+} from "@/lib/github-api";
 
 function getRandomFutureDate(): string {
   /**
@@ -36,7 +42,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -87,19 +93,27 @@ const app = new Hono()
       }
     }
 
-    const octokit = new Octokit({
-      auth: existingProject.accessToken,
-    });
+    // Get GitHub OAuth access token
+    const githubToken = await getAccessToken(user.$id);
+    if (!githubToken) {
+      return c.json({
+        error: "GitHub account not connected. Cannot delete issue."
+      }, 400);
+    }
 
-    const owner = await octokit.rest.users.getAuthenticated();
+    const owner = await getAuthenticatedUser(githubToken);
+    if (!owner) {
+      return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+    }
 
-    const issuesFromGit = await octokit.rest.issues.listForRepo({
-      owner: owner.data.login,
-      repo: existingProject.name,
-    });
+    const issuesFromGit = await listRepositoryIssues(
+      githubToken,
+      owner.login,
+      existingProject.name
+    );
     // console.log("Issues from Git:", issuesFromGit);
 
-    const currentIssue = issuesFromGit.data.find(
+    const currentIssue = issuesFromGit.find(
       (issue) => issue.title === issuesFromDb.name,
     );
 
@@ -109,12 +123,13 @@ const app = new Hono()
 
     const issue_number = currentIssue.number;
 
-    await octokit.rest.issues.update({
-      owner: owner.data.login,
-      repo: existingProject.name,
-      issue_number: issue_number,
-      state: "closed",
-    });
+    await updateIssue(
+      githubToken,
+      owner.login,
+      existingProject.name,
+      issue_number,
+      { state: "closed" }
+    );
 
     await databases.deleteDocument(DATABASE_ID, ISSUES_ID, issueId);
     return c.json({
@@ -205,132 +220,136 @@ const app = new Hono()
             projectId,
           );
 
-          if (project.accessToken) {
-            const octokit = new Octokit({
-              auth: project.accessToken,
-            });
+          // Get GitHub OAuth access token
+          const githubToken = await getAccessToken(user.$id);
 
-            const owner = await octokit.rest.users.getAuthenticated();
-            const issuesFromGit = await octokit.rest.issues.listForRepo({
-              owner: owner.data.login,
-              repo: project.name,
-              state: "all", // Get both open and closed issues
-            });
-
-            const issuesFromDb = await databases.listDocuments<Issue>(
-              DATABASE_ID,
-              ISSUES_ID,
-              [Query.equal("projectId", projectId)],
-            );
-
-            // Check for new issues to create
-            const openIssuesFromGit = issuesFromGit.data.filter(
-              (issue) => issue.state === "open",
-            );
-            const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
-              return !issuesFromDb.documents.some(
-                (dbIssue) =>
-                  dbIssue.number === gitIssue.number ||
-                  dbIssue.name === gitIssue.title,
-              );
-            });
-
-            // Check for status updates (GitHub issues that were closed should be marked as DONE)
-            const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
-              const gitIssue = issuesFromGit.data.find(
-                (issue) => issue.title === dbIssue.name,
+          if (githubToken) {
+            const owner = await getAuthenticatedUser(githubToken);
+            if (!owner) {
+              console.error("Failed to authenticate with GitHub for auto-sync");
+            } else {
+              const issuesFromGit = await listRepositoryIssues(
+                githubToken,
+                owner.login,
+                project.name,
+                "all" // Get both open and closed issues
               );
 
-              if (gitIssue) {
-                // If GitHub issue is closed but DB issue is not DONE, update it
-                if (gitIssue.state === "closed" && dbIssue.status !== "DONE") {
-                  return true;
+              const issuesFromDb = await databases.listDocuments<Issue>(
+                DATABASE_ID,
+                ISSUES_ID,
+                [Query.equal("projectId", projectId)],
+              );
+
+              // Check for new issues to create
+              const openIssuesFromGit = issuesFromGit.filter(
+                (issue) => issue.state === "open",
+              );
+              const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
+                return !issuesFromDb.documents.some(
+                  (dbIssue) =>
+                    dbIssue.number === gitIssue.number ||
+                    dbIssue.name === gitIssue.title,
+                );
+              });
+
+              // Check for status updates (GitHub issues that were closed should be marked as DONE)
+              const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
+                const gitIssue = issuesFromGit.find(
+                  (issue) => issue.title === dbIssue.name,
+                );
+
+                if (gitIssue) {
+                  // If GitHub issue is closed but DB issue is not DONE, update it
+                  if (gitIssue.state === "closed" && dbIssue.status !== "DONE") {
+                    return true;
+                  }
+                  // If GitHub issue is open but DB issue is DONE, update it
+                  if (gitIssue.state === "open" && dbIssue.status === "DONE") {
+                    return true;
+                  }
+                  // If DB issue is missing the number, update it
+                  if (!dbIssue.number && gitIssue.number) {
+                    return true;
+                  }
                 }
-                // If GitHub issue is open but DB issue is DONE, update it
-                if (gitIssue.state === "open" && dbIssue.status === "DONE") {
-                  return true;
-                }
-                // If DB issue is missing the number, update it
-                if (!dbIssue.number && gitIssue.number) {
-                  return true;
-                }
+                return false;
+              });
+
+              // Update existing issues with status changes
+              if (issuesToUpdate.length > 0) {
+                await Promise.all(
+                  issuesToUpdate.map(async (dbIssue) => {
+                    const gitIssue = issuesFromGit.find(
+                      (issue) => issue.title === dbIssue.name,
+                    );
+
+                    if (gitIssue) {
+                      const newStatus =
+                        gitIssue.state === "closed" ? "DONE" : "TODO";
+                      const newNumber = dbIssue.number || gitIssue.number;
+                      return databases.updateDocument(
+                        DATABASE_ID,
+                        ISSUES_ID,
+                        dbIssue.$id,
+                        {
+                          status: newStatus,
+                          number: newNumber,
+                        },
+                      );
+                    }
+                  }),
+                );
               }
-              return false;
-            });
 
-            // Update existing issues with status changes
-            if (issuesToUpdate.length > 0) {
-              await Promise.all(
-                issuesToUpdate.map(async (dbIssue) => {
-                  const gitIssue = issuesFromGit.data.find(
-                    (issue) => issue.title === dbIssue.name,
-                  );
+              // Create new issues if any
+              if (issuesToCreate.length > 0) {
+                const findMemberByGithubUsername = async (
+                  githubUsername: string,
+                ) => {
+                  return githubUsername;
+                };
 
-                  if (gitIssue) {
-                    const newStatus =
-                      gitIssue.state === "closed" ? "DONE" : "TODO";
-                    const newNumber = dbIssue.number || gitIssue.number;
-                    return databases.updateDocument(
+                await Promise.all(
+                  issuesToCreate.map(async (issue) => {
+                    let assigneeId = null;
+                    if (issue.assignee?.login) {
+                      assigneeId = await findMemberByGithubUsername(
+                        issue.assignee.login,
+                      );
+                    }
+
+                    // Re-check existence by projectId + number to avoid races
+                    const existingWithNumber = await databases
+                      .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
+                        Query.equal("projectId", projectId),
+                        Query.equal("number", issue.number),
+                      ])
+                      .catch(() => ({ documents: [] as Issue[] }));
+
+                    if (existingWithNumber.documents.length > 0) {
+                      return existingWithNumber.documents[0];
+                    }
+
+                    return databases.createDocument(
                       DATABASE_ID,
                       ISSUES_ID,
-                      dbIssue.$id,
+                      ID.unique(),
                       {
-                        status: newStatus,
-                        number: newNumber,
+                        name: issue.title,
+                        status: IssueStatus.TODO,
+                        workspaceId: project.workspaceId,
+                        projectId: projectId,
+                        assigneeId: assigneeId,
+                        dueDate: getRandomFutureDate(),
+                        position: 1000,
+                        description: issue.body || "",
+                        number: issue.number,
                       },
                     );
-                  }
-                }),
-              );
-            }
-
-            // Create new issues if any
-            if (issuesToCreate.length > 0) {
-              const findMemberByGithubUsername = async (
-                githubUsername: string,
-              ) => {
-                return githubUsername;
-              };
-
-              await Promise.all(
-                issuesToCreate.map(async (issue) => {
-                  let assigneeId = null;
-                  if (issue.assignee?.login) {
-                    assigneeId = await findMemberByGithubUsername(
-                      issue.assignee.login,
-                    );
-                  }
-
-                  // Re-check existence by projectId + number to avoid races
-                  const existingWithNumber = await databases
-                    .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
-                      Query.equal("projectId", projectId),
-                      Query.equal("number", issue.number),
-                    ])
-                    .catch(() => ({ documents: [] as Issue[] }));
-
-                  if (existingWithNumber.documents.length > 0) {
-                    return existingWithNumber.documents[0];
-                  }
-
-                  return databases.createDocument(
-                    DATABASE_ID,
-                    ISSUES_ID,
-                    ID.unique(),
-                    {
-                      name: issue.title,
-                      status: IssueStatus.TODO,
-                      workspaceId: project.workspaceId,
-                      projectId: projectId,
-                      assigneeId: assigneeId,
-                      dueDate: getRandomFutureDate(),
-                      position: 1000,
-                      description: issue.body || "",
-                      number: issue.number,
-                    },
-                  );
-                }),
-              );
+                  }),
+                );
+              }
             }
           }
         } catch (error) {
@@ -492,12 +511,8 @@ const app = new Hono()
         );
         // console.log("projects:", projects);
 
-        const { accessToken } = projects.documents.filter(
-          (project) => project.$id === projectId,
-        )[0];
-
-        if (!accessToken) {
-          return c.json({ error: "Workspace not found" }, 404);
+        if (projects.documents.length === 0) {
+          return c.json({ error: "Project not found" }, 404);
         }
 
         const fetchAssinee = await databases.getDocument(
@@ -510,9 +525,13 @@ const app = new Hono()
           return c.json({ error: "Assignee not found" }, 404);
         }
 
-        const octokit = new Octokit({
-          auth: accessToken,
-        });
+        // Get GitHub OAuth access token
+        const githubToken = await getAccessToken(user.$id);
+        if (!githubToken) {
+          return c.json({
+            error: "GitHub account not connected. Cannot create issue."
+          }, 400);
+        }
 
         // Check if user is a super admin
         const isSuper = await isSuperAdmin({ databases, userId: user.$id });
@@ -557,20 +576,24 @@ const app = new Hono()
             ? highestPositionTask.documents[0].position + 1000
             : 1000;
 
-        const owner = await octokit.rest.users.getAuthenticated();
+        const owner = await getAuthenticatedUser(githubToken);
+        if (!owner) {
+          return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+        }
 
-        const issueInGit = await octokit.rest.issues.create({
-          owner: owner.data.login,
-          repo: projects.documents[0].name,
-          title: name,
-          body: description || "",
-        });
+        const issueInGit = await createIssue(
+          githubToken,
+          owner.login,
+          projects.documents[0].name,
+          name,
+          description || ""
+        );
 
         // Idempotency guard: if an issue with the same GitHub number already exists for this project, return it
         const existingByNumber = await databases
           .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
             Query.equal("projectId", projectId),
-            Query.equal("number", issueInGit.data.number),
+            Query.equal("number", issueInGit.number),
           ])
           .catch(() => ({ documents: [] as Issue[] }));
 
@@ -594,7 +617,7 @@ const app = new Hono()
             projectId,
             assigneeId,
             position: newPosition,
-            number: issueInGit.data.number,
+            number: issueInGit.number,
           },
         );
 
@@ -714,40 +737,44 @@ const app = new Hono()
           issue.projectId,
         );
 
-        if (project.accessToken) {
-          const octokit = new Octokit({
-            auth: project.accessToken,
-          });
+        // Get GitHub OAuth access token
+        const githubToken = await getAccessToken(user.$id);
 
-          const owner = await octokit.rest.users.getAuthenticated();
-          const issuesFromGit = await octokit.rest.issues.listForRepo({
-            owner: owner.data.login,
-            repo: project.name,
-            state: "all", // Get both open and closed issues
-          });
+        if (githubToken) {
+          const owner = await getAuthenticatedUser(githubToken);
 
-          // Find the GitHub issue by title
-          const githubIssue = issuesFromGit.data.find(
-            (gitIssue) => gitIssue.title === issue.name,
-          );
+          if (owner) {
+            const issuesFromGit = await listRepositoryIssues(
+              githubToken,
+              owner.login,
+              project.name,
+              "all" // Get both open and closed issues
+            );
 
-          if (githubIssue) {
-            const newState = status === "DONE" ? "closed" : "open";
+            // Find the GitHub issue by title
+            const githubIssue = issuesFromGit.find(
+              (gitIssue) => gitIssue.title === issue.name,
+            );
 
-            // Only update if the state actually changed
-            if (
-              (newState === "closed" && githubIssue.state === "open") ||
-              (newState === "open" && githubIssue.state === "closed")
-            ) {
-              await octokit.rest.issues.update({
-                owner: owner.data.login,
-                repo: project.name,
-                issue_number: githubIssue.number,
-                state: newState,
-              });
-              console.log(
-                `Updated GitHub issue #${githubIssue.number} state to ${newState}`,
-              );
+            if (githubIssue) {
+              const newState = status === "DONE" ? "closed" : "open";
+
+              // Only update if the state actually changed
+              if (
+                (newState === "closed" && githubIssue.state === "open") ||
+                (newState === "open" && githubIssue.state === "closed")
+              ) {
+                await updateIssue(
+                  githubToken,
+                  owner.login,
+                  project.name,
+                  githubIssue.number,
+                  { state: newState }
+                );
+                console.log(
+                  `Updated GitHub issue #${githubIssue.number} state to ${newState}`,
+                );
+              }
             }
           }
         }
@@ -995,32 +1022,37 @@ const app = new Hono()
             existing.projectId,
           );
 
-          const octokit = new Octokit({
-            auth: project.accessToken,
-          });
+          // Get GitHub OAuth access token
+          const githubToken = await getAccessToken(user.$id);
 
-          const owner = await octokit.rest.users.getAuthenticated();
+          if (githubToken) {
+            const owner = await getAuthenticatedUser(githubToken);
 
-          const issuesFromGit = await octokit.rest.issues.listForRepo({
-            owner: owner.data.login,
-            repo: project.name,
-          });
+            if (owner) {
+              const issuesFromGit = await listRepositoryIssues(
+                githubToken,
+                owner.login,
+                project.name
+              );
 
-          const currentIssue = issuesFromGit.data.find(
-            (issue) => issue.title === existing.name,
-          );
+              const currentIssue = issuesFromGit.find(
+                (issue) => issue.title === existing.name,
+              );
 
-          if (!currentIssue) {
-            return c.json({ error: "Issue not found" }, 404);
-          }
+              if (!currentIssue) {
+                return c.json({ error: "Issue not found" }, 404);
+              }
 
-          if (currentIssue) {
-            await octokit.rest.issues.update({
-              owner: owner.data.login,
-              repo: project.name,
-              issue_number: currentIssue.number,
-              state: "closed",
-            });
+              if (currentIssue) {
+                await updateIssue(
+                  githubToken,
+                  owner.login,
+                  project.name,
+                  currentIssue.number,
+                  { state: "closed" }
+                );
+              }
+            }
           }
         }
       }
@@ -1096,18 +1128,27 @@ const app = new Hono()
           }
         }
 
-        const octokit = new Octokit({
-          auth: project.accessToken,
-        });
+        // Get GitHub OAuth access token
+        const githubToken = await getAccessToken(user.$id);
 
-        const owner = await octokit.rest.users.getAuthenticated();
+        if (!githubToken) {
+          return c.json({
+            error: "GitHub account not connected. Cannot fetch issues."
+          }, 400);
+        }
 
-        const issuesFromGit = await octokit.rest.issues.listForRepo({
-          owner: owner.data.login,
-          repo: project.name,
-        });
+        const owner = await getAuthenticatedUser(githubToken);
 
-        console.log("Issues from Git:", issuesFromGit.data);
+        if (!owner) {
+          return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+        }
+
+        const issuesFromGit = await listRepositoryIssues(
+          githubToken,
+          owner.login,
+          project.name
+        );
+
 
         const issuesFromDb = await databases.listDocuments<Issue>(
           DATABASE_ID,
@@ -1117,7 +1158,7 @@ const app = new Hono()
 
         console.log("Issues from DB:", issuesFromDb.documents);
 
-        const issuesToCreate = issuesFromGit.data.filter((gitIssue) => {
+        const issuesToCreate = issuesFromGit.filter((gitIssue) => {
           // Only process open issues from GitHub
           if (gitIssue.state !== "open") return false;
 

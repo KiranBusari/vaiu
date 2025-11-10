@@ -1,157 +1,402 @@
-import { Octokit } from "octokit";
+import { Octokit, RequestError } from "octokit";
 import { createAdminClient } from "@/lib/appwrite";
 import { DATABASE_ID, USER_PROFILES_ID } from "@/config";
 
 /**
- * Get GitHub access token for a user
+ * Consolidated GitHub API operations
+ * All GitHub API calls should be centralized here
  */
-export async function getGithubAccessToken(userId: string): Promise<string | null> {
+
+// ============================================================================
+// ACCESS TOKEN MANAGEMENT
+// ============================================================================
+
+/**
+ * Get GitHub OAuth access token for a user from their profile
+ * Users must authenticate with GitHub OAuth to use GitHub features
+ */
+export async function getAccessToken(userId: string): Promise<string | null> {
     try {
         const { databases } = await createAdminClient();
-        const profile = await databases.getDocument(DATABASE_ID, USER_PROFILES_ID, userId);
+        const profile = await databases.getDocument(
+            DATABASE_ID,
+            USER_PROFILES_ID,
+            userId
+        );
+
         return profile.githubAccessToken || null;
     } catch (error) {
-        console.error("Failed to get GitHub access token:", error);
+        console.error("Failed to get GitHub access token from profile:", error);
         return null;
     }
 }
 
+// ============================================================================
+// REPOSITORY OPERATIONS
+// ============================================================================
+
 /**
- * Create a GitHub repository for a user
+ * Create a new GitHub repository
  */
-export async function createGithubRepository(
-    userId: string,
-    repoName: string,
-    options?: {
-        description?: string;
-        private?: boolean;
-        autoInit?: boolean;
-    }
+export async function createRepository(
+    accessToken: string,
+    repoName: string
 ) {
-    const accessToken = await getGithubAccessToken(userId);
-
-    if (!accessToken) {
-        throw new Error("GitHub access token not found. User needs to authenticate with GitHub.");
-    }
-
     const octokit = new Octokit({ auth: accessToken });
 
-    try {
-        const { data: repo } = await octokit.rest.repos.createForAuthenticatedUser({
-            name: repoName,
-            description: options?.description,
-            private: options?.private ?? false,
-            auto_init: options?.autoInit ?? true,
-        });
+    const repo = await octokit.rest.repos.createForAuthenticatedUser({
+        name: repoName,
+    });
 
-        return repo;
-    } catch (error: any) {
-        console.error("Failed to create GitHub repository:", error);
-        throw new Error(`Failed to create repository: ${error.message}`);
-    }
+    return repo.data;
 }
 
 /**
- * Get user's GitHub repositories
+ * Delete a GitHub repository
  */
-export async function getUserGithubRepositories(userId: string) {
-    const accessToken = await getGithubAccessToken(userId);
-
-    if (!accessToken) {
-        throw new Error("GitHub access token not found. User needs to authenticate with GitHub.");
-    }
-
+export async function deleteRepository(
+    accessToken: string,
+    owner: string,
+    repo: string
+) {
     const octokit = new Octokit({ auth: accessToken });
 
-    try {
-        const { data: repos } = await octokit.rest.repos.listForAuthenticatedUser({
-            sort: "updated",
-            per_page: 100,
-        });
-
-        return repos;
-    } catch (error: any) {
-        console.error("Failed to fetch GitHub repositories:", error);
-        throw new Error(`Failed to fetch repositories: ${error.message}`);
-    }
+    await octokit.rest.repos.delete({
+        owner,
+        repo,
+    });
 }
 
 /**
- * Create a branch in a repository
+ * Get repository information
  */
-export async function createGithubBranch(
-    userId: string,
+export async function getRepository(
+    accessToken: string,
+    owner: string,
+    repo: string
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data } = await octokit.rest.repos.get({
+        owner,
+        repo,
+    });
+
+    return data;
+}
+
+// ============================================================================
+// USER OPERATIONS
+// ============================================================================
+
+/**
+ * Get authenticated user information
+ */
+export async function getAuthenticatedUser(accessToken: string) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: user } = await octokit.rest.users.getAuthenticated();
+    return user;
+}
+
+/**
+ * Get user by username
+ */
+export async function getUserByUsername(
+    accessToken: string,
+    username: string
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: user } = await octokit.rest.users.getByUsername({
+        username,
+    });
+
+    return user;
+}
+
+/**
+ * Get user's email addresses
+ */
+export async function getUserEmails(accessToken: string) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: emails } = await octokit.rest.users.listEmailsForAuthenticatedUser();
+    return emails;
+}
+
+// ============================================================================
+// COLLABORATOR OPERATIONS
+// ============================================================================
+
+/**
+ * Check if user is a collaborator on a repository
+ */
+export async function checkCollaborator(
+    accessToken: string,
     owner: string,
     repo: string,
-    branchName: string,
-    fromBranch: string = "main"
+    username: string
 ) {
-    const accessToken = await getGithubAccessToken(userId);
-
-    if (!accessToken) {
-        throw new Error("GitHub access token not found. User needs to authenticate with GitHub.");
-    }
-
     const octokit = new Octokit({ auth: accessToken });
 
     try {
-        // Get the SHA of the source branch
-        const { data: refData } = await octokit.rest.git.getRef({
+        await octokit.rest.repos.checkCollaborator({
             owner,
             repo,
-            ref: `heads/${fromBranch}`,
+            username,
         });
-
-        // Create new branch
-        const { data: newRef } = await octokit.rest.git.createRef({
-            owner,
-            repo,
-            ref: `refs/heads/${branchName}`,
-            sha: refData.object.sha,
-        });
-
-        return newRef;
-    } catch (error: any) {
-        console.error("Failed to create GitHub branch:", error);
-        throw new Error(`Failed to create branch: ${error.message}`);
+        return true;
+    } catch (error) {
+        if (error instanceof RequestError && error.status === 404) {
+            return false;
+        }
+        throw error;
     }
+}
+
+/**
+ * Add a collaborator to a repository
+ */
+export async function addCollaborator(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    username: string,
+    permission: "pull" | "push" | "admin" | "maintain" | "triage" = "push"
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    await octokit.rest.repos.addCollaborator({
+        owner,
+        repo,
+        username,
+        permission,
+    });
+}
+
+// ============================================================================
+// ISSUE OPERATIONS
+// ============================================================================
+
+/**
+ * List issues for a repository
+ */
+export async function listRepositoryIssues(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    state?: "open" | "closed" | "all"
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: issues } = await octokit.rest.issues.listForRepo({
+        owner,
+        repo,
+        state: state || "open",
+    });
+
+    return issues;
+}
+
+/**
+ * Create a new issue
+ */
+export async function createIssue(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    title: string,
+    body?: string,
+    assignees?: string[]
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: issue } = await octokit.rest.issues.create({
+        owner,
+        repo,
+        title,
+        body,
+        assignees,
+    });
+
+    return issue;
+}
+
+/**
+ * Update an issue
+ */
+export async function updateIssue(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    issueNumber: number,
+    updates: {
+        title?: string;
+        body?: string;
+        state?: "open" | "closed";
+        assignees?: string[];
+        labels?: string[];
+    }
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: issue } = await octokit.rest.issues.update({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        ...updates,
+    });
+
+    return issue;
+}
+
+/**
+ * Add assignees to an issue
+ */
+export async function addIssueAssignees(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    issueNumber: number,
+    assignees: string[]
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    await octokit.rest.issues.addAssignees({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        assignees,
+    });
+}
+
+// ============================================================================
+// PULL REQUEST OPERATIONS
+// ============================================================================
+
+/**
+ * List pull requests for a repository
+ */
+export async function listPullRequests(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    state: "open" | "closed" | "all" = "all"
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: pullRequests } = await octokit.rest.pulls.list({
+        owner,
+        repo,
+        state,
+    });
+
+    return pullRequests;
+}
+
+/**
+ * Get a specific pull request
+ */
+export async function getPullRequest(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    pullNumber: number
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: pr } = await octokit.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: pullNumber,
+    });
+
+    return pr;
 }
 
 /**
  * Create a pull request
  */
-export async function createGithubPullRequest(
-    userId: string,
+export async function createPullRequest(
+    accessToken: string,
     owner: string,
     repo: string,
-    options: {
-        title: string;
-        head: string; // branch name
-        base: string; // base branch (e.g., 'main')
-        body?: string;
-    }
+    title: string,
+    head: string,
+    base: string,
+    body?: string
 ) {
-    const accessToken = await getGithubAccessToken(userId);
-
-    if (!accessToken) {
-        throw new Error("GitHub access token not found. User needs to authenticate with GitHub.");
-    }
-
     const octokit = new Octokit({ auth: accessToken });
 
-    try {
-        const { data: pr } = await octokit.rest.pulls.create({
-            owner,
-            repo,
-            title: options.title,
-            head: options.head,
-            base: options.base,
-            body: options.body,
-        });
+    const { data: pr } = await octokit.rest.pulls.create({
+        owner,
+        repo,
+        title,
+        body,
+        head,
+        base,
+    });
 
-        return pr;
-    } catch (error: any) {
-        console.error("Failed to create GitHub pull request:", error);
-        throw new Error(`Failed to create pull request: ${error.message}`);
-    }
+    return pr;
+}
+
+/**
+ * List files changed in a pull request
+ */
+export async function listPullRequestFiles(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    pullNumber: number
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: files } = await octokit.rest.pulls.listFiles({
+        owner,
+        repo,
+        pull_number: pullNumber,
+    });
+
+    return files;
+}
+
+/**
+ * List reviews for a pull request
+ */
+export async function listPullRequestReviews(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    pullNumber: number
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: reviews } = await octokit.rest.pulls.listReviews({
+        owner,
+        repo,
+        pull_number: pullNumber,
+    });
+
+    return reviews;
+}
+
+/**
+ * List commits in a pull request
+ */
+export async function listPullRequestCommits(
+    accessToken: string,
+    owner: string,
+    repo: string,
+    pullNumber: number
+) {
+    const octokit = new Octokit({ auth: accessToken });
+
+    const { data: commits } = await octokit.rest.pulls.listCommits({
+        owner,
+        repo,
+        pull_number: pullNumber,
+    });
+
+    return commits;
 }

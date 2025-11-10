@@ -4,7 +4,7 @@ import { Octokit } from "octokit";
 import { createAdminClient } from "@/lib/appwrite";
 import { AUTH_COOKIE } from "@/features/auth/constants";
 import { DATABASE_ID, USER_PROFILES_ID } from "@/config";
-import { ID } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 
 /**
  * Custom GitHub OAuth implementation
@@ -82,7 +82,9 @@ export async function GET(request: NextRequest) {
 
         try {
             // Try to find existing user by email
-            const usersList = await users.list([`email="${userEmail}"`]);
+            const usersList = await users.list([
+                Query.equal("email", [userEmail])
+            ]);
 
             if (usersList.users.length > 0) {
                 userId = usersList.users[0].$id;
@@ -97,6 +99,9 @@ export async function GET(request: NextRequest) {
                 );
                 userId = newUser.$id;
                 isNewUser = true;
+                
+                // Mark email as verified since GitHub has already verified it
+                await users.updateEmailVerification(userId, true);
             }
         } catch (error) {
             console.error("Error managing Appwrite user:", error);

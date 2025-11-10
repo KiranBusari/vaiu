@@ -7,6 +7,7 @@ import { DATABASE_ID, PROJECTS_ID } from "@/config";
 import { Project } from "@/features/projects/types";
 import { Octokit } from "octokit";
 import { generateAISummary, SummaryInput } from "@/lib/ai-service";
+import { getAccessToken } from "@/lib/github-api";
 
 const app = new Hono()
   .post("/generate",
@@ -46,8 +47,17 @@ const app = new Hono()
         return c.json({ error: "Project not found" }, 404);
       }
 
+      // Get GitHub OAuth access token
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Cannot generate summary."
+        }, 400);
+      }
+
       const octokit = new Octokit({
-        auth: project.accessToken,
+        auth: githubToken,
       });
 
       try {

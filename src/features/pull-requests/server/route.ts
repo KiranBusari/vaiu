@@ -7,6 +7,13 @@ import { DATABASE_ID, PROJECTS_ID, PR_ID, AI_TESTS_ID } from "@/config";
 import { Project } from "@/features/projects/types";
 import { Octokit, RequestError } from "octokit";
 import { PrStatus } from "../types";
+import {
+  getAccessToken,
+  listPullRequests,
+  getPullRequest,
+  listPullRequestFiles,
+  createPullRequest,
+} from "@/lib/github-api";
 import { createPrSchema } from "../schemas";
 import { ID, Query, type Databases } from "node-appwrite";
 import { AIReview } from "../types-ai";
@@ -51,16 +58,22 @@ const app = new Hono()
         return c.json({ error: "Project not found" }, 404);
       }
 
-      const octokit = new Octokit({
-        auth: project.accessToken,
-      });
+      // Get GitHub OAuth access token
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Cannot fetch pull requests."
+        }, 400);
+      }
 
       try {
-        const { data: prsFromGit } = await octokit.rest.pulls.list({
-          owner: project.owner,
-          repo: project.name,
-          state: "all",
-        });
+        const prsFromGit = await listPullRequests(
+          githubToken,
+          project.owner,
+          project.name,
+          "all"
+        );
 
         const pullRequests = prsFromGit.map((pr) => {
           let status = PrStatus.OPEN;
@@ -146,29 +159,38 @@ const app = new Hono()
         }
       }
 
-      const octokit = new Octokit({
-        auth: project.accessToken,
-      });
+      // Get GitHub OAuth access token
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Cannot create pull request."
+        }, 400);
+      }
 
       try {
         // Check if the user is a collaborator
+        const { checkCollaborator, addCollaborator, addIssueAssignees } = await import("@/lib/github-api");
+
         try {
-          await octokit.rest.repos.checkCollaborator({
-            owner: project.owner,
-            repo: project.name,
-            username: githubUsername,
-          });
+          await checkCollaborator(
+            githubToken,
+            project.owner,
+            project.name,
+            githubUsername
+          );
         } catch (error) {
           if (error instanceof RequestError) {
             // If the user is not a collaborator, add them
             if (error.status === 404) {
               try {
-                await octokit.rest.repos.addCollaborator({
-                  owner: project.owner,
-                  repo: project.name,
-                  username: githubUsername,
-                  permission: "push",
-                });
+                await addCollaborator(
+                  githubToken,
+                  project.owner,
+                  project.name,
+                  githubUsername,
+                  "push"
+                );
               } catch (addCollaboratorError) {
                 console.error("Failed to add collaborator:", addCollaboratorError);
                 return c.json({ error: "Failed to add user as a collaborator." }, 500);
@@ -184,21 +206,23 @@ const app = new Hono()
           }
         }
 
-        const createPR = await octokit.rest.pulls.create({
-          owner: project.owner,
-          repo: project.name,
-          title: title,
-          body: description,
-          head: branch,
-          base: baseBranch,
-        });
+        const createPR = await createPullRequest(
+          githubToken,
+          project.owner,
+          project.name,
+          title,
+          branch,
+          baseBranch,
+          description
+        );
 
-        await octokit.rest.issues.addAssignees({
-          owner: project.owner,
-          repo: project.name,
-          issue_number: createPR.data.number,
-          assignees: [githubUsername],
-        });
+        await addIssueAssignees(
+          githubToken,
+          project.owner,
+          project.name,
+          createPR.number,
+          [githubUsername]
+        );
 
         await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
           title,
@@ -213,7 +237,7 @@ const app = new Hono()
           {
             success: true,
             data: {
-              pullRequest: createPR.data,
+              pullRequest: createPR,
             },
           },
           200
@@ -278,16 +302,21 @@ const app = new Hono()
           }
         }
 
-        const octokit = new Octokit({
-          auth: project.accessToken,
-        });
+        // Get GitHub OAuth access token
+        const githubToken = await getAccessToken(user.$id);
+
+        if (!githubToken) {
+          return c.json({
+            error: "GitHub account not connected. Cannot generate AI review."
+          }, 400);
+        }
 
         // Start AI review analysis
         const aiReview = await generateAIReview({
           projectId,
           prNumber: parseInt(prNumber),
           project,
-          octokit,
+          githubToken,
         });
 
         return c.json({ success: true, review: aiReview });
@@ -331,16 +360,21 @@ const app = new Hono()
           }
         }
 
-        const octokit = new Octokit({
-          auth: project.accessToken,
-        });
+        // Get GitHub OAuth access token
+        const githubToken = await getAccessToken(user.$id);
+
+        if (!githubToken) {
+          return c.json({
+            error: "GitHub account not connected. Cannot generate tests."
+          }, 400);
+        }
 
         // Generate AI test cases
         const testGeneration = await generateAITests({
           projectId,
           prNumber: parseInt(prNumber),
           project,
-          octokit,
+          githubToken,
         });
 
         // Persist the generated tests to database asynchronously (don't wait)
@@ -604,14 +638,16 @@ async function generateAIReview({
   projectId,
   prNumber,
   project,
-  octokit,
+  githubToken,
 }: {
   projectId: string;
   prNumber: number;
   project: Project;
-  octokit: Octokit;
+  githubToken: string;
 }): Promise<AIReview> {
   try {
+    const octokit = new Octokit({ auth: githubToken });
+
     // Fetch all GitHub data in parallel for faster response
     const [
       { data: pr },
@@ -704,14 +740,16 @@ async function generateAITests({
   projectId,
   prNumber,
   project,
-  octokit,
+  githubToken,
 }: {
   projectId: string;
   prNumber: number;
   project: Project;
-  octokit: Octokit;
+  githubToken: string;
 }): Promise<AITestGeneration> {
   try {
+    const octokit = new Octokit({ auth: githubToken });
+
     // Fetch all GitHub data in parallel for faster response
     const [
       { data: pr },
