@@ -10,7 +10,6 @@ export const createProjectSchema = z.object({
     .optional(),
 
   workspaceId: z.string(),
-  accessToken: z.string().optional(),
 });
 export const updateProjectSchema = z.object({
   name: z
@@ -41,7 +40,6 @@ export const removeCollaboratorFromProjectSchema = z.object({
 export const addExistingProjectSchema = z.object({
   workspaceId: z.string(),
   projectLink: z.string(),
-  accessToken: z.string().optional(),
   image: z
     .union([
       z.instanceof(File),

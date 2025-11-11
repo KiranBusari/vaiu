@@ -8,6 +8,5 @@ export type Project = Models.Document & {
   workspaceId: string;
   owner: string;
   projectAdmin: string;
-  accessToken: string;
   projectCollaborators: string[];
 };

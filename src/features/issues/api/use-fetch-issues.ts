@@ -23,18 +23,30 @@ export const useFetchIssues = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
+          "error" in errorData ? errorData.error : "Failed to sync issues",
         );
       }
       return (await response.json()) as ResponseType;
     },
-    onSuccess: () => {
-      toast.success("Issues fetched successfully");
+    onSuccess: (data) => {
+      const summary = data.summary;
+      if (summary) {
+        const { newIssues, updatedIssues } = summary;
+        if (newIssues === 0 && updatedIssues === 0) {
+          toast.success("Already in sync with GitHub");
+        } else {
+          toast.success(
+            `Synced successfully! ${newIssues} new, ${updatedIssues} updated`
+          );
+        }
+      } else {
+        toast.success("Issues synced successfully");
+      }
 
       queryClient.invalidateQueries({ queryKey: ["issues"] });
     },
     onError: (e) => {
-      toast.error(e.message || "Failed to fetch issues");
+      toast.error(e.message || "Failed to sync issues");
     },
   });
   return mutation;

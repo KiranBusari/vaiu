@@ -119,10 +119,10 @@ export const SignInCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="hidden px-7">
+      <div className="px-7">
         <Separator />
       </div>
-      <CardContent className="hidden flex-col gap-y-4 p-7">
+      <CardContent className="flex-col gap-y-4 p-7">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
@@ -134,7 +134,7 @@ export const SignInCard = () => {
           Login with Github
         </Button>
       </CardContent>
-      <div className="px-7">
+      <div className="hidden px-7">
         <Separator />
       </div>
       <CardContent className="flex items-center justify-center p-7">

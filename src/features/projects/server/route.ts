@@ -23,9 +23,16 @@ import {
 import { Project } from "../types";
 import { endOfMonth, startOfMonth } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
-import { Octokit } from "octokit";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
 import { MemberRole } from "@/features/members/types";
+import {
+  createRepository,
+  getAccessToken,
+  deleteRepository,
+  getAuthenticatedUser,
+  addCollaborator,
+  listRepositoryIssues
+} from "@/lib/github-api";
 
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
@@ -46,10 +53,7 @@ const app = new Hono()
       const user = c.get("user");
       console.log("User", user);
 
-      const { name, image, workspaceId, accessToken } = c.req.valid("form");
-      const octokit = new Octokit({
-        auth: accessToken,
-      });
+      const { name, image, workspaceId } = c.req.valid("form");
 
       const member = await getMember({
         databases,
@@ -59,6 +63,15 @@ const app = new Hono()
 
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Get GitHub OAuth access token from user profile
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Please sign in with GitHub to create projects."
+        }, 400);
       }
 
       let uploadedImage: string | undefined;
@@ -93,11 +106,9 @@ const app = new Hono()
       if (existingProject.total !== 0) {
         return c.json({ error: "Project with this name already exists" }, 400);
       } else {
-        const repo = await octokit.rest.repos.createForAuthenticatedUser({
-          name: name,
-        });
+        const repo = await createRepository(githubToken, name);
 
-        if (!repo.data) {
+        if (!repo) {
           return c.json({ error: "Failed to create repository" }, 500);
         }
 
@@ -108,11 +119,10 @@ const app = new Hono()
           {
             name: correctedName,
             imageUrl: uploadedImage,
-            accessToken,
             workspaceId,
             projectAdmin: member.$id,
             inviteCode: generateInviteCode(INVITECODE_LENGTH),
-            owner: repo.data.owner.login,
+            owner: repo.owner.login,
           },
         );
 
@@ -122,7 +132,7 @@ const app = new Hono()
           projectId: [...currentProjectIds, project.$id],
         });
 
-        return c.json({ data: project, repo: repo.data });
+        return c.json({ data: project, repo });
       }
     },
   )
@@ -134,16 +144,11 @@ const app = new Hono()
       const databases = c.get("databases");
       const user = c.get("user");
 
-      const { projectLink, workspaceId, accessToken } = c.req.valid("form");
-
-      const octokit = new Octokit({
-        auth: accessToken,
-      });
+      const { projectLink, workspaceId } = c.req.valid("form");
 
       if (!projectLink) {
         return c.json({ error: "Please Paste the project link" }, 401);
       }
-      const repoName = extractRepoName(projectLink);
 
       const member = await getMember({
         databases,
@@ -155,7 +160,21 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const owner = await octokit.rest.users.getAuthenticated();
+      // Get GitHub OAuth access token from user profile
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Please sign in with GitHub to add projects."
+        }, 400);
+      }
+
+      const repoName = extractRepoName(projectLink);
+
+      const githubUser = await getAuthenticatedUser(githubToken);
+      if (!githubUser) {
+        return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+      }
 
       const project = await databases.createDocument(
         DATABASE_ID,
@@ -165,18 +184,17 @@ const app = new Hono()
           name: repoName,
           workspaceId,
           projectAdmin: member.$id,
-          accessToken,
           inviteCode: generateInviteCode(INVITECODE_LENGTH),
-          owner: owner.data.login,
+          owner: githubUser.login,
         },
       );
 
-      const { data } = await octokit.rest.issues.listForRepo({
-        owner: owner.data.login,
-        repo: repoName,
-      });
+      const data = await listRepositoryIssues(
+        githubToken,
+        githubUser.login,
+        repoName
+      );
 
-      console.log("issues", data);
 
       const status = IssueStatus.TODO;
 
@@ -709,16 +727,23 @@ const app = new Hono()
       );
     }
 
-    const octokit = new Octokit({
-      auth: existingProject.accessToken,
-    });
+    // Get GitHub OAuth access token from user profile
+    const githubToken = await getAccessToken(user.$id);
 
-    const owner = await octokit.rest.users.getAuthenticated();
+    if (!githubToken) {
+      return c.json({
+        error: "GitHub account not connected. Cannot delete repository."
+      }, 400);
+    }
+
+    // Delete the GitHub repository
+    const githubUser = await getAuthenticatedUser(githubToken);
+    if (!githubUser) {
+      return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+    }
+
     // TODO: delete  tasks
-    await octokit.rest.repos.delete({
-      owner: owner.data.login,
-      repo: existingProject.name,
-    });
+    await deleteRepository(githubToken, githubUser.login, existingProject.name);
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId);
     return c.json({ data: { $id: existingProject.$id } });
   })
@@ -739,10 +764,6 @@ const app = new Hono()
         projectId,
       );
 
-      const octokit = new Octokit({
-        auth: existingProject.accessToken,
-      });
-
       const member = await getMember({
         databases,
         workspaceId: existingProject.workspaceId,
@@ -757,15 +778,28 @@ const app = new Hono()
         return c.json({ error: "Collaborator already exists" }, 400);
       }
 
-      const owner = await octokit.rest.users.getAuthenticated();
+      // Get GitHub OAuth access token from user profile
+      const githubToken = await getAccessToken(user.$id);
+
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Cannot add collaborator."
+        }, 400);
+      }
+
+      const githubUser = await getAuthenticatedUser(githubToken);
+      if (!githubUser) {
+        return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+      }
 
       try {
-        await octokit.rest.repos.addCollaborator({
-          owner: owner.data.login,
-          repo: existingProject.name,
-          username: username,
-          permission: "push",
-        });
+        await addCollaborator(
+          githubToken,
+          githubUser.login,
+          existingProject.name,
+          username,
+          "push"
+        );
 
         const projectCollaborators = Array.isArray(
           existingProject.projectCollaborators,

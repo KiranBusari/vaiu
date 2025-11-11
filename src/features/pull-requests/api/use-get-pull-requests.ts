@@ -1,14 +1,19 @@
 import { client } from "@/lib/rpc";
 import { useQuery } from "@tanstack/react-query";
+import { PrStatus } from "../types";
 
 interface useGetPullRequestsProps {
   workspaceId: string;
   projectId: string;
+  status?: PrStatus | null;
+  search?: string | null;
   enabled?: boolean;
 }
 export const useGetPullRequests = ({
   workspaceId,
   projectId,
+  status,
+  search,
   enabled = true,
 }: useGetPullRequestsProps) => {
   const query = useQuery({
@@ -16,12 +21,16 @@ export const useGetPullRequests = ({
       "pull-requests",
       workspaceId,
       projectId,
+      status,
+      search,
     ],
     queryFn: async () => {
       const response = await client.api.v1["pull-requests"].$get({
         query: {
           workspaceId,
           projectId,
+          status: status ?? undefined,
+          search: search ?? undefined,
         },
       });
       if (!response.ok) {

@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import Image from "next/image";
-import { ImageIcon, Info, Loader2 } from "lucide-react";
+import { ImageIcon, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,11 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -42,13 +38,6 @@ import {
   createProjectSchema,
 } from "../schemas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useAddExistingProject } from "../api/use-add-existing-project";
 
 interface CreateProjectFormProps {
@@ -67,7 +56,6 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
     defaultValues: {
       name: "",
       image: "",
-      accessToken: "",
     },
   });
 
@@ -76,10 +64,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
     defaultValues: {
       image: "",
       projectLink: "",
-      accessToken: "",
     },
   });
-  // console.log(form2);
 
   const onSubmit = (values: CreateProjectSchema) => {
     const finalValues = {
@@ -187,139 +173,6 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                       </FormItem>
                     )}
                   />
-                  <div>
-                    <FormField
-                      control={form1.control}
-                      name="accessToken"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex justify-between">
-                            <div className="flex items-center">
-                              Access Token{" "}
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <span className="text-muted-foreground">
-                                    <Info size={16} className="ml-2" />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex max-w-sm place-content-center bg-slate-900 text-slate-100">
-                                  <p className="text-sm">
-                                    Access token is a unique identifier that
-                                    allows you to access your repo data. You can
-                                    generate an access token from your github
-                                    account settings.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <p className="text-sm text-blue-400">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <button className="underline">
-                                    Steps to generate personal access token
-                                  </button>
-                                </DialogTrigger>
-                                <DialogContent className="size-[400px] overflow-y-auto sm:size-[600px]">
-                                  <DialogTitle>
-                                    Steps to generate personal access token from
-                                    Github
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    <p className="text-lg">
-                                      Step 1. Go to your Github account
-                                      settings.
-                                    </p>
-                                    <Image
-                                      src="/step1.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 2. Scroll to the bottom and Click on
-                                      &quot;Developer settings&quot;.
-                                    </p>
-                                    <Image
-                                      src="/step2.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 3. Click on &quot;Personal access
-                                      tokens&quot;. Choose Tokens(Classic)
-                                    </p>
-                                    <Image
-                                      src="/step3.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 4. Click on &quot;Generate new
-                                      token&quot;. Enter the required
-                                      information.
-                                    </p>
-                                    <Image
-                                      src="/step4.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 5. Define the scopes as shown in the
-                                      image below.
-                                    </p>
-                                    <Image
-                                      src="/scope1.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <Image
-                                      src="/scope2.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <Image
-                                      src={"/scope3.png"}
-                                      alt="github token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 6. Copy the generated token and paste
-                                      it here.
-                                    </p>
-                                    <Image
-                                      src="/step6.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                  </DialogDescription>
-                                </DialogContent>
-                              </Dialog>
-                            </p>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Enter access token"
-                              className="border border-gray-200 dark:border-gray-400"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                   <FormField
                     control={form1.control}
                     name="image"
@@ -460,139 +313,6 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
                       </FormItem>
                     )}
                   />
-                  <div>
-                    <FormField
-                      control={form2.control}
-                      name="accessToken"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex justify-between">
-                            <div className="flex items-center">
-                              Access Token{" "}
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <span className="text-muted-foreground">
-                                    <Info size={16} className="ml-2" />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="flex max-w-sm place-content-center bg-slate-900 text-slate-100">
-                                  <p className="text-sm">
-                                    Access token is a unique identifier that
-                                    allows you to access your repo data. You can
-                                    generate an access token from your github
-                                    account settings.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </div>
-                            <p className="text-sm text-blue-400">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <button className="underline">
-                                    Steps to generate personal access token
-                                  </button>
-                                </DialogTrigger>
-                                <DialogContent className="size-[400px] overflow-y-auto sm:size-[600px]">
-                                  <DialogTitle>
-                                    Steps to generate personal access token from
-                                    Github
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    <p className="text-lg">
-                                      Step 1. Go to your Github account
-                                      settings.
-                                    </p>
-                                    <Image
-                                      src="/step1.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 2. Scroll to the bottom and Click on
-                                      &quot;Developer settings&quot;.
-                                    </p>
-                                    <Image
-                                      src="/step2.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 3. Click on &quot;Personal access
-                                      tokens&quot;. Choose Tokens(Classic)
-                                    </p>
-                                    <Image
-                                      src="/step3.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 4. Click on &quot;Generate new
-                                      token&quot;. Enter the required
-                                      information.
-                                    </p>
-                                    <Image
-                                      src="/step4.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 5. Define the scopes as shown in the
-                                      image below.
-                                    </p>
-                                    <Image
-                                      src="/scope1.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <Image
-                                      src="/scope2.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <Image
-                                      src={"/scope3.png"}
-                                      alt="github token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                    <br />
-                                    <p className="text-lg">
-                                      Step 6. Copy the generated token and paste
-                                      it here.
-                                    </p>
-                                    <Image
-                                      src="/step6.png"
-                                      alt="Github Token"
-                                      width={600}
-                                      height={400}
-                                    />
-                                  </DialogDescription>
-                                </DialogContent>
-                              </Dialog>
-                            </p>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              placeholder="Enter access token"
-                              className="border border-gray-200 dark:border-gray-400"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                   <div className="">
                     <FormField
                       control={form2.control}
