@@ -5,6 +5,7 @@ import { deleteCookie, setCookie } from "hono/cookie";
 
 import { createAdminClient } from "@/lib/appwrite";
 import { sessionMiddleware } from "@/lib/session-middleware";
+import { DATABASE_ID, USER_PROFILES_ID } from "@/config";
 
 import { AUTH_COOKIE } from "../constants";
 import {
@@ -124,13 +125,30 @@ const app = new Hono()
       } catch (error: unknown) {
         console.log("Error checking users:", error);
       }
-      const { account } = await createAdminClient();
+      const { account, databases } = await createAdminClient();
       const user = await account.create(
         ID.unique(),
         email,
         password,
         name
       );
+
+      // Create user profile in database
+      try {
+        await databases.createDocument(
+          DATABASE_ID,
+          USER_PROFILES_ID,
+          user.$id,
+          {
+            userId: user.$id,
+            email: user.email,
+            name: user.name,
+            githubAccessToken: "",
+          }
+        );
+      } catch (profileError) {
+        console.error("Failed to create user profile:", profileError);
+      }
 
       const origin = headers().get("origin") ?? "";
 

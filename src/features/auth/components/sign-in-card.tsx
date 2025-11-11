@@ -45,8 +45,7 @@ export const SignInCard = () => {
       <div className="px-7">
         <Separator />
       </div>
-      {/* Email/Password login - temporarily hidden */}
-      <CardContent className="hidden p-7">
+      <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -120,7 +119,7 @@ export const SignInCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="hidden px-7">
+      <div className="px-7">
         <Separator />
       </div>
       <CardContent className="flex-col gap-y-4 p-7">
@@ -135,7 +134,7 @@ export const SignInCard = () => {
           Login with Github
         </Button>
       </CardContent>
-      <div className="px-7">
+      <div className="hidden px-7">
         <Separator />
       </div>
       <CardContent className="flex items-center justify-center p-7">

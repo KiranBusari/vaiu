@@ -15,6 +15,7 @@ import { useIsMember } from "@/features/workspaces/api/use-is-member";
 import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
 import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
 import { FaUsers, FaUsersCog } from "react-icons/fa";
+import { User, UserCircle } from "lucide-react";
 
 const navItems = [
   {
@@ -34,6 +35,12 @@ const navItems = [
     href: "/settings",
     icon: RiSettings2Line,
     activeIcon: RiSettings2Fill,
+  },
+  {
+    label: "Account",
+    href: "/account",
+    icon: User,
+    activeIcon: UserCircle,
   },
   {
     label: "Members",
@@ -90,12 +97,12 @@ export const Navigation = () => {
         const isActive =
           label === "Home"
             ? pathname === absoluteHref ||
-              pathname === `/workspaces/${workspaceId}` ||
-              pathname === `/workspaces/${workspaceId}/`
+            pathname === `/workspaces/${workspaceId}` ||
+            pathname === `/workspaces/${workspaceId}/`
             : label === "Contributions"
               ? inContributionsWorkspace
               : pathname === absoluteHref ||
-                pathname.startsWith(`${absoluteHref}/`);
+              pathname.startsWith(`${absoluteHref}/`);
         const Icon = isActive ? activeIcon : icon;
 
         if (dynamicRedirect) {
