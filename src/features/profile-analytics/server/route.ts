@@ -2,13 +2,18 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
-import { Octokit } from "octokit";
+import {
+  getAccessToken,
+  getUserByUsername,
+  listUserRepositories,
+} from "@/lib/github-api";
 import {
   GitHubUser,
   GitHubRepository,
   ProfileAnalytics,
   LanguageStats
 } from "../types";
+import { DATABASE_ID, USER_PROFILES_ID } from "@/config";
 
 const app = new Hono()
   .get(
@@ -19,26 +24,53 @@ const app = new Hono()
     })),
     async (c) => {
       const { username } = c.req.valid("param");
+      const user = c.get("user");
+      const databases = c.get("databases");
 
       // Additional validation to prevent undefined username
       if (!username || username === 'undefined' || username.trim() === '') {
         return c.json({ error: "Username is required" }, 400);
       }
 
-      const octokit = new Octokit();
+      // Get GitHub access token - required for profile analytics
+      const githubToken = await getAccessToken(user.$id);
+
+      // Token is required to prevent users from accessing wrong profiles
+      if (!githubToken) {
+        return c.json({
+          error: "GitHub account not connected. Please connect your GitHub account in Account settings to use analytics."
+        }, 400);
+      }
+
+      // Fetch user's GitHub username from profile
+      let targetUsername = username;
 
       try {
-        const [userResponse, reposResponse] = await Promise.all([
-          octokit.rest.users.getByUsername({ username }),
-          octokit.rest.repos.listForUser({
-            username,
+        const profile = await databases.getDocument(
+          DATABASE_ID,
+          USER_PROFILES_ID,
+          user.$id
+        );
+
+        if (profile.githubUsername) {
+          targetUsername = profile.githubUsername;
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        return c.json({
+          error: "Failed to fetch user profile. Please ensure your GitHub account is connected."
+        }, 500);
+      }
+
+      try {
+        // These functions handle null tokens gracefully with unauthenticated requests
+        const [githubUser, rawRepositories] = await Promise.all([
+          getUserByUsername(githubToken, targetUsername),
+          listUserRepositories(githubToken, targetUsername, {
             sort: "updated",
             per_page: 30,
           }),
         ]);
-
-        const user = userResponse.data;
-        const rawRepositories = reposResponse.data;
 
         // Map repositories to match GitHubRepository interface
         const repositories: GitHubRepository[] = rawRepositories.map(repo => ({
@@ -72,14 +104,14 @@ const app = new Hono()
 
         const analytics: ProfileAnalytics = {
           user: {
-            login: user.login,
-            name: user.name,
-            avatar_url: user.avatar_url,
-            bio: user.bio,
-            public_repos: user.public_repos,
-            followers: user.followers,
-            following: user.following,
-            created_at: user.created_at,
+            login: githubUser.login,
+            name: githubUser.name,
+            avatar_url: githubUser.avatar_url,
+            bio: githubUser.bio,
+            public_repos: githubUser.public_repos,
+            followers: githubUser.followers,
+            following: githubUser.following,
+            created_at: githubUser.created_at,
           } as GitHubUser,
           repositories,
           languageStats,

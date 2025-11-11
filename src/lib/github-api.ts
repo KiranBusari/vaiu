@@ -103,16 +103,38 @@ export async function getAuthenticatedUser(accessToken: string) {
  * Get user by username
  */
 export async function getUserByUsername(
-    accessToken: string,
+    accessToken: string | null,
     username: string
 ) {
-    const octokit = new Octokit({ auth: accessToken });
+    const octokit = new Octokit({ auth: accessToken || undefined });
 
     const { data: user } = await octokit.rest.users.getByUsername({
         username,
     });
 
     return user;
+}
+
+/**
+ * List repositories for a user
+ */
+export async function listUserRepositories(
+    accessToken: string | null,
+    username: string,
+    options?: {
+        sort?: "created" | "updated" | "pushed" | "full_name";
+        per_page?: number;
+    }
+) {
+    const octokit = new Octokit({ auth: accessToken || undefined });
+
+    const { data: repos } = await octokit.rest.repos.listForUser({
+        username,
+        sort: options?.sort || "updated",
+        per_page: options?.per_page || 30,
+    });
+
+    return repos;
 }
 
 /**
