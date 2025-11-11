@@ -37,6 +37,7 @@ import { useGetIssues } from "@/features/issues/api/use-get-tasks";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { IssueStatus, Issue } from "@/features/issues/types";
 import { PullRequest, PrStatus } from "@/features/pull-requests/types";
@@ -46,6 +47,8 @@ import {
   formatDistanceToNow,
 } from "date-fns";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // --- Data Processing Functions (Pull Requests) ---
 const processVelocityData = (documents: PullRequest[]) => {
@@ -192,6 +195,11 @@ const calculateIssueKpis = (documents: Issue[]) => {
 
 export default function AnalyticsDashboard() {
   const projectId = useProjectId();
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back();
+  };
 
   if (!projectId) {
     return <SelectProjectMessage />;
@@ -199,7 +207,17 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6 p-4 md:p-8">
-      <h1 className="text-3xl font-bold tracking-tight">Project Analytics</h1>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          onClick={handleBack}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 px-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">Project Analytics</h1>
+      </div>
       <Tabs defaultValue="pull-requests">
         <TabsList className="h-8 w-full overflow-hidden rounded-md border border-border bg-transparent p-0 lg:w-auto">
           <TabsTrigger
