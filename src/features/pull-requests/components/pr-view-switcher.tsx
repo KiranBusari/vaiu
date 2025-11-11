@@ -13,8 +13,12 @@ import { columns } from "./columns";
 import { Button } from "@/components/ui/button";
 import { useCreatePrModal } from "../hooks/use-create-pr-modal";
 import { toast } from "sonner";
+import { PrDataFilters } from "./pr-data-filters";
+import { usePrFilter } from "../hooks/use-pr-filter";
 
 export const PrViewSwitcher = () => {
+  const [{ status, search }] = usePrFilter();
+
   const [view, setView] = useQueryState("pr-view", {
     defaultValue: "table",
   });
@@ -26,6 +30,8 @@ export const PrViewSwitcher = () => {
   const { data: prs, isLoading: prsLoading } = useGetPullRequests({
     workspaceId,
     projectId,
+    status,
+    search,
   });
 
   const handleCreatePr = async () => {
@@ -73,6 +79,8 @@ export const PrViewSwitcher = () => {
             </TabsTrigger>
           </TabsList>
         </div>
+        <Separator className="my-4" />
+        <PrDataFilters />
         <Separator className="my-4" />
         {prsLoading ? (
           <div className="flex h-[200px] w-full flex-col items-center justify-center rounded-lg border">

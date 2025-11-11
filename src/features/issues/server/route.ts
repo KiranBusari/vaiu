@@ -211,150 +211,6 @@ const app = new Hono()
           return c.json({ error: "Unauthorized access to this project" }, 403);
         }
         query.push(Query.equal("projectId", projectId));
-
-        // Auto-sync with GitHub when viewing project-specific issues
-        try {
-          const project = await databases.getDocument<Project>(
-            DATABASE_ID,
-            PROJECTS_ID,
-            projectId,
-          );
-
-          // Get GitHub OAuth access token
-          const githubToken = await getAccessToken(user.$id);
-
-          if (githubToken) {
-            const owner = await getAuthenticatedUser(githubToken);
-            if (!owner) {
-              console.error("Failed to authenticate with GitHub for auto-sync");
-            } else {
-              const issuesFromGit = await listRepositoryIssues(
-                githubToken,
-                owner.login,
-                project.name,
-                "all" // Get both open and closed issues
-              );
-
-              const issuesFromDb = await databases.listDocuments<Issue>(
-                DATABASE_ID,
-                ISSUES_ID,
-                [Query.equal("projectId", projectId)],
-              );
-
-              // Check for new issues to create
-              const openIssuesFromGit = issuesFromGit.filter(
-                (issue) => issue.state === "open",
-              );
-              const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
-                return !issuesFromDb.documents.some(
-                  (dbIssue) =>
-                    dbIssue.number === gitIssue.number ||
-                    dbIssue.name === gitIssue.title,
-                );
-              });
-
-              // Check for status updates (GitHub issues that were closed should be marked as DONE)
-              const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
-                const gitIssue = issuesFromGit.find(
-                  (issue) => issue.title === dbIssue.name,
-                );
-
-                if (gitIssue) {
-                  // If GitHub issue is closed but DB issue is not DONE, update it
-                  if (gitIssue.state === "closed" && dbIssue.status !== "DONE") {
-                    return true;
-                  }
-                  // If GitHub issue is open but DB issue is DONE, update it
-                  if (gitIssue.state === "open" && dbIssue.status === "DONE") {
-                    return true;
-                  }
-                  // If DB issue is missing the number, update it
-                  if (!dbIssue.number && gitIssue.number) {
-                    return true;
-                  }
-                }
-                return false;
-              });
-
-              // Update existing issues with status changes
-              if (issuesToUpdate.length > 0) {
-                await Promise.all(
-                  issuesToUpdate.map(async (dbIssue) => {
-                    const gitIssue = issuesFromGit.find(
-                      (issue) => issue.title === dbIssue.name,
-                    );
-
-                    if (gitIssue) {
-                      const newStatus =
-                        gitIssue.state === "closed" ? "DONE" : "TODO";
-                      const newNumber = dbIssue.number || gitIssue.number;
-                      return databases.updateDocument(
-                        DATABASE_ID,
-                        ISSUES_ID,
-                        dbIssue.$id,
-                        {
-                          status: newStatus,
-                          number: newNumber,
-                        },
-                      );
-                    }
-                  }),
-                );
-              }
-
-              // Create new issues if any
-              if (issuesToCreate.length > 0) {
-                const findMemberByGithubUsername = async (
-                  githubUsername: string,
-                ) => {
-                  return githubUsername;
-                };
-
-                await Promise.all(
-                  issuesToCreate.map(async (issue) => {
-                    let assigneeId = null;
-                    if (issue.assignee?.login) {
-                      assigneeId = await findMemberByGithubUsername(
-                        issue.assignee.login,
-                      );
-                    }
-
-                    // Re-check existence by projectId + number to avoid races
-                    const existingWithNumber = await databases
-                      .listDocuments<Issue>(DATABASE_ID, ISSUES_ID, [
-                        Query.equal("projectId", projectId),
-                        Query.equal("number", issue.number),
-                      ])
-                      .catch(() => ({ documents: [] as Issue[] }));
-
-                    if (existingWithNumber.documents.length > 0) {
-                      return existingWithNumber.documents[0];
-                    }
-
-                    return databases.createDocument(
-                      DATABASE_ID,
-                      ISSUES_ID,
-                      ID.unique(),
-                      {
-                        name: issue.title,
-                        status: IssueStatus.TODO,
-                        workspaceId: project.workspaceId,
-                        projectId: projectId,
-                        assigneeId: assigneeId,
-                        dueDate: getRandomFutureDate(),
-                        position: 1000,
-                        description: issue.body || "",
-                        number: issue.number,
-                      },
-                    );
-                  }),
-                );
-              }
-            }
-          }
-        } catch (error) {
-          console.error("Error syncing with GitHub:", error);
-        }
       } else {
         // Only show issues from projects the user is a member of
         query.push(Query.contains("projectId", userProjectIds));
@@ -1085,10 +941,6 @@ const app = new Hono()
           return c.json({ error: "Project ID is required" }, 400);
         }
 
-        if (!projectId) {
-          return c.json({ error: "Project ID is required" }, 400);
-        }
-
         const project = await databases.getDocument<Project>(
           DATABASE_ID,
           PROJECTS_ID,
@@ -1146,9 +998,9 @@ const app = new Hono()
         const issuesFromGit = await listRepositoryIssues(
           githubToken,
           owner.login,
-          project.name
+          project.name,
+          "all" // Get both open and closed issues for sync
         );
-
 
         const issuesFromDb = await databases.listDocuments<Issue>(
           DATABASE_ID,
@@ -1156,13 +1008,12 @@ const app = new Hono()
           [Query.equal("projectId", projectId)],
         );
 
-        console.log("Issues from DB:", issuesFromDb.documents);
+        // Check for new issues to create (only open issues)
+        const openIssuesFromGit = issuesFromGit.filter(
+          (issue) => issue.state === "open",
+        );
 
-        const issuesToCreate = issuesFromGit.filter((gitIssue) => {
-          // Only process open issues from GitHub
-          if (gitIssue.state !== "open") return false;
-
-          // Prefer matching by GitHub issue number; fallback to title for older records
+        const issuesToCreate = openIssuesFromGit.filter((gitIssue) => {
           return !issuesFromDb.documents.some(
             (dbIssue) =>
               dbIssue.number === gitIssue.number ||
@@ -1170,7 +1021,67 @@ const app = new Hono()
           );
         });
 
-        console.log("Issues to create:", issuesToCreate);
+        // Check for status updates (GitHub issues that were closed should be marked as DONE)
+        const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
+          const gitIssue = issuesFromGit.find(
+            (issue) => issue.number === dbIssue.number || issue.title === dbIssue.name,
+          );
+
+          if (gitIssue) {
+            // Only update if GitHub issue is closed but DB issue is not DONE
+            if (gitIssue.state === "closed" && dbIssue.status !== IssueStatus.DONE) {
+              return true;
+            }
+            // Only update if GitHub issue is reopened AND the DB issue was marked as DONE
+            // This prevents overwriting IN_PROGRESS, IN_REVIEW, etc.
+            if (gitIssue.state === "open" && dbIssue.status === IssueStatus.DONE) {
+              return true;
+            }
+            // If DB issue is missing the number, update it (metadata only)
+            if (!dbIssue.number && gitIssue.number) {
+              return true;
+            }
+          }
+          return false;
+        });
+
+        // Update existing issues with status changes
+        const updatedIssues = await Promise.all(
+          issuesToUpdate.map(async (dbIssue) => {
+            const gitIssue = issuesFromGit.find(
+              (issue) => issue.number === dbIssue.number || issue.title === dbIssue.name,
+            );
+
+            if (gitIssue) {
+              const updates: Partial<Issue> = {};
+
+              // Only update status if GitHub is closed (DB → DONE) 
+              // OR if DB is DONE but GitHub reopened (DONE → TODO)
+              if (gitIssue.state === "closed" && dbIssue.status !== IssueStatus.DONE) {
+                updates.status = IssueStatus.DONE;
+              } else if (gitIssue.state === "open" && dbIssue.status === IssueStatus.DONE) {
+                // Reopened issue: revert from DONE to TODO only
+                updates.status = IssueStatus.TODO;
+              }
+
+              // Update number if missing
+              if (!dbIssue.number && gitIssue.number) {
+                updates.number = gitIssue.number;
+              }
+
+              // Only update if there are changes
+              if (Object.keys(updates).length > 0) {
+                return databases.updateDocument(
+                  DATABASE_ID,
+                  ISSUES_ID,
+                  dbIssue.$id,
+                  updates,
+                );
+              }
+            }
+            return null;
+          }),
+        );
 
         // Helper function to find member by GitHub username
         const findMemberByGithubUsername = async (githubUsername: string) => {
@@ -1180,6 +1091,7 @@ const app = new Hono()
           return githubUsername;
         };
 
+        // Create new issues
         const newIssues = await Promise.all(
           issuesToCreate.map(async (issue) => {
             let assigneeId = null;
@@ -1220,11 +1132,15 @@ const app = new Hono()
           }),
         );
 
-        // console.log("New Issues:", newIssues);
-
         return c.json({
           data: issuesFromGit,
-          created: newIssues,
+          created: newIssues.length,
+          updated: updatedIssues.filter(Boolean).length,
+          summary: {
+            newIssues: newIssues.length,
+            updatedIssues: updatedIssues.filter(Boolean).length,
+            totalGitHubIssues: issuesFromGit.length,
+          }
         });
       } catch (error) {
         console.log("Error:", error);

@@ -25,11 +25,13 @@ const app = new Hono()
     zValidator("query", z.object({
       workspaceId: z.string(),
       projectId: z.string(),
+      status: z.nativeEnum(PrStatus).nullish(),
+      search: z.string().nullish(),
     })),
     async (c) => {
       const databases = c.get("databases");
       const user = c.get("user");
-      const { workspaceId, projectId } = c.req.valid("query");
+      const { workspaceId, projectId, status, search } = c.req.valid("query");
 
       // Check if user is a super admin
       const isSuper = await isSuperAdmin({ databases, userId: user.$id });
@@ -73,16 +75,16 @@ const app = new Hono()
           "all"
         );
 
-        const pullRequests = prsFromGit.map((pr) => {
-          let status = PrStatus.OPEN;
+        let pullRequests = prsFromGit.map((pr) => {
+          let prStatus = PrStatus.OPEN;
           if (pr.state === "closed") {
-            status = pr.merged_at ? PrStatus.MERGED : PrStatus.CLOSED;
+            prStatus = pr.merged_at ? PrStatus.MERGED : PrStatus.CLOSED;
           }
 
           return {
             $id: String(pr.id),
             title: pr.title,
-            status,
+            status: prStatus,
             author: pr.user?.login || "unknown",
             assignee: pr.assignee?.login,
             url: pr.html_url,
@@ -96,6 +98,20 @@ const app = new Hono()
             $permissions: [],
           };
         });
+
+        // Apply filters
+        if (status) {
+          pullRequests = pullRequests.filter((pr) => pr.status === status);
+        }
+
+        if (search) {
+          const searchLower = search.toLowerCase();
+          pullRequests = pullRequests.filter((pr) =>
+            pr.title.toLowerCase().includes(searchLower) ||
+            pr.author.toLowerCase().includes(searchLower) ||
+            (pr.assignee && pr.assignee.toLowerCase().includes(searchLower))
+          );
+        }
 
         return c.json({
           data: {

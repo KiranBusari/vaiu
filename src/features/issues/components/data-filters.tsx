@@ -1,4 +1,5 @@
-import { FolderIcon, ListChecksIcon, UserCog2 } from "lucide-react";
+import { FolderIcon, ListChecksIcon, UserCog2, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useGetProjects } from "@/features/projects/api/use-get-projects";
@@ -11,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 import { IssueStatus } from "../types";
 import { useTaskFilter } from "../hooks/use-task-filter";
@@ -43,8 +45,19 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
 
   const assigneeOptions = memberOptions || [];
 
-  const [{ status, dueDate, assigneeId, projectId }, setFilters] =
+  const [{ status, dueDate, assigneeId, projectId, search }, setFilters] =
     useTaskFilter();
+
+  const [searchValue, setSearchValue] = useState(search ?? "");
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters({ search: searchValue || null });
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchValue, setFilters]);
 
   const onStatusChange = (value: string) => {
     setFilters({ status: value === "all" ? null : (value as IssueStatus) });
@@ -62,6 +75,15 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
 
   return (
     <div className="flex flex-col gap-2 lg:flex-row">
+      <div className="relative flex-1 lg:max-w-xs">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search issue name..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          className="h-8 pl-9"
+        />
+      </div>
       <Select
         defaultValue={status ?? undefined}
         onValueChange={(value) => onStatusChange(value)}

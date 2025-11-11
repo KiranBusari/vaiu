@@ -1,7 +1,7 @@
 "use client";
 import { useCallback } from "react";
 import { useQueryState } from "nuqs";
-import { Loader, PlusIcon } from "lucide-react";
+import { Loader, PlusIcon, RefreshCw } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useCreateTaskModal } from "../hooks/use-create-task-modal";
 import { useTaskFilter } from "../hooks/use-task-filter";
 import { useGetIssues } from "../api/use-get-tasks";
+import { useFetchIssues } from "../api/use-fetch-issues";
 import { DataFilters } from "./data-filters";
 import { DataKanban } from "./data-kanban";
 import { DataTable } from "./data-table";
@@ -29,7 +30,7 @@ interface TaskViewSwitcherProps {
 export const TaskViewSwitcher = ({
   hideProjectFilter,
 }: TaskViewSwitcherProps) => {
-  const [{ status, dueDate, assigneeId, projectId }] = useTaskFilter();
+  const [{ status, dueDate, assigneeId, projectId, search }] = useTaskFilter();
 
   const [view, setView] = useQueryState("task-view", {
     defaultValue: "table",
@@ -38,6 +39,7 @@ export const TaskViewSwitcher = ({
   const workspaceId = useWorkspaceId();
   const paramProjectId = useProjectId();
   const { mutate: bulkUpdate } = useBulkUpdateTasks();
+  const { mutate: syncIssues, isPending: isSyncing } = useFetchIssues();
 
   const { data: tasks, isLoading: tasksLoading } = useGetIssues({
     workspaceId,
@@ -45,7 +47,14 @@ export const TaskViewSwitcher = ({
     projectId: paramProjectId || projectId,
     dueDate,
     status,
+    search,
   });
+
+  const handleSyncWithGitHub = () => {
+    if (paramProjectId) {
+      syncIssues({ json: { projectId: paramProjectId } });
+    }
+  };
 
   const onKanbanChange = useCallback(
     (
@@ -72,7 +81,19 @@ export const TaskViewSwitcher = ({
           <p className="ml-1 flex items-center text-center text-xl font-bold">
             Issues
           </p>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2">
+            {paramProjectId && (
+              <Button
+                size={"sm"}
+                onClick={handleSyncWithGitHub}
+                disabled={isSyncing}
+                variant="outline"
+                className="w-full lg:w-auto"
+              >
+                <RefreshCw className={`size-4 ${isSyncing ? "animate-spin" : ""}`} />
+                {isSyncing ? "Syncing..." : "Sync with GitHub"}
+              </Button>
+            )}
             <Button
               size={"sm"}
               onClick={open}
