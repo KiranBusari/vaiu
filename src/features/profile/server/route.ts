@@ -55,7 +55,7 @@ const app = new Hono()
         try {
           const octokit = new Octokit({ auth: token });
           await octokit.rest.users.getAuthenticated();
-        } catch (error) {
+        } catch {
           return c.json(
             { error: "Invalid GitHub token. Please check and try again." },
             400
@@ -63,9 +63,8 @@ const app = new Hono()
         }
 
         // Check if profile exists
-        let profile;
         try {
-          profile = await databases.getDocument(
+          await databases.getDocument(
             DATABASE_ID,
             USER_PROFILES_ID,
             user.$id
@@ -80,8 +79,9 @@ const app = new Hono()
               githubAccessToken: token,
             }
           );
-        } catch (error: any) {
-          if (error.code === 404) {
+        } catch (error: unknown) {
+          const err = error as { code?: number };
+          if (err.code === 404) {
             // Create new profile
             await databases.createDocument(
               DATABASE_ID,
