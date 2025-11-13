@@ -38,7 +38,7 @@ export const SignInCard = () => {
     mutate({ json: values });
   };
   return (
-    <Card className="size-full border-none bg-neutral-200 shadow-none dark:bg-neutral-900 md:w-[487px]">
+    <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
       <CardHeader className="flexx items-center justify-center p-7 text-center">
         <CardTitle className="text-2xl">Welcome Back!</CardTitle>
       </CardHeader>

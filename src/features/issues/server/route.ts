@@ -42,7 +42,7 @@ function getRandomFutureDate(): string {
 
   const randomDate = new Date(
     oneWeekFromNow.getTime() +
-    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+      Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
   );
 
   return randomDate.toISOString();
@@ -96,9 +96,12 @@ const app = new Hono()
     // Get GitHub OAuth access token
     const githubToken = await getAccessToken(user.$id);
     if (!githubToken) {
-      return c.json({
-        error: "GitHub account not connected. Cannot delete issue."
-      }, 400);
+      return c.json(
+        {
+          error: "GitHub account not connected. Cannot delete issue.",
+        },
+        400,
+      );
     }
 
     const owner = await getAuthenticatedUser(githubToken);
@@ -109,7 +112,7 @@ const app = new Hono()
     const issuesFromGit = await listRepositoryIssues(
       githubToken,
       owner.login,
-      existingProject.name
+      existingProject.name,
     );
     // console.log("Issues from Git:", issuesFromGit);
 
@@ -128,7 +131,7 @@ const app = new Hono()
       owner.login,
       existingProject.name,
       issue_number,
-      { state: "closed" }
+      { state: "closed" },
     );
 
     await databases.deleteDocument(DATABASE_ID, ISSUES_ID, issueId);
@@ -384,9 +387,12 @@ const app = new Hono()
         // Get GitHub OAuth access token
         const githubToken = await getAccessToken(user.$id);
         if (!githubToken) {
-          return c.json({
-            error: "GitHub account not connected. Cannot create issue."
-          }, 400);
+          return c.json(
+            {
+              error: "GitHub account not connected. Cannot create issue.",
+            },
+            400,
+          );
         }
 
         // Check if user is a super admin
@@ -410,10 +416,6 @@ const app = new Hono()
               { error: "Unauthorized access to this project" },
               403,
             );
-          }
-
-          if (projects.documents[0].projectAdmin !== member.$id) {
-            return c.json({ error: "Only Admins can create Issues" }, 403);
           }
         }
 
@@ -442,7 +444,7 @@ const app = new Hono()
           owner.login,
           projects.documents[0].name,
           name,
-          description || ""
+          description || "",
         );
 
         // Idempotency guard: if an issue with the same GitHub number already exists for this project, return it
@@ -604,7 +606,7 @@ const app = new Hono()
               githubToken,
               owner.login,
               project.name,
-              "all" // Get both open and closed issues
+              "all", // Get both open and closed issues
             );
 
             // Find the GitHub issue by title
@@ -625,7 +627,7 @@ const app = new Hono()
                   owner.login,
                   project.name,
                   githubIssue.number,
-                  { state: newState }
+                  { state: newState },
                 );
                 console.log(
                   `Updated GitHub issue #${githubIssue.number} state to ${newState}`,
@@ -888,7 +890,7 @@ const app = new Hono()
               const issuesFromGit = await listRepositoryIssues(
                 githubToken,
                 owner.login,
-                project.name
+                project.name,
               );
 
               const currentIssue = issuesFromGit.find(
@@ -905,7 +907,7 @@ const app = new Hono()
                   owner.login,
                   project.name,
                   currentIssue.number,
-                  { state: "closed" }
+                  { state: "closed" },
                 );
               }
             }
@@ -984,9 +986,12 @@ const app = new Hono()
         const githubToken = await getAccessToken(user.$id);
 
         if (!githubToken) {
-          return c.json({
-            error: "GitHub account not connected. Cannot fetch issues."
-          }, 400);
+          return c.json(
+            {
+              error: "GitHub account not connected. Cannot fetch issues.",
+            },
+            400,
+          );
         }
 
         const owner = await getAuthenticatedUser(githubToken);
@@ -999,7 +1004,7 @@ const app = new Hono()
           githubToken,
           owner.login,
           project.name,
-          "all" // Get both open and closed issues for sync
+          "all", // Get both open and closed issues for sync
         );
 
         const issuesFromDb = await databases.listDocuments<Issue>(
@@ -1024,17 +1029,24 @@ const app = new Hono()
         // Check for status updates (GitHub issues that were closed should be marked as DONE)
         const issuesToUpdate = issuesFromDb.documents.filter((dbIssue) => {
           const gitIssue = issuesFromGit.find(
-            (issue) => issue.number === dbIssue.number || issue.title === dbIssue.name,
+            (issue) =>
+              issue.number === dbIssue.number || issue.title === dbIssue.name,
           );
 
           if (gitIssue) {
             // Only update if GitHub issue is closed but DB issue is not DONE
-            if (gitIssue.state === "closed" && dbIssue.status !== IssueStatus.DONE) {
+            if (
+              gitIssue.state === "closed" &&
+              dbIssue.status !== IssueStatus.DONE
+            ) {
               return true;
             }
             // Only update if GitHub issue is reopened AND the DB issue was marked as DONE
             // This prevents overwriting IN_PROGRESS, IN_REVIEW, etc.
-            if (gitIssue.state === "open" && dbIssue.status === IssueStatus.DONE) {
+            if (
+              gitIssue.state === "open" &&
+              dbIssue.status === IssueStatus.DONE
+            ) {
               return true;
             }
             // If DB issue is missing the number, update it (metadata only)
@@ -1049,17 +1061,24 @@ const app = new Hono()
         const updatedIssues = await Promise.all(
           issuesToUpdate.map(async (dbIssue) => {
             const gitIssue = issuesFromGit.find(
-              (issue) => issue.number === dbIssue.number || issue.title === dbIssue.name,
+              (issue) =>
+                issue.number === dbIssue.number || issue.title === dbIssue.name,
             );
 
             if (gitIssue) {
               const updates: Partial<Issue> = {};
 
-              // Only update status if GitHub is closed (DB → DONE) 
+              // Only update status if GitHub is closed (DB → DONE)
               // OR if DB is DONE but GitHub reopened (DONE → TODO)
-              if (gitIssue.state === "closed" && dbIssue.status !== IssueStatus.DONE) {
+              if (
+                gitIssue.state === "closed" &&
+                dbIssue.status !== IssueStatus.DONE
+              ) {
                 updates.status = IssueStatus.DONE;
-              } else if (gitIssue.state === "open" && dbIssue.status === IssueStatus.DONE) {
+              } else if (
+                gitIssue.state === "open" &&
+                dbIssue.status === IssueStatus.DONE
+              ) {
                 // Reopened issue: revert from DONE to TODO only
                 updates.status = IssueStatus.TODO;
               }
@@ -1140,7 +1159,7 @@ const app = new Hono()
             newIssues: newIssues.length,
             updatedIssues: updatedIssues.filter(Boolean).length,
             totalGitHubIssues: issuesFromGit.length,
-          }
+          },
         });
       } catch (error) {
         console.log("Error:", error);
