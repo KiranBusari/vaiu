@@ -26,6 +26,7 @@ import {
   listRepositoryIssues,
   updateIssue,
   createIssue,
+  checkCollaborator,
 } from "@/lib/github-api";
 
 function getRandomFutureDate(): string {
@@ -368,7 +369,6 @@ const app = new Hono()
             Query.equal("workspaceId", workspaceId),
           ],
         );
-        // console.log("projects:", projects);
 
         if (projects.documents.length === 0) {
           return c.json({ error: "Project not found" }, 404);
@@ -419,6 +419,26 @@ const app = new Hono()
           }
         }
 
+        // Get authenticated GitHub user
+        const authenticatedGithubUser = await getAuthenticatedUser(githubToken);
+        if (!authenticatedGithubUser) {
+          return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+        }
+
+        // Check if user is a collaborator on the repository
+        const isCollaborator = await checkCollaborator(
+          githubToken,
+          authenticatedGithubUser.login,
+          projects.documents[0].name,
+          authenticatedGithubUser.login
+        );
+
+        if (!isCollaborator) {
+          return c.json({
+            error: "You must be a collaborator on this repository to create issues"
+          }, 403);
+        }
+
         const highestPositionTask = await databases.listDocuments(
           DATABASE_ID,
           ISSUES_ID,
@@ -434,14 +454,9 @@ const app = new Hono()
             ? highestPositionTask.documents[0].position + 1000
             : 1000;
 
-        const owner = await getAuthenticatedUser(githubToken);
-        if (!owner) {
-          return c.json({ error: "Failed to authenticate with GitHub" }, 500);
-        }
-
         const issueInGit = await createIssue(
           githubToken,
-          owner.login,
+          authenticatedGithubUser.login,
           projects.documents[0].name,
           name,
           description || "",

@@ -11,6 +11,9 @@ import {
   getAccessToken,
   listPullRequests,
   createPullRequest,
+  checkCollaborator,
+  addIssueAssignees,
+  getAuthenticatedUser,
 } from "@/lib/github-api";
 import { createPrSchema } from "../schemas";
 import { ID, Query, type Databases } from "node-appwrite";
@@ -183,41 +186,24 @@ const app = new Hono()
       }
 
       try {
-        // Check if the user is a collaborator
-        const { checkCollaborator, addCollaborator, addIssueAssignees } = await import("@/lib/github-api");
+        // Get authenticated GitHub user
+        const authenticatedGithubUser = await getAuthenticatedUser(githubToken);
+        if (!authenticatedGithubUser) {
+          return c.json({ error: "Failed to authenticate with GitHub" }, 500);
+        }
 
-        try {
-          await checkCollaborator(
-            githubToken,
-            project.owner,
-            project.name,
-            githubUsername
-          );
-        } catch (error) {
-          if (error instanceof RequestError) {
-            // If the user is not a collaborator, add them
-            if (error.status === 404) {
-              try {
-                await addCollaborator(
-                  githubToken,
-                  project.owner,
-                  project.name,
-                  githubUsername,
-                  "push"
-                );
-              } catch (addCollaboratorError) {
-                console.error("Failed to add collaborator:", addCollaboratorError);
-                return c.json({ error: "Failed to add user as a collaborator." }, 500);
-              }
-            } else {
-              // Handle other errors from checkCollaborator
-              console.error("Failed to check collaborator status:", error);
-              return c.json({ error: "Failed to check collaborator status." }, 500);
-            }
-          } else {
-            console.error("Unexpected error:", error);
-            return c.json({ error: "An unexpected error occurred." }, 500);
-          }
+        // Check if user is a collaborator on the repository
+        const isCollaborator = await checkCollaborator(
+          githubToken,
+          project.owner,
+          project.name,
+          authenticatedGithubUser.login
+        );
+
+        if (!isCollaborator) {
+          return c.json({
+            error: "You must be a collaborator on this repository to create pull requests"
+          }, 403);
         }
 
         const createPR = await createPullRequest(
