@@ -1,7 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { BarChart2, Clock, Users, Zap, ChevronRight } from "lucide-react";
+import {
+  GitPullRequest,
+  Sparkles,
+  GitBranch,
+  Video,
+  Kanban,
+  FileSearch,
+  FileText,
+  BarChart3,
+} from "lucide-react";
 
 export default function BoldDesign() {
   return (
@@ -13,39 +21,21 @@ export default function BoldDesign() {
               Features
             </div>
             <h2 className="text-2xl tracking-wide text-gray-500 dark:text-white md:text-3xl">
-              Powerful tools for powerful teams
+              Everything you need for collaborative development
             </h2>
             <p className="max-w-[900px] text-sm text-blue-500 md:text-base lg:text-base/relaxed xl:text-xl/relaxed">
-              Vaiu provides everything you need to take your project management
-              to the next level.
+              Vaiu provides powerful tools to streamline your GitHub workflow,
+              from AI-powered code reviews to real-time team collaboration.
             </p>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 py-8 sm:grid-cols-2 md:gap-6 md:py-12 lg:grid-cols-3">
           {[
             {
-              icon: <BarChart2 className="h-8 w-8 md:h-10 md:w-10" />,
-              title: "Advanced Analytics",
+              icon: <Sparkles className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "AI-Powered Code Review",
               description:
-                "Gain deep insights into your team's performance with customizable dashboards and real-time metrics.",
-            },
-            {
-              icon: <Clock className="h-8 w-8 md:h-10 md:w-10" />,
-              title: "Time Tracking",
-              description:
-                "Track time spent on tasks and projects to improve estimation accuracy and resource allocation.",
-            },
-            {
-              icon: <Users className="h-8 w-8 md:h-10 md:w-10" />,
-              title: "Team Collaboration",
-              description:
-                "Enhance team communication with integrated chat, comments, and file sharing capabilities.",
-            },
-            {
-              icon: <Zap className="h-8 w-8 md:h-10 md:w-10" />,
-              title: "Automation",
-              description:
-                "Automate repetitive tasks and workflows to save time and reduce manual errors.",
+                "Get intelligent PR analysis with automated code quality, security, and performance assessments powered by advanced AI technology.",
             },
             {
               icon: (
@@ -59,37 +49,57 @@ export default function BoldDesign() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="md:h-10 md:w-10"
+                  className="h-8 w-8 md:h-10 md:w-10"
                 >
-                  <rect width="18" height="18" x="3" y="3" rx="2" />
-                  <path d="M9 9h6v6H9z" />
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
               ),
-              title: "Custom Fields",
+              title: "Automated Test Generation",
               description:
-                "Create and manage custom fields to tailor vaiu to your specific project requirements.",
+                "AI generates comprehensive test cases for your PRs - unit, integration, E2E, and more with prioritized recommendations.",
             },
             {
-              icon: (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="md:h-10 md:w-10"
-                >
-                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
-                  <path d="M12 8v4l3 3" />
-                </svg>
-              ),
-              title: "Reporting",
+              icon: <FileText className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "AI-Powered Summaries",
               description:
-                "Generate comprehensive reports to track progress, identify bottlenecks, and make data-driven decisions.",
+                "Generate intelligent summaries of pull requests and issues with impact analysis, key changes, and actionable recommendations.",
+            },
+            {
+              icon: <BarChart3 className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "Advanced Analytics & Insights",
+              description:
+                "Track project metrics, issue statistics, team performance, and GitHub profile analytics with detailed dashboards and real-time data visualization.",
+            },
+            {
+              icon: <GitPullRequest className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "Pull Request Management",
+              description:
+                "Create, review, and manage pull requests seamlessly with an intuitive interface and intelligent workflows.",
+            },
+            {
+              icon: <Kanban className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "Advanced Issue Tracking",
+              description:
+                "Track issues with kanban boards, table views, and calendar layouts. Filter, sort, search, and assign issues with ease.",
+            },
+            {
+              icon: <FileSearch className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "GitHub Issues Integration",
+              description:
+                "Seamlessly fetch and sync issues from your GitHub repositories. Create, manage, and track GitHub issues directly within vaiu.",
+            },
+            {
+              icon: <GitBranch className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "Repository Management",
+              description:
+                "Create new repos or import existing ones. Manage settings, collaborators, and view comprehensive project analytics.",
+            },
+            {
+              icon: <Video className="h-8 w-8 md:h-10 md:w-10" />,
+              title: "Real-Time Collaboration",
+              description:
+                "Connect with your team through audio/video rooms and integrated chat for seamless communication.",
             },
           ].map((feature, i) => (
             <div
@@ -98,19 +108,12 @@ export default function BoldDesign() {
             >
               <div className="space-y-3 md:space-y-4">
                 <div className="text-blue-600">{feature.icon}</div>
-                <h3 className="text-lg font-bold text-white md:text-xl">
+                <h3 className="text-lg font-semibold text-black md:text-xl">
                   {feature.title}
                 </h3>
                 <p className="text-sm text-slate-500 md:text-base">
                   {feature.description}
                 </p>
-                <Link
-                  href="#"
-                  className="inline-flex items-center text-sm text-blue-600 hover:text-blue-300 md:text-base"
-                >
-                  Learn more{" "}
-                  <ChevronRight className="ml-1 h-3 w-3 md:h-4 md:w-4" />
-                </Link>
               </div>
             </div>
           ))}

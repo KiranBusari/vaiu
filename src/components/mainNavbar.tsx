@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "./ui/ModeToggle";
 import Link from "next/link";
@@ -13,10 +13,34 @@ import { usePathname } from "next/navigation";
 export function Navbar({ className }: { className?: string }) {
   const pathname = usePathname();
   const isSignIn = pathname === "/sign-in";
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Show navbar when scrolling up or at the top
+      if (currentScrollY < lastScrollY || currentScrollY < 10) {
+        setIsVisible(true);
+      }
+      // Hide navbar when scrolling down
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
     <div
       className={cn(
-        "wrapper sticky top-0 z-50 mx-auto flex w-full items-center gap-2 py-6",
+        "wrapper sticky top-0 z-50 mx-auto flex w-full items-center gap-2 py-6 transition-transform duration-300",
+        isVisible ? "translate-y-0" : "-translate-y-full",
         className,
       )}
     >
@@ -32,7 +56,7 @@ export function Navbar({ className }: { className?: string }) {
             className="font-semibold text-blue-600 hover:text-blue-500"
           >
             <Link href={isSignIn ? "/sign-up" : "/sign-in"}>
-              {isSignIn ? "SignUp" : "SignIn"}
+              {isSignIn ? "Sign Up" : "Sign In"}
             </Link>
           </Button>
           <ModeToggle />

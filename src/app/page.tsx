@@ -5,8 +5,9 @@ import Hero from "@/components/Hero";
 import { getWorkspaces } from "@/features/workspaces/queries";
 import { Navbar } from "@/components/mainNavbar";
 import Features from "@/components/Features";
-import Testimonials from "@/components/Testimonials";
-import Pricing from "@/components/Pricing";
+import Footer from "@/components/Footer";
+// import Testimonials from "@/components/Testimonials";
+// import Pricing from "@/components/Pricing";
 
 export default async function Home() {
   const current = await getCurrent();
@@ -17,8 +18,9 @@ export default async function Home() {
         <Navbar />
         <Hero />
         <Features />
-        <Testimonials />
-        <Pricing />
+        {/* <Testimonials /> */}
+        {/* <Pricing /> */}
+        <Footer />
       </div>
     );
   }
