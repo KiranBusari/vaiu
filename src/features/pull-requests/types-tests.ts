@@ -64,13 +64,6 @@ export interface AITestGeneration {
     author: string;
   };
 
-  testingStrategy: {
-    approach: string;
-    focusAreas: string[];
-    testingFramework: string;
-    runInstructions: string;
-  };
-
   createdAt: string;
   generationVersion: string;
 }

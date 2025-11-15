@@ -369,6 +369,30 @@ const app = new Hono()
           }, 400);
         }
 
+        // Check if tests were recently generated (within last 5 minutes) to prevent spamming
+        const recentTests = await databases.listDocuments<PersistedTestCase>(
+          DATABASE_ID,
+          AI_TESTS_ID,
+          [
+            Query.equal("projectId", projectId),
+            Query.equal("prNumber", parseInt(prNumber)),
+            Query.orderDesc("$createdAt"),
+            Query.limit(1),
+          ]
+        );
+
+        if (recentTests.documents.length > 0) {
+          const lastGenerated = new Date(recentTests.documents[0].$createdAt);
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+          if (lastGenerated > fiveMinutesAgo) {
+            return c.json({
+              error: "Tests were recently generated. Please wait 5 minutes before generating again.",
+              lastGenerated: lastGenerated.toISOString()
+            }, 429);
+          }
+        }
+
         // Generate AI test cases
         const testGeneration = await generateAITests({
           projectId,
@@ -778,23 +802,23 @@ async function generateAITests({
       })
     ]);
 
-    // Optimize: Sort files by changes (most changed first) and limit to top 30
+    // Optimize: Limit to top 15 most changed files and truncate patches
     const sortedFiles = files
       .sort((a, b) => b.changes - a.changes)
-      .slice(0, 30);
+      .slice(0, 15); // Reduced from 30 to 15 to avoid overloading
 
     const testGenerationInput = {
       prTitle: pr.title,
-      prDescription: pr.body || "No description provided",
+      prDescription: (pr.body || "No description provided").slice(0, 500), // Limit description
       prUrl: pr.html_url,
       files: sortedFiles.map(file => ({
         filename: file.filename,
         status: file.status as "added" | "modified" | "removed",
         additions: file.additions,
         deletions: file.deletions,
-        patch: file.patch,
+        patch: file.patch ? file.patch.slice(0, 1000) : undefined, // Limit patch size to 1000 chars
       })),
-      commitMessages: commits.map(commit => commit.commit.message),
+      commitMessages: commits.slice(0, 10).map(commit => commit.commit.message.slice(0, 200)), // Limit to 10 commits, 200 chars each
       author: pr.user?.login || "unknown",
       repoInfo: {
         language: repo.language,
@@ -823,7 +847,6 @@ async function generateAITests({
         prDescription: pr.body || "No description provided",
         author: pr.user?.login || "unknown",
       },
-      testingStrategy: testGeneration.testingStrategy,
       createdAt: new Date().toISOString(),
       generationVersion: "1.0.0",
     };

@@ -5,7 +5,13 @@ import { GEMINI_API_KEY } from "@/config";
 const client = new GoogleGenAI({
   apiKey: GEMINI_API_KEY,
 });
-const MODEL_NAME = "gemini-2.5-flash";
+
+// Model fallback chain: try each model in order if previous one fails
+const MODEL_FALLBACK_CHAIN = [
+  "gemini-2.5-flash",
+  "gemini-1.5-flash",          // Fallback 1: Stable fast model
+  "gemini-1.5-pro",            // Fallback 2: More capable model
+];
 
 export interface PRAnalysisInput {
   prTitle: string;
@@ -66,39 +72,56 @@ export interface SummaryOutput {
 
 export async function generateAISummary(input: SummaryInput): Promise<SummaryOutput> {
   const prompt = createSummaryPrompt(input);
-  
-  try {
-    const result = await client.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt
-    });
 
-    const text = result.text;
-    
-    if (!text) {
-      throw new Error('No response text from Gemini API');
+  // Try each model in the fallback chain
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const modelName = MODEL_FALLBACK_CHAIN[i];
+
+    try {
+      const result = await client.models.generateContent({
+        model: modelName,
+        contents: prompt
+      });
+
+      const text = result.text;
+
+      if (!text) {
+        throw new Error('No response text from Gemini API');
+      }
+
+      // Clean the response text to extract JSON from markdown code blocks
+      let cleanedText = text.trim();
+
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      const summary = JSON.parse(cleanedText);
+      return summary;
+    } catch (error) {
+      console.error(`AI summary failed with model ${modelName}:`, error);
+
+      // Check if it's a rate limit or overload error
+      const errorObj = error as { status?: number; message?: string };
+      const isRateLimit = errorObj?.status === 429 || errorObj?.message?.includes('rate limit') ||
+        errorObj?.message?.includes('quota') || errorObj?.message?.includes('overloaded');
+
+      // If it's the last model or not a rate limit error, return fallback
+      if (i === MODEL_FALLBACK_CHAIN.length - 1 || !isRateLimit) {
+        console.error("All models failed or non-recoverable error, using fallback summary");
+        return createFallbackSummary(input);
+      }
     }
-    
-    // Clean the response text to extract JSON from markdown code blocks
-    let cleanedText = text.trim();
-    
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    const summary = JSON.parse(cleanedText);
-    return summary;
-  } catch (error) {
-    console.error("AI summary failed:", error);
-    return createFallbackSummary(input);
   }
+
+  return createFallbackSummary(input);
 }
 
 function createSummaryPrompt(input: SummaryInput): string {
   const contextInfo = input.context;
-  
+
   return `
 You are an expert technical project manager specializing in summarizing GitHub ${input.type === 'pr' ? 'Pull Requests' : 'Issues'} for development teams.
 
@@ -112,9 +135,9 @@ You are an expert technical project manager specializing in summarizing GitHub $
 
 ${contextInfo.comments && contextInfo.comments.length > 0 ? `
 ## Recent Comments:
-${contextInfo.comments.map(comment => 
-  `**${comment.user}** (${comment.createdAt}): ${comment.body.substring(0, 200)}${comment.body.length > 200 ? '...' : ''}`
-).join('\n')}
+${contextInfo.comments.map(comment =>
+    `**${comment.user}** (${comment.createdAt}): ${comment.body.substring(0, 200)}${comment.body.length > 200 ? '...' : ''}`
+  ).join('\n')}
 ` : ''}
 
 Please analyze this ${input.type} and provide a comprehensive summary that helps team members quickly understand:
@@ -170,37 +193,50 @@ function createFallbackSummary(input: SummaryInput): SummaryOutput {
 
 export async function analyzeWithGemini(input: PRAnalysisInput) {
   const prompt = createAnalysisPrompt(input);
-  
-  try {
-    const result = await client.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt
-    });
 
-    const text = result.text;
-    
-    if (!text) {
-      throw new Error('No response text from Gemini API');
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const modelName = MODEL_FALLBACK_CHAIN[i];
+
+    try {
+      const result = await client.models.generateContent({
+        model: modelName,
+        contents: prompt
+      });
+
+      const text = result.text;
+
+      if (!text) {
+        throw new Error('No response text from Gemini API');
+      }
+
+      // Clean the response text to extract JSON from markdown code blocks
+      let cleanedText = text.trim();
+
+      // Remove markdown code blocks if present
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      // Parse the JSON response from Gemini
+      const analysis = JSON.parse(cleanedText);
+      return analysis;
+    } catch (error) {
+      // Check if it's a rate limit or overload error
+      const errorObj = error as { status?: number; message?: string };
+      const isRateLimit = errorObj?.status === 429 || errorObj?.message?.includes('rate limit') ||
+        errorObj?.message?.includes('quota') || errorObj?.message?.includes('overloaded');
+
+      // If it's the last model or not a rate limit error, return fallback
+      if (i === MODEL_FALLBACK_CHAIN.length - 1 || !isRateLimit) {
+        console.error("All models failed or non-recoverable error, using fallback analysis");
+        return createFallbackAnalysis(input);
+      }
     }
-    
-    // Clean the response text to extract JSON from markdown code blocks
-    let cleanedText = text.trim();
-    
-    // Remove markdown code blocks if present
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    // Parse the JSON response from Gemini
-    const analysis = JSON.parse(cleanedText);
-    return analysis;
-  } catch (error) {
-    console.error("Gemini AI analysis failed:", error);
-    // Fallback to mock data if AI fails
-    return createFallbackAnalysis(input);
   }
+
+  return createFallbackAnalysis(input);
 }
 
 function createAnalysisPrompt(input: PRAnalysisInput): string {
@@ -235,11 +271,11 @@ You are a senior code reviewer with expertise in software engineering best pract
 ${JSON.stringify(filesInfo, null, 2)}
 
 ## Existing Reviews:
-${input.existingReviews.length > 0 ? 
-  input.existingReviews.map(review => 
-    `### ${review.user} (${review.state}) - ${review.submittedAt}\n${review.body || 'No comment'}`
-  ).join('\n\n') 
-  : 'No existing reviews'}
+${input.existingReviews.length > 0 ?
+      input.existingReviews.map(review =>
+        `### ${review.user} (${review.state}) - ${review.submittedAt}\n${review.body || 'No comment'}`
+      ).join('\n\n')
+      : 'No existing reviews'}
 
 Please analyze this PR and return a JSON response with the following exact structure:
 
@@ -401,34 +437,52 @@ export interface TestGenerationInput {
 
 export async function generateTestCases(input: TestGenerationInput) {
   const prompt = createTestGenerationPrompt(input);
-  
-  try {
-    const result = await client.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt
-    });
 
-    const text = result.text;
-    
-    if (!text) {
-      throw new Error('No response text from Gemini API');
+  // Try each model in the fallback chain
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const modelName = MODEL_FALLBACK_CHAIN[i];
+
+    try {
+
+      const result = await client.models.generateContent({
+        model: modelName,
+        contents: prompt
+      });
+
+      const text = result.text;
+
+      if (!text) {
+        throw new Error('No response text from Gemini API');
+      }
+
+      // Clean the response text to extract JSON from markdown code blocks
+      let cleanedText = text.trim();
+
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      const testGeneration = JSON.parse(cleanedText);
+      return testGeneration;
+    } catch (error) {
+      console.error(`Test generation failed with model ${modelName}:`, error);
+
+      // Check if it's a rate limit or overload error
+      const errorObj = error as { status?: number; message?: string };
+      const isRateLimit = errorObj?.status === 429 || errorObj?.message?.includes('rate limit') ||
+        errorObj?.message?.includes('quota') || errorObj?.message?.includes('overloaded');
+
+      // If it's the last model or not a rate limit error, return fallback
+      if (i === MODEL_FALLBACK_CHAIN.length - 1 || !isRateLimit) {
+        console.error("All models failed or non-recoverable error, using fallback generation");
+        return createFallbackTestGeneration(input);
+      }
     }
-    
-    // Clean the response text to extract JSON from markdown code blocks
-    let cleanedText = text.trim();
-    
-    if (cleanedText.startsWith('```json')) {
-      cleanedText = cleanedText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedText.startsWith('```')) {
-      cleanedText = cleanedText.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    
-    const testGeneration = JSON.parse(cleanedText);
-    return testGeneration;
-  } catch (error) {
-    console.error("Test generation failed:", error);
-    return createFallbackTestGeneration(input);
   }
+
+  return createFallbackTestGeneration(input);
 }
 
 function createTestGenerationPrompt(input: TestGenerationInput): string {
@@ -510,13 +564,7 @@ Return a JSON response with this exact structure:
         }
       ]
     }
-  ],
-  "testingStrategy": {
-    "approach": "<overall testing approach>",
-    "focusAreas": ["<area1>", "<area2>"],
-    "testingFramework": "<recommended framework>",
-    "runInstructions": "<how to run the tests>"
-  }
+  ]
 }
 
 ## Guidelines:
@@ -584,12 +632,6 @@ function createFallbackTestGeneration(input: TestGenerationInput) {
           }
         ]
       }
-    ],
-    testingStrategy: {
-      approach: "Manual test creation recommended",
-      focusAreas: ["All changed files"],
-      testingFramework: "Use your project's testing framework",
-      runInstructions: "Follow your project's testing guidelines"
-    }
+    ]
   };
 }

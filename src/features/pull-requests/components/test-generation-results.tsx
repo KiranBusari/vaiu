@@ -28,7 +28,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -47,7 +46,6 @@ interface TestGenerationResultsProps {
 export function TestGenerationResults({
   testGeneration
 }: TestGenerationResultsProps) {
-  const [activeTab, setActiveTab] = useState("summary");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const getTestTypeIcon = (type: TestType) => {
@@ -232,133 +230,53 @@ export function TestGenerationResults({
         </CardContent>
       </Card>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="summary">Test Scenarios</TabsTrigger>
-          <TabsTrigger value="strategy">Testing Strategy</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="summary" className="space-y-4">
-          {testGeneration.scenarios.map((scenario) => (
-            <Card key={scenario.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">
-                      {scenario.feature}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {scenario.description}
-                    </p>
-                  </div>
-                  <Badge variant={getRiskBadgeVariant(scenario.riskLevel)}>
-                    {scenario.riskLevel.toUpperCase()} RISK
-                  </Badge>
-                </div>
-                {scenario.affectedFiles && Array.isArray(scenario.affectedFiles) && scenario.affectedFiles.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {scenario.affectedFiles.map((file, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        <FileCode className="mr-1 h-3 w-3" />
-                        {file}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="max-h-[600px]">
-                  <div className="space-y-3">
-                    {scenario.testCases.map((testCase) => (
-                      <TestCaseCard
-                        key={testCase.id}
-                        testCase={testCase}
-                        getTestTypeIcon={getTestTypeIcon}
-                        getPriorityColor={getPriorityColor}
-                        copyToClipboard={copyToClipboard}
-                        copiedId={copiedId}
-                      />
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="strategy" className="space-y-4">
-          <Card>
+      <div className="w-full space-y-4">
+        {testGeneration.scenarios.map((scenario) => (
+          <Card key={scenario.id}>
             <CardHeader>
-              <CardTitle>Testing Strategy</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="mb-2 font-semibold">Approach</h3>
-                <p className="text-sm text-muted-foreground">
-                  {testGeneration.testingStrategy.approach}
-                </p>
-              </div>
-
-              {testGeneration.testingStrategy.focusAreas && Array.isArray(testGeneration.testingStrategy.focusAreas) && testGeneration.testingStrategy.focusAreas.length > 0 && (
-                <div>
-                  <h3 className="mb-2 font-semibold">Focus Areas</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {testGeneration.testingStrategy.focusAreas.map(
-                      (area, index) => (
-                        <Badge key={index} variant="secondary">
-                          {area}
-                        </Badge>
-                      ),
-                    )}
-                  </div>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">
+                    {scenario.feature}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {scenario.description}
+                  </p>
                 </div>
-              )}
-
-              <div>
-                <h3 className="mb-2 font-semibold">Recommended Framework</h3>
-                <Badge variant="outline" className="text-sm">
-                  {testGeneration.testingStrategy.testingFramework}
+                <Badge variant={getRiskBadgeVariant(scenario.riskLevel)}>
+                  {scenario.riskLevel.toUpperCase()} RISK
                 </Badge>
               </div>
-
-              <div>
-                <h3 className="mb-2 font-semibold">Run Instructions</h3>
-                <div className="rounded-lg border border-border bg-muted p-4">
-                  <code className="text-sm">
-                    {testGeneration.testingStrategy.runInstructions}
-                  </code>
+              {scenario.affectedFiles && Array.isArray(scenario.affectedFiles) && scenario.affectedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {scenario.affectedFiles.map((file, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      <FileCode className="mr-1 h-3 w-3" />
+                      {file}
+                    </Badge>
+                  ))}
                 </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="mb-3 font-semibold">PR Context</h3>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium">Files Changed: </span>
-                    <span className="text-muted-foreground">
-                      {testGeneration.context.filesChanged.length}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Commits: </span>
-                    <span className="text-muted-foreground">
-                      {testGeneration.context.commitMessages.length}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-medium">Author: </span>
-                    <span className="text-muted-foreground">
-                      {testGeneration.context.author}
-                    </span>
-                  </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="max-h-[600px]">
+                <div className="space-y-3">
+                  {scenario.testCases.map((testCase) => (
+                    <TestCaseCard
+                      key={testCase.id}
+                      testCase={testCase}
+                      getTestTypeIcon={getTestTypeIcon}
+                      getPriorityColor={getPriorityColor}
+                      copyToClipboard={copyToClipboard}
+                      copiedId={copiedId}
+                    />
+                  ))}
                 </div>
-              </div>
+              </ScrollArea>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        ))}
+      </div>
 
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <div>
