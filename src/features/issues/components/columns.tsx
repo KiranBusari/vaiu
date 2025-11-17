@@ -1,6 +1,7 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreVerticalIcon } from "lucide-react";
+import Link from "next/link";
 
 import { snakeCaseToTitleCase } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,24 @@ export const columns: ColumnDef<Issue>[] = [
     },
     cell: ({ row }) => {
       const name = row.original.name;
+      const number = row.original.number;
+      const project = row.original.project;
+
+      // If issue has a GitHub number and project has owner/name, create GitHub link
+      if (number && project?.owner && project?.name) {
+        const githubUrl = `https://github.com/${project.owner}/${project.name}/issues/${number}`;
+        return (
+          <Link
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            <p className="line-clamp-1">#{number} {name}</p>
+          </Link>
+        );
+      }
+
       return <p className="line-clamp-1">{name}</p>;
     },
   },
