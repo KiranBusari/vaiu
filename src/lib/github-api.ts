@@ -212,10 +212,12 @@ export async function listRepositoryIssues(
 ) {
     const octokit = new Octokit({ auth: accessToken });
 
-    const { data: issues } = await octokit.rest.issues.listForRepo({
+    // Use pagination to fetch all issues (GitHub default is 30 per page, max is 100)
+    const issues = await octokit.paginate(octokit.rest.issues.listForRepo, {
         owner,
         repo,
         state: state || "open",
+        per_page: 100, // Maximum allowed by GitHub API
     });
 
     return issues;
@@ -308,10 +310,12 @@ export async function listPullRequests(
 ) {
     const octokit = new Octokit({ auth: accessToken });
 
-    const { data: pullRequests } = await octokit.rest.pulls.list({
+    // Use pagination to fetch all PRs (GitHub default is 30 per page, max is 100)
+    const pullRequests = await octokit.paginate(octokit.rest.pulls.list, {
         owner,
         repo,
         state,
+        per_page: 100, // Maximum allowed by GitHub API
     });
 
     return pullRequests;
