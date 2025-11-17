@@ -8,9 +8,9 @@ const client = new GoogleGenAI({
 
 // Model fallback chain: try each model in order if previous one fails
 const MODEL_FALLBACK_CHAIN = [
-  "gemini-2.5-flash",
-  "gemini-1.5-flash",          // Fallback 1: Stable fast model
-  "gemini-1.5-pro",            // Fallback 2: More capable model
+  "gemini-2.5-flash",          // Primary: Latest fast model
+  "gemini-2.5-flash-lite",     // Fallback 1: Lighter/faster version
+  "gemini-2.5-pro",            // Fallback 2: Most capable model
 ];
 
 export interface PRAnalysisInput {
