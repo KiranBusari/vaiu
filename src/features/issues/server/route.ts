@@ -29,25 +29,25 @@ import {
   checkCollaborator,
 } from "@/lib/github-api";
 
-function getRandomFutureDate(): string {
-  /**
-   * Generates a random date string in the future, at least 7 days from the current date,
-   * and no more than 2 months from the current date.
-   * @returns A string representing a random date in the future, in ISO format.
-   **/
+// function getRandomFutureDate(): string {
+//   /**
+//    * Generates a random date string in the future, at least 7 days from the current date,
+//    * and no more than 2 months from the current date.
+//    * @returns A string representing a random date in the future, in ISO format.
+//    **/
 
-  const today = new Date();
-  const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days minimum
-  const twoMonthsFromNow = new Date();
-  twoMonthsFromNow.setMonth(today.getMonth() + 2);
+//   const today = new Date();
+//   const oneWeekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days minimum
+//   const twoMonthsFromNow = new Date();
+//   twoMonthsFromNow.setMonth(today.getMonth() + 2);
 
-  const randomDate = new Date(
-    oneWeekFromNow.getTime() +
-    Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
-  );
+//   const randomDate = new Date(
+//     oneWeekFromNow.getTime() +
+//     Math.random() * (twoMonthsFromNow.getTime() - oneWeekFromNow.getTime()),
+//   );
 
-  return randomDate.toISOString();
-}
+//   return randomDate.toISOString();
+// }
 
 const app = new Hono()
   .delete("/:issueId", sessionMiddleware, async (c) => {
