@@ -24,6 +24,7 @@ import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Project } from "@/features/projects/types";
+import { checkSubscriptionLimit } from "@/features/subscriptions";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -154,6 +155,28 @@ const app = new Hono()
         const databases = c.get("databases");
         const storage = c.get("storage");
         const user = c.get("user");
+
+        // Check workspace limit
+        const limitCheck = await checkSubscriptionLimit({
+          databases,
+          userId: user.$id,
+          limitType: "workspaces",
+        });
+
+        if (!limitCheck.allowed) {
+          return c.json(
+            {
+              error: "Workspace limit reached",
+              details: {
+                limit: limitCheck.limit,
+                current: limitCheck.current,
+                plan: limitCheck.plan,
+                message: `You have reached the maximum number of workspaces (${limitCheck.limit}) for your ${limitCheck.plan} plan. Please upgrade to create more workspaces.`,
+              },
+            },
+            403
+          );
+        }
 
         const { name, image } = c.req.valid("form");
 
