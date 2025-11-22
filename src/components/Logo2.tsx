@@ -9,8 +9,8 @@ export const Logo2 = ({ className }: { className?: string }) => {
       <Image
         src={"/logo2.png"}
         alt="logo"
-        width={100}
-        height={100}
+        width={60}
+        height={60}
         quality={100}
       />
     </div>

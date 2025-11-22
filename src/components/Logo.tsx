@@ -5,15 +5,15 @@ export const Logo = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        `flex w-full items-center justify-center object-cover`,
+        `flex w-full items-center justify-start object-cover`,
         className,
       )}
     >
       <Image
         src={"/logo.png"}
         alt="logo"
-        width={100}
-        height={100}
+        width={60}
+        height={60}
         quality={100}
       />
     </div>
