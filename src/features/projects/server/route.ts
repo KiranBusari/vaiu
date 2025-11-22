@@ -250,6 +250,22 @@ const app = new Hono()
         return c.json({ error: "Missing workspaceId" }, 400);
       }
 
+      // Check if user is a super admin
+      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+
+      if (isSuper) {
+        // Super admins can see all projects
+        const projects = await databases.listDocuments<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          [
+            Query.equal("workspaceId", workspaceId),
+            Query.orderDesc("$createdAt"),
+          ],
+        );
+        return c.json({ data: projects });
+      }
+
       const member = await getMember({
         databases,
         workspaceId,
@@ -260,7 +276,28 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const projects = await databases.listDocuments<Project>(
+      // Workspace admins can see all projects in the workspace
+      if (member.role === MemberRole.ADMIN) {
+        const projects = await databases.listDocuments<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          [
+            Query.equal("workspaceId", workspaceId),
+            Query.orderDesc("$createdAt"),
+          ],
+        );
+        return c.json({ data: projects });
+      }
+
+      // Regular members can only see projects they're assigned to
+      const projectIds = member.projectId || [];
+
+      if (projectIds.length === 0) {
+        return c.json({ data: { documents: [], total: 0 } });
+      }
+
+      // Fetch all projects in workspace and filter by member's projectIds
+      const allProjects = await databases.listDocuments<Project>(
         DATABASE_ID,
         PROJECTS_ID,
         [
@@ -269,7 +306,16 @@ const app = new Hono()
         ],
       );
 
-      return c.json({ data: projects });
+      const filteredProjects = allProjects.documents.filter((project) =>
+        projectIds.includes(project.$id),
+      );
+
+      return c.json({
+        data: {
+          documents: filteredProjects,
+          total: filteredProjects.length,
+        },
+      });
     },
   )
   .get(
@@ -312,7 +358,7 @@ const app = new Hono()
         }
       }
 
-      // Regular users can only see projects they're members of
+      // Check workspace membership and role
       const member = await getMember({
         databases,
         workspaceId,
@@ -323,54 +369,57 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      const memberDocuments = await databases.listDocuments(
-        DATABASE_ID,
-        MEMBERS_ID,
-        [
-          Query.equal("workspaceId", workspaceId),
-          Query.equal("userId", user.$id),
-        ],
-      );
+      // Workspace admins can see all projects in the workspace
+      if (member.role === MemberRole.ADMIN) {
+        try {
+          const projects = await databases.listDocuments<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            [
+              Query.equal("workspaceId", workspaceId),
+              Query.orderDesc("$createdAt"),
+            ],
+          );
 
-      if (memberDocuments.documents.length === 0) {
-        return c.json({ error: "Unauthorized" }, 401);
+          return c.json({
+            data: {
+              documents: projects.documents,
+              total: projects.total,
+            },
+          });
+        } catch (error) {
+          console.error("Error fetching projects:", error);
+          return c.json({ error: "Failed to fetch projects" }, 500);
+        }
       }
 
-      const projectIds = memberDocuments.documents.flatMap(
-        (member) => member.projectId || [],
-      );
+      // Regular members can only see projects they're assigned to
+      const projectIds = member.projectId || [];
 
       if (projectIds.length === 0) {
         return c.json({ data: { documents: [], total: 0 } });
       }
 
-      try {
-        // Since Query.contains doesn't work with $id, we'll fetch all projects for the workspace
-        // and then filter them manually
-        const projects = await databases.listDocuments<Project>(
-          DATABASE_ID,
-          PROJECTS_ID,
-          [
-            Query.equal("workspaceId", workspaceId),
-            Query.orderDesc("$createdAt"),
-          ],
-        );
+      // Fetch all projects in workspace and filter by member's projectIds
+      const allProjects = await databases.listDocuments<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        [
+          Query.equal("workspaceId", workspaceId),
+          Query.orderDesc("$createdAt"),
+        ],
+      );
 
-        // Filter the projects to only include those in the projectIds array
-        const validProjects = projects.documents.filter(
-          (project) => project !== null && projectIds.includes(project.$id),
-        );
+      const filteredProjects = allProjects.documents.filter((project) =>
+        projectIds.includes(project.$id),
+      );
 
-        return c.json({
-          data: {
-            documents: validProjects,
-            total: validProjects.length,
-          },
-        });
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        return c.json({ error: "Failed to fetch projects" }, 500);
-      }
+      return c.json({
+        data: {
+          documents: filteredProjects,
+          total: filteredProjects.length,
+        },
+      });
     },
   )
   .get("/:projectId", sessionMiddleware, async (c) => {

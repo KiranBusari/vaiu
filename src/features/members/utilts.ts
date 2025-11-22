@@ -40,7 +40,7 @@ export const getProjectMember = async ({
   try {
     const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
       Query.equal("workspaceId", workspaceId),
-      Query.equal("projectId", projectId),
+      Query.contains("projectId", projectId),
       Query.equal("userId", userId),
     ]);
     return members.documents[0];
