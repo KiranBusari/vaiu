@@ -34,6 +34,8 @@ import {
   listRepositoryIssues
 } from "@/lib/github-api";
 
+import { checkSubscriptionLimit } from "@/features/subscriptions/utils";
+
 const extractRepoName = (githubUrl: string): string => {
   // Split by '/' and get the last segment
   const segments = githubUrl.split("/");
@@ -63,6 +65,29 @@ const app = new Hono()
 
       if (!member) {
         return c.json({ error: "Unauthorized" }, 401);
+      }
+
+      // Check project limit
+      const limitCheck = await checkSubscriptionLimit({
+        databases,
+        userId: user.$id,
+        limitType: "projects",
+        workspaceId,
+      });
+
+      if (!limitCheck.allowed) {
+        return c.json(
+          {
+            error: "Project limit reached",
+            details: {
+              limit: limitCheck.limit,
+              current: limitCheck.current,
+              plan: limitCheck.plan,
+              message: `You have reached the maximum number of projects (${limitCheck.limit}) for your ${limitCheck.plan} plan in this workspace. Please upgrade to create more projects.`,
+            },
+          },
+          403
+        );
       }
 
       // Get GitHub OAuth access token from user profile
@@ -160,6 +185,29 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
+      // Check project limit
+      const limitCheck = await checkSubscriptionLimit({
+        databases,
+        userId: user.$id,
+        limitType: "projects",
+        workspaceId,
+      });
+
+      if (!limitCheck.allowed) {
+        return c.json(
+          {
+            error: "Project limit reached",
+            details: {
+              limit: limitCheck.limit,
+              current: limitCheck.current,
+              plan: limitCheck.plan,
+              message: `You have reached the maximum number of projects (${limitCheck.limit}) for your ${limitCheck.plan} plan in this workspace. Please upgrade to import more projects.`,
+            },
+          },
+          403
+        );
+      }
+
       // Get GitHub OAuth access token from user profile
       const githubToken = await getAccessToken(user.$id);
 
@@ -176,6 +224,22 @@ const app = new Hono()
         return c.json({ error: "Failed to authenticate with GitHub" }, 500);
       }
 
+      // Validate repository exists and is accessible BEFORE creating project
+      let data;
+      try {
+        data = await listRepositoryIssues(
+          githubToken,
+          githubUser.login,
+          repoName
+        );
+      } catch (error) {
+        console.error("Failed to fetch repository:", error);
+        return c.json({
+          error: "Failed to access repository. Please check if the repository exists and you have access to it."
+        }, 400);
+      }
+
+      // Now create the project only if repository is accessible
       const project = await databases.createDocument(
         DATABASE_ID,
         PROJECTS_ID,
@@ -189,52 +253,68 @@ const app = new Hono()
         },
       );
 
-      const data = await listRepositoryIssues(
-        githubToken,
-        githubUser.login,
-        repoName
-      );
-
-
-      const status = IssueStatus.TODO;
-
-      const highestPositionTask = await databases.listDocuments(
-        DATABASE_ID,
-        ISSUES_ID,
-        [
-          Query.equal("status", status),
-          Query.equal("workspaceId", workspaceId),
-          Query.orderAsc("position"),
-          Query.limit(1),
-        ],
-      );
-
-      const newPosition =
-        highestPositionTask.documents.length > 0
-          ? highestPositionTask.documents[0].position + 1000
-          : 1000;
-
-      data.map(async (issue) => {
-        await databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
-          name: issue.title,
-          description: issue.body,
-          status,
-          dueDate: new Date().toISOString(),
-          workspaceId,
-          projectId: project.$id,
-          assigneeId: issue?.assignee?.login,
-          position: newPosition,
-          number: issue.number,
-        });
-      });
-
       // Update member's projectId array (keep existing workspace role)
       const currentProjectIds = member.projectId || [];
       await databases.updateDocument(DATABASE_ID, MEMBERS_ID, member.$id, {
         projectId: [...currentProjectIds, project.$id],
       });
 
-      return c.json({ data: project, issues: data });
+      // Import issues asynchronously in the background (non-blocking)
+      const issueCount = data?.length || 0;
+      if (issueCount > 0) {
+        (async () => {
+          try {
+            const status = IssueStatus.TODO;
+            const highestPositionTask = await databases.listDocuments(
+              DATABASE_ID,
+              ISSUES_ID,
+              [
+                Query.equal("status", status),
+                Query.equal("workspaceId", workspaceId),
+                Query.orderAsc("position"),
+                Query.limit(1),
+              ],
+            );
+
+            const newPosition =
+              highestPositionTask.documents.length > 0
+                ? highestPositionTask.documents[0].position + 1000
+                : 1000;
+
+            // Process issues in batches to avoid overwhelming the database
+            const BATCH_SIZE = 10;
+            for (let i = 0; i < data.length; i += BATCH_SIZE) {
+              const batch = data.slice(i, i + BATCH_SIZE);
+              await Promise.all(
+                batch.map((issue) =>
+                  databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
+                    name: issue.title,
+                    description: issue.body,
+                    status,
+                    dueDate: new Date().toISOString(),
+                    workspaceId,
+                    projectId: project.$id,
+                    assigneeId: issue?.assignee?.login,
+                    position: newPosition,
+                    number: issue.number,
+                  })
+                )
+              );
+            }
+            console.log(`Successfully imported ${data.length} issues for project ${project.$id}`);
+          } catch (error) {
+            console.error(`Failed to import issues for project ${project.$id}:`, error);
+          }
+        })();
+      }
+
+      return c.json({
+        data: project,
+        issuesImporting: issueCount,
+        message: issueCount > 0
+          ? `Project created successfully. Importing ${issueCount} issues`
+          : "Project created successfully."
+      });
     },
   )
   .get(

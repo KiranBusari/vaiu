@@ -155,6 +155,29 @@ const app = new Hono()
         const storage = c.get("storage");
         const user = c.get("user");
 
+        // Check workspace limit
+        const { checkSubscriptionLimit } = await import("@/features/subscriptions/utils");
+        const limitCheck = await checkSubscriptionLimit({
+          databases,
+          userId: user.$id,
+          limitType: "workspaces",
+        });
+
+        if (!limitCheck.allowed) {
+          return c.json(
+            {
+              error: "Workspace limit reached",
+              details: {
+                limit: limitCheck.limit,
+                current: limitCheck.current,
+                plan: limitCheck.plan,
+                message: `You have reached the maximum number of workspaces (${limitCheck.limit}) for your ${limitCheck.plan} plan. Please upgrade to create more workspaces.`,
+              },
+            },
+            403
+          );
+        }
+
         const { name, image } = c.req.valid("form");
 
         let uploadedImage: string | undefined;

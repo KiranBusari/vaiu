@@ -24,6 +24,7 @@ import { RoomSwitcher } from "./room-switcher";
 import { useProjectId } from "@/features/projects/hooks/use-projectId";
 import { useMemo, useCallback } from "react";
 import { Button } from "./ui/button";
+import { CreditCard } from "lucide-react";
 
 /**
  * AddButton Component - Reusable button for adding items
@@ -165,6 +166,18 @@ export const SidebarComponent = () => {
             )}
           </div>
         </SidebarSection>
+
+        {/* Billing Section */}
+        <SidebarGroup className="pt-2">
+          <SidebarGroupContent>
+            <Link href="/billing" className="w-full">
+              <Button variant="outline" className="w-full justify-start" size="sm">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Billing & Plans
+              </Button>
+            </Link>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
     </Sidebar>
   );

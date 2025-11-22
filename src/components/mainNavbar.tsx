@@ -52,6 +52,15 @@ export function Navbar({ className }: { className?: string }) {
         <div className="flex items-center gap-x-4">
           <Button
             asChild
+            variant="ghost"
+            className="font-semibold"
+          >
+            <Link href="/pricing">
+              Pricing
+            </Link>
+          </Button>
+          <Button
+            asChild
             variant="outline"
             className="font-semibold text-blue-600 hover:text-blue-500"
           >
