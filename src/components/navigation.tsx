@@ -14,8 +14,8 @@ import { usePathname } from "next/navigation";
 // import { useIsMember } from "@/features/workspaces/api/use-is-member";
 // import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
 import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
-import { FaUsers, FaUsersCog } from "react-icons/fa";
-import { User, UserCircle } from "lucide-react";
+import { FaRegUserCircle, FaUserCircle } from "react-icons/fa";
+import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
 
 const navItems = [
   {
@@ -39,14 +39,14 @@ const navItems = [
   {
     label: "Account",
     href: "/account",
-    icon: User,
-    activeIcon: UserCircle,
+    icon: FaRegUserCircle,
+    activeIcon: FaUserCircle,
   },
   {
     label: "Members",
     href: "/members",
-    icon: FaUsersCog,
-    activeIcon: FaUsers,
+    icon: HiOutlineUserGroup,
+    activeIcon: HiUserGroup,
   },
   // {
   //   label: "Contributions",
@@ -89,10 +89,10 @@ export const Navigation = () => {
         const isActive =
           label === "Home"
             ? pathname === absoluteHref ||
-            pathname === `/workspaces/${workspaceId}` ||
-            pathname === `/workspaces/${workspaceId}/`
+              pathname === `/workspaces/${workspaceId}` ||
+              pathname === `/workspaces/${workspaceId}/`
             : pathname === absoluteHref ||
-            pathname.startsWith(`${absoluteHref}/`);
+              pathname.startsWith(`${absoluteHref}/`);
         const Icon = isActive ? activeIcon : icon;
 
         // Commented out Contributions dynamic redirect logic
