@@ -1,3 +1,4 @@
+import { type Databases } from "node-appwrite";
 import { useGetCurrentSubscription } from "../api/use-get-current-subscription";
 import { checkSubscriptionLimit } from "../utils";
 import { SubscriptionPlan, SubscriptionStatus } from "../types";
@@ -14,7 +15,7 @@ export const useSubscription = () => {
     const isStandard = subscription?.plan === SubscriptionPlan.STANDARD;
     const isEnterprise = subscription?.plan === SubscriptionPlan.ENTERPRISE;
 
-    const canCreateWorkspace = async (databases: any, userId: string) => {
+    const canCreateWorkspace = async (databases: Databases, userId: string) => {
         if (!databases || !userId) return false;
         const result = await checkSubscriptionLimit({
             databases,
@@ -25,7 +26,7 @@ export const useSubscription = () => {
     };
 
     const canCreateProject = async (
-        databases: any,
+        databases: Databases,
         userId: string,
         workspaceId: string
     ) => {
@@ -40,7 +41,7 @@ export const useSubscription = () => {
     };
 
     const canCreateRoom = async (
-        databases: any,
+        databases: Databases,
         userId: string,
         workspaceId: string
     ) => {

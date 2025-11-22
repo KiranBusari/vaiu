@@ -10,9 +10,15 @@ import { useCreateSubscription } from "../api/use-create-subscription";
 import { useVerifyPayment } from "../api/use-verify-payment";
 import { useGetCurrentSubscription } from "../api/use-get-current-subscription";
 
+interface RazorpayResponse {
+    razorpay_payment_id: string;
+    razorpay_subscription_id: string;
+    razorpay_signature: string;
+}
+
 declare global {
     interface Window {
-        Razorpay: any;
+        Razorpay: new (options: unknown) => { open: () => void };
     }
 }
 
@@ -46,7 +52,7 @@ export const SubscriptionFlow = () => {
                             subscription_id: razorpaySubscriptionId,
                             name: "Vaiu",
                             description: `${plan} ${billingCycle} Subscription`,
-                            handler: function (response: any) {
+                            handler: function (response: RazorpayResponse) {
                                 verifyPayment(
                                     {
                                         razorpayPaymentId: response.razorpay_payment_id,

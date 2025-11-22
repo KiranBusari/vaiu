@@ -4,13 +4,10 @@ import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { SubscriptionPlan } from "../types";
 
 interface UpgradePromptProps {
     title?: string;
     message: string;
-    currentPlan: SubscriptionPlan;
-    requiredPlan?: SubscriptionPlan;
     limit?: number;
     current?: number;
 }
@@ -18,8 +15,6 @@ interface UpgradePromptProps {
 export const UpgradePrompt = ({
     title = "Upgrade Required",
     message,
-    currentPlan,
-    requiredPlan,
     limit,
     current,
 }: UpgradePromptProps) => {
@@ -34,7 +29,7 @@ export const UpgradePrompt = ({
                     <p>{message}</p>
                     {limit !== undefined && current !== undefined && (
                         <p className="mt-2 text-muted-foreground">
-                            You're using {current} of {limit === -1 ? "unlimited" : limit} available.
+                            You&apos;re using {current} of {limit === -1 ? "unlimited" : limit} available.
                         </p>
                     )}
                 </div>

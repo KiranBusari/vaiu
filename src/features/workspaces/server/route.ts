@@ -24,6 +24,7 @@ import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
 import { Project } from "@/features/projects/types";
+import { checkSubscriptionLimit } from "@/features/subscriptions";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
@@ -156,7 +157,6 @@ const app = new Hono()
         const user = c.get("user");
 
         // Check workspace limit
-        const { checkSubscriptionLimit } = await import("@/features/subscriptions/utils");
         const limitCheck = await checkSubscriptionLimit({
           databases,
           userId: user.$id,

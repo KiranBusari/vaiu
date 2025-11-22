@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { SubscriptionPlan, PLAN_LIMITS, PLAN_PRICING } from "../types";
+import { toast } from "sonner";
+import { SubscriptionPlan, PLAN_PRICING } from "../types";
 import { getPlanFeatures } from "../utils";
 
 interface PricingCardsProps {
@@ -60,9 +61,6 @@ export const PricingCards = ({ currentPlan, onSelectPlan }: PricingCardsProps) =
                         <TabsTrigger value="MONTHLY">Monthly</TabsTrigger>
                         <TabsTrigger value="YEARLY">
                             Yearly
-                            <Badge variant="secondary" className="ml-2">
-                                Save 17%
-                            </Badge>
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
@@ -126,7 +124,15 @@ export const PricingCards = ({ currentPlan, onSelectPlan }: PricingCardsProps) =
                                     className="w-full"
                                     variant={plan.popular ? "default" : "outline"}
                                     disabled={isCurrentPlan || plan.name === SubscriptionPlan.FREE}
-                                    onClick={() => onSelectPlan(plan.name, billingCycle)}
+                                    onClick={() => {
+                                        if (plan.name === SubscriptionPlan.ENTERPRISE) {
+                                            toast.info("Contact Sales", {
+                                                description: "Please reach out to our sales team for Enterprise pricing and custom solutions.",
+                                            });
+                                        } else {
+                                            onSelectPlan(plan.name, billingCycle);
+                                        }
+                                    }}
                                 >
                                     {isCurrentPlan
                                         ? "Current Plan"

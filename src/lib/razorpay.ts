@@ -1,4 +1,5 @@
 import "server-only";
+import crypto from "crypto";
 import Razorpay from "razorpay";
 
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
@@ -38,16 +39,13 @@ export const createRazorpaySubscription = async (
     totalCount?: number
 ) => {
     try {
-        const subscriptionData: any = {
+        const subscriptionData = {
             plan_id: planId,
             total_count: totalCount || 12,
             quantity: 1,
-            customer_notify: 1,
+            customer_notify: 1 as const,
+            ...(customerId && { customer_id: customerId }),
         };
-
-        if (customerId) {
-            subscriptionData.customer_id = customerId;
-        }
 
         const subscription = await razorpay.subscriptions.create(subscriptionData);
         return subscription;
@@ -86,7 +84,6 @@ export const verifyRazorpaySignature = (
     razorpaySignature: string
 ): boolean => {
     try {
-        const crypto = require("crypto");
         const generated_signature = crypto
             .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
             .update(`${razorpayPaymentId}|${razorpaySubscriptionId}`)

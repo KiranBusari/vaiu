@@ -25,7 +25,6 @@ export interface PlanLimits {
     projectsPerWorkspace: number;
     membersPerWorkspace: number;
     roomsPerWorkspace: number;
-    storageGB: number;
     aiCredits: number; // Total workspace pool
     aiCreditsPerUser: number; // Per-user monthly quota
     durationDays: number | null; // null for unlimited
@@ -37,7 +36,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
         projectsPerWorkspace: 1,
         membersPerWorkspace: 3,
         roomsPerWorkspace: 2,
-        storageGB: 1,
         aiCredits: 10, // Total pool
         aiCreditsPerUser: 5, // Per-user quota
         durationDays: 30,
@@ -47,7 +45,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
         projectsPerWorkspace: 10,
         membersPerWorkspace: 15,
         roomsPerWorkspace: 10,
-        storageGB: 50,
         aiCredits: 500, // Total pool
         aiCreditsPerUser: 100, // Per-user quota
         durationDays: null,
@@ -57,7 +54,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
         projectsPerWorkspace: 50,
         membersPerWorkspace: 50,
         roomsPerWorkspace: 50,
-        storageGB: 200,
         aiCredits: 2000, // Total pool
         aiCreditsPerUser: 200, // Per-user quota
         durationDays: null,
@@ -67,7 +63,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
         projectsPerWorkspace: -1, // unlimited
         membersPerWorkspace: -1, // unlimited
         roomsPerWorkspace: -1, // unlimited
-        storageGB: 1000,
         aiCredits: 10000, // Total pool
         aiCreditsPerUser: 1000, // Per-user quota
         durationDays: null,
@@ -115,13 +110,12 @@ export type Subscription = Models.Document & {
     cancelAtPeriodEnd: boolean;
     billingCycle: "MONTHLY" | "YEARLY";
     // Plan limits
-    workspaces: number;
-    projectsPerWorkspace: number;
-    membersPerWorkspace: number;
-    roomsPerWorkspace: number;
-    storageGB: number;
-    aiCredits: number;
-    aiCreditsPerUser: number;
+    workspaces?: number;
+    projectsPerWorkspace?: number;
+    membersPerWorkspace?: number;
+    roomsPerWorkspace?: number;
+    aiCredits?: number;
+    aiCreditsPerUser?: number;
     monthlyPrice: number | null;
     yearlyPrice: number | null;
     durationDays: number | null;
@@ -132,7 +126,6 @@ export type UserUsage = Models.Document & {
     workspacesCount: number;
     projectsCount: Record<string, number>; // workspaceId -> count
     roomsCount: Record<string, number>; // workspaceId -> count
-    storageUsedGB: number;
     aiCreditsUsed: number; // Total credits used across all workspaces
     aiCreditsPerWorkspace: Record<string, number>; // workspaceId -> credits used
     lastUpdated: string;

@@ -71,20 +71,6 @@ export const UsageStats = ({ subscription, usage }: UsageStatsProps) => {
                     </div>
                 </div>
 
-                {/* Storage */}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">Storage</span>
-                        <span className="text-muted-foreground">
-                            {usage.storageUsedGB.toFixed(2)} GB / {limits.storageGB} GB
-                        </span>
-                    </div>
-                    <Progress
-                        value={getUsagePercentage(usage.storageUsedGB, limits.storageGB)}
-                        className={getUsageColor(getUsagePercentage(usage.storageUsedGB, limits.storageGB))}
-                    />
-                </div>
-
                 {/* AI Credits */}
                 <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">

@@ -6,7 +6,6 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { DATABASE_ID, SUBSCRIPTIONS_ID, USER_USAGE_ID, WORKSPACE_ID, PROJECTS_ID, ROOMS_ID } from "@/config";
 import {
     createSubscriptionSchema,
-    updateSubscriptionSchema,
     cancelSubscriptionSchema,
     verifyPaymentSchema,
 } from "../schemas";
@@ -20,7 +19,6 @@ import {
 import {
     createRazorpaySubscription,
     cancelRazorpaySubscription,
-    fetchRazorpaySubscription,
     verifyRazorpaySignature,
 } from "@/lib/razorpay";
 import { getUserSubscription } from "../utils";
@@ -61,7 +59,6 @@ const app = new Hono()
                         projectsPerWorkspace: freeLimits.projectsPerWorkspace,
                         membersPerWorkspace: freeLimits.membersPerWorkspace,
                         roomsPerWorkspace: freeLimits.roomsPerWorkspace,
-                        storageGB: freeLimits.storageGB,
                         aiCredits: freeLimits.aiCredits,
                         aiCreditsPerUser: freeLimits.aiCreditsPerUser,
                         monthlyPrice: freePricing.monthly,
@@ -76,8 +73,7 @@ const app = new Hono()
                     workspacesCount: 1,
                     projectsCount: "{}",
                     roomsCount: "{}",
-                    storageUsedGB: 1,
-                    aiCreditsUsed: 1,
+                    aiCreditsUsed: 0,
                     aiCreditsPerWorkspace: "{}",
                     lastUpdated: new Date().toISOString(),
                 });
@@ -135,11 +131,6 @@ const app = new Hono()
                     databases,
                     userId: user.$id,
                 });
-
-                // Calculate amount based on plan and billing cycle
-                const pricing = PLAN_PRICING[plan];
-                const amount =
-                    billingCycle === "MONTHLY" ? pricing.monthly : pricing.yearly;
 
                 const razorpayPlanIds: Record<string, string> = {
                     "PRO_MONTHLY": process.env.RAZORPAY_PLAN_PRO_MONTHLY || "plan_PRO_MONTHLY",
@@ -211,7 +202,6 @@ const app = new Hono()
                         projectsPerWorkspace: planLimits.projectsPerWorkspace,
                         membersPerWorkspace: planLimits.membersPerWorkspace,
                         roomsPerWorkspace: planLimits.roomsPerWorkspace,
-                        storageGB: planLimits.storageGB,
                         aiCredits: planLimits.aiCredits,
                         aiCreditsPerUser: planLimits.aiCreditsPerUser,
                         monthlyPrice: planPricing.monthly,
@@ -401,8 +391,7 @@ const app = new Hono()
                         workspacesCount: 1,
                         projectsCount: "{}",
                         roomsCount: "{}",
-                        storageUsedGB: 1,
-                        aiCreditsUsed: 1,
+                        aiCreditsUsed: 0,
                         aiCreditsPerWorkspace: "{}",
                         lastUpdated: new Date().toISOString(),
                     }
@@ -440,7 +429,7 @@ const app = new Hono()
                 );
                 roomsCount[workspace.$id] = rooms.total;
             }
-            
+
             return c.json({
                 data: {
                     ...usageDoc,

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { Query } from "node-appwrite";
+import { Query, type Databases } from "node-appwrite";
 import { createAdminClient } from "@/lib/appwrite";
 import { DATABASE_ID, SUBSCRIPTIONS_ID } from "@/config";
 import { SubscriptionStatus } from "@/features/subscriptions/types";
@@ -67,7 +67,14 @@ export async function POST(req: NextRequest) {
     }
 }
 
-async function handleSubscriptionActivated(databases: any, razorpaySubscription: any) {
+interface RazorpaySubscription {
+    id: string;
+    start_at: number;
+    end_at: number;
+    current_end: number;
+}
+
+async function handleSubscriptionActivated(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,
@@ -80,6 +87,11 @@ async function handleSubscriptionActivated(databases: any, razorpaySubscription:
 
         if (subscriptions.documents.length > 0) {
             const subscription = subscriptions.documents[0];
+
+            if (!razorpaySubscription.start_at || !razorpaySubscription.end_at) {
+                console.error("Missing start_at or end_at in subscription");
+                return;
+            }
 
             const startDate = new Date(razorpaySubscription.start_at * 1000);
             const endDate = new Date(razorpaySubscription.end_at * 1000);
@@ -100,7 +112,7 @@ async function handleSubscriptionActivated(databases: any, razorpaySubscription:
     }
 }
 
-async function handleSubscriptionCharged(databases: any, razorpaySubscription: any) {
+async function handleSubscriptionCharged(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,
@@ -113,6 +125,11 @@ async function handleSubscriptionCharged(databases: any, razorpaySubscription: a
 
         if (subscriptions.documents.length > 0) {
             const subscription = subscriptions.documents[0];
+
+            if (!razorpaySubscription.current_end) {
+                console.error("Missing current_end in subscription");
+                return;
+            }
 
             const endDate = new Date(razorpaySubscription.current_end * 1000);
 
@@ -130,7 +147,7 @@ async function handleSubscriptionCharged(databases: any, razorpaySubscription: a
     }
 }
 
-async function handleSubscriptionCancelled(databases: any, razorpaySubscription: any) {
+async function handleSubscriptionCancelled(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,
@@ -158,7 +175,7 @@ async function handleSubscriptionCancelled(databases: any, razorpaySubscription:
     }
 }
 
-async function handleSubscriptionCompleted(databases: any, razorpaySubscription: any) {
+async function handleSubscriptionCompleted(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,
@@ -186,7 +203,7 @@ async function handleSubscriptionCompleted(databases: any, razorpaySubscription:
     }
 }
 
-async function handleSubscriptionPaused(databases: any, razorpaySubscription: any) {
+async function handleSubscriptionPaused(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,
@@ -214,7 +231,7 @@ async function handleSubscriptionPaused(databases: any, razorpaySubscription: an
     }
 }
 
-async function handleSubscriptionResumed(databases: any, razorpaySubscription: any) {
+async function handleSubscriptionResumed(databases: Databases, razorpaySubscription: RazorpaySubscription) {
     try {
         const subscriptions = await databases.listDocuments(
             DATABASE_ID,

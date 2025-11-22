@@ -62,7 +62,6 @@ export const UpgradeDialog = ({
                                 • {limits.projectsPerWorkspace === -1 ? "Unlimited" : limits.projectsPerWorkspace}{" "}
                                 project(s) per workspace
                             </li>
-                            <li>• {limits.storageGB}GB storage</li>
                             <li>• {limits.aiCredits} AI credits/month</li>
                         </ul>
                     </div>

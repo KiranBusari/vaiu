@@ -141,14 +141,13 @@ export const checkSubscriptionLimit = async ({
 
             // Use subscription fields
             limits = subscription ? {
-                workspaces: subscription.workspaces,
-                projectsPerWorkspace: subscription.projectsPerWorkspace,
-                membersPerWorkspace: subscription.membersPerWorkspace,
-                roomsPerWorkspace: subscription.roomsPerWorkspace,
-                storageGB: subscription.storageGB,
-                aiCredits: subscription.aiCredits,
-                aiCreditsPerUser: subscription.aiCreditsPerUser,
-                durationDays: subscription.durationDays,
+                workspaces: subscription.workspaces ?? PLAN_LIMITS[plan].workspaces,
+                projectsPerWorkspace: subscription.projectsPerWorkspace ?? PLAN_LIMITS[plan].projectsPerWorkspace,
+                membersPerWorkspace: subscription.membersPerWorkspace ?? PLAN_LIMITS[plan].membersPerWorkspace,
+                roomsPerWorkspace: subscription.roomsPerWorkspace ?? PLAN_LIMITS[plan].roomsPerWorkspace,
+                aiCredits: subscription.aiCredits ?? PLAN_LIMITS[plan].aiCredits,
+                aiCreditsPerUser: subscription.aiCreditsPerUser ?? PLAN_LIMITS[plan].aiCreditsPerUser,
+                durationDays: subscription.durationDays ?? PLAN_LIMITS[plan].durationDays,
             } : PLAN_LIMITS[plan];
 
             // Check if subscription is expired for FREE plan
@@ -182,14 +181,13 @@ export const checkSubscriptionLimit = async ({
 
             // Use subscription fields if available
             limits = workspaceSubscription.subscription ? {
-                workspaces: workspaceSubscription.subscription.workspaces,
-                projectsPerWorkspace: workspaceSubscription.subscription.projectsPerWorkspace,
-                membersPerWorkspace: workspaceSubscription.subscription.membersPerWorkspace,
-                roomsPerWorkspace: workspaceSubscription.subscription.roomsPerWorkspace,
-                storageGB: workspaceSubscription.subscription.storageGB,
-                aiCredits: workspaceSubscription.subscription.aiCredits,
-                aiCreditsPerUser: workspaceSubscription.subscription.aiCreditsPerUser,
-                durationDays: workspaceSubscription.subscription.durationDays,
+                workspaces: workspaceSubscription.subscription.workspaces ?? PLAN_LIMITS[plan].workspaces,
+                projectsPerWorkspace: workspaceSubscription.subscription.projectsPerWorkspace ?? PLAN_LIMITS[plan].projectsPerWorkspace,
+                membersPerWorkspace: workspaceSubscription.subscription.membersPerWorkspace ?? PLAN_LIMITS[plan].membersPerWorkspace,
+                roomsPerWorkspace: workspaceSubscription.subscription.roomsPerWorkspace ?? PLAN_LIMITS[plan].roomsPerWorkspace,
+                aiCredits: workspaceSubscription.subscription.aiCredits ?? PLAN_LIMITS[plan].aiCredits,
+                aiCreditsPerUser: workspaceSubscription.subscription.aiCreditsPerUser ?? PLAN_LIMITS[plan].aiCreditsPerUser,
+                durationDays: workspaceSubscription.subscription.durationDays ?? PLAN_LIMITS[plan].durationDays,
             } : PLAN_LIMITS[plan];
 
             // Check if subscription is expired
@@ -245,7 +243,6 @@ export const checkSubscriptionLimit = async ({
                     return { allowed: true, limit: -1, current: 0, plan };
                 }
 
-                const { MEMBERS_ID } = await import("@/config");
                 const members = await databases.listDocuments(
                     DATABASE_ID,
                     MEMBERS_ID,
@@ -342,11 +339,10 @@ export const consumeAICredits = async ({
             aiCredits: PLAN_LIMITS[workspaceSubscription.plan].aiCredits,
             aiCreditsPerUser: PLAN_LIMITS[workspaceSubscription.plan].aiCreditsPerUser,
         };
-        const workspacePoolLimit = limits.aiCredits;
-        const userQuotaLimit = limits.aiCreditsPerUser;
+        const workspacePoolLimit = limits.aiCredits ?? PLAN_LIMITS[workspaceSubscription.plan].aiCredits;
+        const userQuotaLimit = limits.aiCreditsPerUser ?? PLAN_LIMITS[workspaceSubscription.plan].aiCreditsPerUser;
 
         // Get all workspace members' usage for pool calculation
-        const { MEMBERS_ID } = await import("@/config");
         const members = await databases.listDocuments(
             DATABASE_ID,
             MEMBERS_ID,
@@ -451,13 +447,12 @@ export const isSubscriptionActive = (subscription: Subscription | null): boolean
 
 export const getPlanFeatures = (plan: SubscriptionPlan, subscription?: Subscription): string[] => {
     const limits = subscription ? {
-        workspaces: subscription.workspaces,
-        projectsPerWorkspace: subscription.projectsPerWorkspace,
-        membersPerWorkspace: subscription.membersPerWorkspace,
-        roomsPerWorkspace: subscription.roomsPerWorkspace,
-        storageGB: subscription.storageGB,
-        aiCredits: subscription.aiCredits,
-        aiCreditsPerUser: subscription.aiCreditsPerUser,
+        workspaces: subscription.workspaces ?? PLAN_LIMITS[plan].workspaces,
+        projectsPerWorkspace: subscription.projectsPerWorkspace ?? PLAN_LIMITS[plan].projectsPerWorkspace,
+        membersPerWorkspace: subscription.membersPerWorkspace ?? PLAN_LIMITS[plan].membersPerWorkspace,
+        roomsPerWorkspace: subscription.roomsPerWorkspace ?? PLAN_LIMITS[plan].roomsPerWorkspace,
+        aiCredits: subscription.aiCredits ?? PLAN_LIMITS[plan].aiCredits,
+        aiCreditsPerUser: subscription.aiCreditsPerUser ?? PLAN_LIMITS[plan].aiCreditsPerUser,
         durationDays: subscription.durationDays,
     } : PLAN_LIMITS[plan];
 
@@ -475,19 +470,12 @@ export const getPlanFeatures = (plan: SubscriptionPlan, subscription?: Subscript
         features.push(`${limits.projectsPerWorkspace} project${limits.projectsPerWorkspace > 1 ? 's' : ''} per workspace`);
     }
 
-    if (limits.membersPerWorkspace === -1) {
-        features.push("Unlimited members");
-    } else {
-        features.push(`Up to ${limits.membersPerWorkspace} members per workspace`);
-    }
-
     if (limits.roomsPerWorkspace === -1) {
         features.push("Unlimited rooms");
     } else {
         features.push(`${limits.roomsPerWorkspace} room${limits.roomsPerWorkspace > 1 ? 's' : ''} per workspace`);
     }
 
-    features.push(`${limits.storageGB}GB storage`);
     features.push(`${limits.aiCredits} AI credits per month`);
 
     if (limits.durationDays) {
