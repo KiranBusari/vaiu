@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useSidebar } from "./ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface RoomSwitcherProps {
   projectId: string;
@@ -19,6 +26,8 @@ export const RoomSwitcher = ({ projectId, workspaceId }: RoomSwitcherProps) => {
   const pathname = usePathname();
   const { open } = useCreateRoomModal();
   const { data: rooms, isLoading } = useGetRooms({ workspaceId, projectId });
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const currentRoomId = pathname.includes("/rooms/")
     ? pathname.split("/rooms/")[1].split("?")[0]
@@ -38,6 +47,68 @@ export const RoomSwitcher = ({ projectId, workspaceId }: RoomSwitcherProps) => {
       );
     }, 100);
   };
+
+  if (isCollapsed) {
+    return (
+      <TooltipProvider>
+        <ScrollArea className="h-[200px]">
+          <div className="flex flex-col gap-1">
+            {isLoading ? (
+              <div className="flex h-12 w-12 items-center justify-center">
+                <span className="text-xs">...</span>
+              </div>
+            ) : (
+              <>
+                {videoRooms?.map((room) => (
+                  <Tooltip key={room.$id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-12 w-12",
+                          currentRoomId === room.$id &&
+                            "bg-slate-200 dark:bg-slate-700",
+                        )}
+                        onClick={() => handleJoinRoom(room.$id, "VIDEO")}
+                      >
+                        <Video className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p>{room.name} (Video)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+
+                {audioRooms?.map((room) => (
+                  <Tooltip key={room.$id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-12 w-12",
+                          currentRoomId === room.$id &&
+                            "bg-slate-200 dark:bg-slate-700",
+                        )}
+                        onClick={() => handleJoinRoom(room.$id, "AUDIO")}
+                      >
+                        <PhoneCall className="h-6 w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p>{room.name} (Audio)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </>
+            )}
+          </div>
+        </ScrollArea>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-y-2">

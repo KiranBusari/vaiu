@@ -19,7 +19,11 @@ import {
 } from "../schemas";
 import { MemberRole } from "@/features/members/types";
 import { generateInviteCode, INVITECODE_LENGTH } from "@/lib/utils";
-import { getMember, getProjectMember, isSuperAdmin } from "@/features/members/utilts";
+import {
+  getMember,
+  getProjectMember,
+  isSuperAdmin,
+} from "@/features/members/utilts";
 import { Workspace } from "../types";
 import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 import { IssueStatus } from "@/features/issues/types";
@@ -142,6 +146,38 @@ const app = new Hono()
         return c.json({ error: "Workspace not found" }, 404);
       }
       console.error("Error fetching workspace info:", error);
+      return c.json({ error: "Failed to fetch workspace info" }, 500);
+    }
+  })
+  .get("/:workspaceId/join", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { workspaceId } = c.req.param();
+
+    try {
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      // Return only public information (no invite code)
+      return c.json({
+        data: {
+          $id: workspace.$id,
+          name: workspace.name,
+          imageUrl: workspace.imageUrl,
+        },
+      });
+    } catch (error: unknown) {
+      const appwriteError = error as {
+        code?: number;
+        type?: string;
+        message?: string;
+      };
+      if (appwriteError.code === 404) {
+        return c.json({ error: "Workspace not found" }, 404);
+      }
+      console.error("Error fetching workspace join info:", error);
       return c.json({ error: "Failed to fetch workspace info" }, 500);
     }
   })
@@ -292,13 +328,14 @@ const app = new Hono()
     if (!isSuper) {
       // For regular users, allow deletion if only the current user is a member
       const otherMembers = workspaceMembers.documents.filter(
-        (member) => member.userId !== user.$id
+        (member) => member.userId !== user.$id,
       );
 
       if (otherMembers.length > 0) {
         return c.json(
           {
-            error: "Cannot delete workspace that has other members. Please remove all other members first."
+            error:
+              "Cannot delete workspace that has other members. Please remove all other members first.",
           },
           400,
         );
@@ -315,7 +352,8 @@ const app = new Hono()
     if (workspaceProjects.total > 0) {
       return c.json(
         {
-          error: "Cannot delete workspace that has projects. Please delete all projects first."
+          error:
+            "Cannot delete workspace that has projects. Please delete all projects first.",
         },
         400,
       );
@@ -324,18 +362,22 @@ const app = new Hono()
     if (isSuper) {
       // Super admin: delete all memberships
       await Promise.all(
-        workspaceMembers.documents.map(member =>
-          databases.deleteDocument(DATABASE_ID, MEMBERS_ID, member.$id)
-        )
+        workspaceMembers.documents.map((member) =>
+          databases.deleteDocument(DATABASE_ID, MEMBERS_ID, member.$id),
+        ),
       );
     } else {
       // Regular user: delete only their own membership
       const currentUserMembership = workspaceMembers.documents.find(
-        (member) => member.userId === user.$id
+        (member) => member.userId === user.$id,
       );
 
       if (currentUserMembership) {
-        await databases.deleteDocument(DATABASE_ID, MEMBERS_ID, currentUserMembership.$id);
+        await databases.deleteDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          currentUserMembership.$id,
+        );
       }
     }
 
@@ -393,7 +435,7 @@ const app = new Hono()
         PROJECTS_ID,
         [Query.equal("workspaceId", workspaceId)],
       );
-      userProjectIds = allProjects.documents.map(project => project.$id);
+      userProjectIds = allProjects.documents.map((project) => project.$id);
 
       // For super admins, we need a member record for analytics
       const memberRecords = await databases.listDocuments(
@@ -700,6 +742,50 @@ const app = new Hono()
         },
       );
       return c.json({ data: project });
+    },
+  )
+  .post(
+    "/:workspaceId/join",
+    sessionMiddleware,
+    zValidator("json", inviteCodeSchema),
+    async (c) => {
+      const { workspaceId } = c.req.param();
+      const { code } = c.req.valid("json");
+
+      const databases = c.get("databases");
+      const user = c.get("user");
+
+      // Get the workspace to verify invite code
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+      );
+
+      if (workspace.inviteCode !== code) {
+        return c.json({ error: "Invalid invite code" }, 400);
+      }
+
+      // Check if user is already a member of this workspace
+      const existingMember = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      });
+
+      if (existingMember) {
+        return c.json({ error: "Already a member of this workspace" }, 400);
+      }
+
+      // Create new member document for the workspace
+      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+        workspaceId,
+        projectId: [],
+        userId: user.$id,
+        role: MemberRole.MEMBER,
+      });
+
+      return c.json({ data: workspace });
     },
   );
 

@@ -14,8 +14,16 @@ import { usePathname } from "next/navigation";
 // import { useIsMember } from "@/features/workspaces/api/use-is-member";
 // import { useGetWorkspaceInfo } from "@/features/workspaces/api/use-get-workspace-info";
 import { RiSettings2Fill, RiSettings2Line } from "react-icons/ri";
-import { FaUsers, FaUsersCog } from "react-icons/fa";
-import { User, UserCircle } from "lucide-react";
+import { FaRegUserCircle, FaUserCircle } from "react-icons/fa";
+import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
+import { useSidebar } from "./ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { Button } from "./ui/button";
 
 const navItems = [
   {
@@ -39,14 +47,14 @@ const navItems = [
   {
     label: "Account",
     href: "/account",
-    icon: User,
-    activeIcon: UserCircle,
+    icon: FaRegUserCircle,
+    activeIcon: FaUserCircle,
   },
   {
     label: "Members",
     href: "/members",
-    icon: FaUsersCog,
-    activeIcon: FaUsers,
+    icon: HiOutlineUserGroup,
+    activeIcon: HiUserGroup,
   },
   // {
   //   label: "Contributions",
@@ -59,6 +67,8 @@ const navItems = [
 export const Navigation = () => {
   const workspaceId = useWorkspaceId();
   const pathname = usePathname();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   // const OPEN_CONTRIBUTION_WORKSPACE_ID = process.env.OPEN_CONTRIBUTION_WORKSPACE_ID || "";
 
@@ -80,6 +90,55 @@ export const Navigation = () => {
     return null;
   }
 
+  if (isCollapsed) {
+    return (
+      <TooltipProvider>
+        <ul className="flex flex-col gap-1">
+          {navItems.map(({ activeIcon, href, icon, label }) => {
+            const absoluteHref = `/workspaces/${workspaceId}${href ?? ""}`;
+
+            // Check if path is active, with special case for Home
+            const isActive =
+              label === "Home"
+                ? pathname === absoluteHref ||
+                  pathname === `/workspaces/${workspaceId}` ||
+                  pathname === `/workspaces/${workspaceId}/`
+                : pathname === absoluteHref ||
+                  pathname.startsWith(`${absoluteHref}/`);
+            const Icon = isActive ? activeIcon : icon;
+
+            return (
+              <li key={href}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-12 w-12",
+                        isActive
+                          ? "bg-slate-200 text-primary hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-primary dark:text-slate-200 hover:dark:bg-slate-700/50",
+                      )}
+                      asChild
+                    >
+                      <Link href={absoluteHref}>
+                        <Icon className="size-12" />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p>{label}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </li>
+            );
+          })}
+        </ul>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <ul className="flex flex-col">
       {navItems.map(({ activeIcon, href, icon, label }) => {
@@ -89,10 +148,10 @@ export const Navigation = () => {
         const isActive =
           label === "Home"
             ? pathname === absoluteHref ||
-            pathname === `/workspaces/${workspaceId}` ||
-            pathname === `/workspaces/${workspaceId}/`
+              pathname === `/workspaces/${workspaceId}` ||
+              pathname === `/workspaces/${workspaceId}/`
             : pathname === absoluteHref ||
-            pathname.startsWith(`${absoluteHref}/`);
+              pathname.startsWith(`${absoluteHref}/`);
         const Icon = isActive ? activeIcon : icon;
 
         // Commented out Contributions dynamic redirect logic

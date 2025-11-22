@@ -15,16 +15,66 @@ import { ProjectAvatar } from "@/features/projects/components/project-avatar";
 import { Project } from "@/features/projects/types";
 import { cn } from "@/lib/utils";
 import { useGetSpecificProjects } from "@/features/projects/api/use-get-specific-projects";
+import { useSidebar } from "./ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { Button } from "./ui/button";
 
 export const ProjectSwitcher = () => {
   const workspaceId = useWorkspaceId();
   const router = useRouter();
   const projectId = useProjectId();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
   // const { data: projects } = useGetProjects({ workspaceId });
   const { data: specificProjects } = useGetSpecificProjects({ workspaceId });
+
   const onSelect = (id: string) => {
     router.push(`/workspaces/${workspaceId}/projects/${id}`);
   };
+
+  const currentProject =
+    specificProjects &&
+    typeof specificProjects === "object" &&
+    "documents" in specificProjects &&
+    Array.isArray(specificProjects.documents)
+      ? specificProjects.documents.find((p: Project) => p.$id === projectId)
+      : null;
+
+  if (isCollapsed) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-12 w-12"
+              onClick={() => {
+                if (currentProject) {
+                  onSelect(currentProject.$id);
+                }
+              }}
+            >
+              <ProjectAvatar
+                name={currentProject?.name || "P"}
+                image={currentProject?.imageUrl}
+              />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="flex items-center gap-2">
+            <p className="capitalize">
+              {currentProject?.name || "Select project"}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-y-2">
