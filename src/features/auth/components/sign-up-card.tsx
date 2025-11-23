@@ -152,7 +152,7 @@ export const SignUpCard = () => {
           className="w-full border border-zinc-600"
         >
           <FaGithub className="mr-2 size-5" />
-          Login with Github
+          Continue with Github
         </Button>
       </CardContent>
       <div className="px-7">
