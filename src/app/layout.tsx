@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={cn(poppins.className, "h-[90vh] antialiased")}>
         <ThemeProvider
           attribute="class"
