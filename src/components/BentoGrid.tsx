@@ -261,7 +261,7 @@ export default function BentoFeatures() {
       description: "Seamless GitHub issue synchronization.",
       header: <IssuesVisual />,
       icon: <FileSearch className="h-4 w-4" />,
-      className: "md:col-span-1 md:row-span-1 min-h-[320px]",
+      className: "md:col-span-2 md:row-span-1 min-h-[320px]",
       category: "Integration",
     },
     {
@@ -292,14 +292,6 @@ export default function BentoFeatures() {
       id="features"
     >
       <div className="mb-20 space-y-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="inline-block rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-blue-500"
-        >
-          Capabilities
-        </motion.div>
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -314,7 +306,7 @@ export default function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mx-auto max-w-2xl text-lg text-neutral-400 md:text-xl"
+          className="mx-auto max-w-2xl text-sm text-neutral-400 md:text-lg"
         >
           A complete toolkit designed to accelerate your development workflow,
           from intelligent code reviews to seamless deployment synchronization.
