@@ -20,6 +20,8 @@ import { ID, Query, type Databases } from "node-appwrite";
 import { AIReview } from "../types-ai";
 import { AITestGeneration, PersistedTestCase, TestType } from "../types-tests";
 import { analyzeWithGemini, PRAnalysisInput, generateTestCases } from "@/lib/ai-service";
+import { consumeAICredits } from "@/features/subscriptions/utils";
+import { AIFeatureCost } from "@/features/subscriptions/types";
 
 const app = new Hono()
   .get(
@@ -311,6 +313,18 @@ const app = new Hono()
           }, 400);
         }
 
+        // Check and consume AI credits
+        const creditResult = await consumeAICredits({
+          databases,
+          userId: user.$id,
+          workspaceId: project.workspaceId,
+          creditsToConsume: AIFeatureCost.CODE_REVIEW,
+        });
+
+        if (!creditResult.success) {
+          return c.json({ error: creditResult.message }, 402);
+        }
+
         // Start AI review analysis
         const aiReview = await generateAIReview({
           projectId,
@@ -391,6 +405,18 @@ const app = new Hono()
               lastGenerated: lastGenerated.toISOString()
             }, 429);
           }
+        }
+
+        // Check and consume AI credits
+        const creditResult = await consumeAICredits({
+          databases,
+          userId: user.$id,
+          workspaceId: project.workspaceId,
+          creditsToConsume: AIFeatureCost.TEST_GENERATION,
+        });
+
+        if (!creditResult.success) {
+          return c.json({ error: creditResult.message }, 402);
         }
 
         // Generate AI test cases
