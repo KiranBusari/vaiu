@@ -25,7 +25,7 @@ interface TaskActionsProps {
 
 export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
   const [showAISummary, setShowAISummary] = useState(false);
-  const { data: taskData } = useGetTask({ issueId: id });
+  const { data: taskData, isLoading: isLoadingTask } = useGetTask({ issueId: id, enabled: showAISummary });
   const { isPending: isSummaryPending } = useGenerateAISummary();
 
   const handleAISummary = () => {
@@ -107,13 +107,24 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
           <DialogHeader>
             <DialogTitle>AI Summary</DialogTitle>
           </DialogHeader>
-          <AISummaryCard
-            workspaceId={workspaceId}
-            projectId={projectId}
-            type="issue"
-            identifier={taskData?.number || 0}
-            title={taskData?.name || ""}
-          />
+          {isLoadingTask ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="size-8 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Loading issue data...</span>
+            </div>
+          ) : taskData?.number ? (
+            <AISummaryCard
+              workspaceId={workspaceId}
+              projectId={projectId}
+              type="issue"
+              identifier={taskData.number}
+              title={taskData.name}
+            />
+          ) : (
+            <div className="py-8 text-center text-sm text-muted-foreground">
+              Unable to load issue data
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -274,41 +274,28 @@ const app = new Hono()
         documents: allMembers.filter(Boolean),
       };
 
-      const assignees = await Promise.all(
-        members.documents.map(async (member) => {
-          if (!member) {
-            throw new Error("Member not found");
-          }
-          try {
-            const user = await users.get(member.userId);
-            return {
-              ...member,
-              name: user.name || user.email,
-              email: user.email,
-            };
-          } catch (error) {
-            if (
-              typeof error === "object" &&
-              error &&
-              "code" in error &&
-              error.code === 404
-            ) {
-              // User not found in Appwrite
-              return {
-                ...member,
-                name: "Unknown User",
-                email: "user-not-found@example.com",
-              };
-            }
-            console.error(`Error fetching user ${member.userId}:`, error);
-            return {
-              ...member,
-              name: "Error Fetching User",
-              email: "error@example.com",
-            };
-          }
-        }),
+      // Batch fetch all users in parallel instead of one-by-one
+      const userIds = members.documents.map(member => member!.userId);
+      const usersPromises = userIds.map(userId =>
+        users.get(userId).catch(error => {
+          console.warn(`Failed to fetch user ${userId}:`, error);
+          return { $id: userId, name: "Unknown User", email: "unknown@example.com" };
+        })
       );
+      const usersData = await Promise.all(usersPromises);
+      const usersMap = new Map(usersData.map(user => [user.$id, user]));
+
+      const assignees = members.documents.map((member) => {
+        if (!member) {
+          throw new Error("Member not found");
+        }
+        const user = usersMap.get(member.userId);
+        return {
+          ...member,
+          name: user?.name || user?.email || "Unknown User",
+          email: user?.email || "unknown@example.com",
+        };
+      });
 
       const populatedTask = issues.documents.map((issue) => {
         const project = projects.documents.find(
@@ -668,61 +655,66 @@ const app = new Hono()
     );
 
     let assignee;
-    try {
-      const member = await databases.getDocument(
-        DATABASE_ID,
-        MEMBERS_ID,
-        issue.assigneeId,
-      );
-
+    // Check if assigneeId exists before trying to fetch
+    if (!issue.assigneeId) {
+      assignee = null;
+    } else {
       try {
-        const user = await users.get(member.userId);
-        assignee = {
-          ...member,
-          name: user.name || user.email,
-          email: user.email,
-        };
-      } catch (userError) {
-        if (
-          typeof userError === "object" &&
-          userError &&
-          "code" in userError &&
-          userError.code === 404
-        ) {
-          // User not found in Appwrite
-          assignee = {
-            ...member,
-            name: "Unknown User",
-            email: "user-not-found@example.com",
-          };
-        } else {
-          console.error(`Error fetching user ${member.userId}:`, userError);
-          assignee = {
-            ...member,
-            name: "Error Fetching User",
-            email: "error@example.com",
-          };
-        }
-      }
-    } catch {
-      // If member not found by ID, it might be a GitHub username from fetched issues
-      console.log(
-        `Member not found by ID ${issue.assigneeId}, treating as GitHub username`,
-      );
+        const member = await databases.getDocument(
+          DATABASE_ID,
+          MEMBERS_ID,
+          issue.assigneeId,
+        );
 
-      // Create a fallback assignee object for GitHub usernames
-      assignee = {
-        $id: issue.assigneeId || "unknown",
-        userId: issue.assigneeId || "unknown",
-        workspaceId: issue.workspaceId,
-        name: issue.assigneeId || "Unassigned",
-        email: `${issue.assigneeId}@github.local`,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
-        $permissions: [],
-        $collectionId: MEMBERS_ID,
-        $databaseId: DATABASE_ID,
-      };
+        try {
+          const user = await users.get(member.userId);
+          assignee = {
+            ...member,
+            name: user.name || user.email,
+            email: user.email,
+          };
+        } catch (userError) {
+          if (
+            typeof userError === "object" &&
+            userError &&
+            "code" in userError &&
+            userError.code === 404
+          ) {
+            // User not found in Appwrite
+            assignee = {
+              ...member,
+              name: "Unknown User",
+              email: "user-not-found@example.com",
+            };
+          } else {
+            console.error(`Error fetching user ${member.userId}:`, userError);
+            assignee = {
+              ...member,
+              name: "Error Fetching User",
+              email: "error@example.com",
+            };
+          }
+        }
+      } catch {
+        // If member not found by ID, it might be a GitHub username from fetched issues
+        console.log(
+          `Member not found by ID ${issue.assigneeId}, treating as GitHub username`,
+        );
+
+        // Create a fallback assignee object for GitHub usernames
+        assignee = {
+          $id: issue.assigneeId || "unknown",
+          userId: issue.assigneeId || "unknown",
+          workspaceId: issue.workspaceId,
+          name: issue.assigneeId || "Unassigned",
+          email: `${issue.assigneeId}@github.local`,
+          $createdAt: new Date().toISOString(),
+          $updatedAt: new Date().toISOString(),
+          $permissions: [],
+          $collectionId: MEMBERS_ID,
+          $databaseId: DATABASE_ID,
+        };
+      }
     }
 
     return c.json({

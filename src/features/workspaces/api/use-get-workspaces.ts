@@ -12,6 +12,9 @@ export const useGetWorkspaces = () => {
       const { data } = await response.json();
       return data;
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes - workspaces rarely change
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
+    refetchOnWindowFocus: false,
   });
 
   return query;

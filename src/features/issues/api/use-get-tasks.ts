@@ -51,6 +51,9 @@ export const useGetIssues = ({
 
       return data;
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes - list can be slightly fresher
+    gcTime: 5 * 60 * 1000, // 5 minutes cache time
+    refetchOnWindowFocus: false, // Don't refetch on window focus
     enabled,
   });
 
