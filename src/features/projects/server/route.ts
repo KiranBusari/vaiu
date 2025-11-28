@@ -215,7 +215,7 @@ const app = new Hono()
 
       // Create all issues in parallel instead of sequentially
       await Promise.all(
-        data.map((issue, index) =>
+        data.map((issue) =>
           databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
             name: issue.title,
             description: issue.body,

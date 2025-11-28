@@ -81,7 +81,10 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
             Edit Task
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={onDelete}
+            onSelect={(e) => {
+              e.preventDefault();
+              onDelete();
+            }}
             disabled={isPending}
             className="p-[10px] font-medium text-amber-700 focus:text-amber-700"
           >
