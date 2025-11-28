@@ -63,7 +63,7 @@ const app = new Hono()
         ISSUES_ID,
         issueId,
       );
-    } catch (error) {
+    } catch {
       return c.json({ error: "Issue not found" }, 404);
     }
 
