@@ -36,6 +36,16 @@ const app = new Hono()
       const user = c.get("user");
       const { workspaceId, projectId, status, search } = c.req.valid("query");
 
+      const project = await databases.getDocument<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        projectId
+      );
+
+      if (!project) {
+        return c.json({ error: "Project not found" }, 404);
+      }
+
       // Check if user is a super admin
       const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
@@ -49,16 +59,6 @@ const app = new Hono()
         if (!member) {
           return c.json({ error: "Unauthorized" }, 401);
         }
-      }
-
-      const project = await databases.getDocument<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        projectId
-      );
-
-      if (!project) {
-        return c.json({ error: "Project not found" }, 404);
       }
 
       // Get GitHub OAuth access token
@@ -216,22 +216,24 @@ const app = new Hono()
           description
         );
 
-        await addIssueAssignees(
-          githubToken,
-          project.owner,
-          project.name,
-          createPR.number,
-          [githubUsername]
-        );
-
-        await databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
-          title,
-          description,
-          branch,
-          baseBranch,
-          githubUsername,
-          projectId,
-        });
+        // Add assignee and persist to database in parallel
+        await Promise.all([
+          addIssueAssignees(
+            githubToken,
+            project.owner,
+            project.name,
+            createPR.number,
+            [githubUsername]
+          ),
+          databases.createDocument(DATABASE_ID, PR_ID, ID.unique(), {
+            title,
+            description,
+            branch,
+            baseBranch,
+            githubUsername,
+            projectId,
+          })
+        ]);
 
         return c.json(
           {

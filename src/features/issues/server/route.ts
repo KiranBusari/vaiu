@@ -105,37 +105,26 @@ const app = new Hono()
       );
     }
 
+    if (!issuesFromDb.number) {
+      return c.json({ error: "Issue number not found in database" }, 400);
+    }
+
     const owner = await getAuthenticatedUser(githubToken);
     if (!owner) {
       return c.json({ error: "Failed to authenticate with GitHub" }, 500);
     }
 
-    const issuesFromGit = await listRepositoryIssues(
-      githubToken,
-      owner.login,
-      existingProject.name,
-    );
-    // console.log("Issues from Git:", issuesFromGit);
-
-    const currentIssue = issuesFromGit.find(
-      (issue) => issue.title === issuesFromDb.name,
-    );
-
-    if (!currentIssue) {
-      return c.json({ error: "Issue not found" }, 404);
-    }
-
-    const issue_number = currentIssue.number;
-
-    await updateIssue(
-      githubToken,
-      owner.login,
-      existingProject.name,
-      issue_number,
-      { state: "closed" },
-    );
-
-    await databases.deleteDocument(DATABASE_ID, ISSUES_ID, issueId);
+    // Close the GitHub issue and delete from database in parallel
+    await Promise.all([
+      updateIssue(
+        githubToken,
+        owner.login,
+        existingProject.name,
+        issuesFromDb.number,
+        { state: "closed" },
+      ),
+      databases.deleteDocument(DATABASE_ID, ISSUES_ID, issueId)
+    ]);
     return c.json({
       success: true,
       data: {
@@ -602,57 +591,36 @@ const app = new Hono()
         },
       );
 
-      // Sync status changes to GitHub
-      try {
-        const project = await databases.getDocument<Project>(
-          DATABASE_ID,
-          PROJECTS_ID,
-          issue.projectId,
-        );
+      // Sync status changes to GitHub (only if status changed)
+      if (status && issue.number) {
+        try {
+          const project = await databases.getDocument<Project>(
+            DATABASE_ID,
+            PROJECTS_ID,
+            issue.projectId,
+          );
 
-        // Get GitHub OAuth access token
-        const githubToken = await getAccessToken(user.$id);
+          // Get GitHub OAuth access token
+          const githubToken = await getAccessToken(user.$id);
 
-        if (githubToken) {
-          const owner = await getAuthenticatedUser(githubToken);
+          if (githubToken) {
+            const owner = await getAuthenticatedUser(githubToken);
 
-          if (owner) {
-            const issuesFromGit = await listRepositoryIssues(
-              githubToken,
-              owner.login,
-              project.name,
-              "all", // Get both open and closed issues
-            );
-
-            // Find the GitHub issue by title
-            const githubIssue = issuesFromGit.find(
-              (gitIssue) => gitIssue.title === issue.name,
-            );
-
-            if (githubIssue) {
+            if (owner) {
               const newState = status === "DONE" ? "closed" : "open";
 
-              // Only update if the state actually changed
-              if (
-                (newState === "closed" && githubIssue.state === "open") ||
-                (newState === "open" && githubIssue.state === "closed")
-              ) {
-                await updateIssue(
-                  githubToken,
-                  owner.login,
-                  project.name,
-                  githubIssue.number,
-                  { state: newState },
-                );
-                console.log(
-                  `Updated GitHub issue #${githubIssue.number} state to ${newState}`,
-                );
-              }
+              await updateIssue(
+                githubToken,
+                owner.login,
+                project.name,
+                issue.number,
+                { state: newState },
+              );
             }
           }
+        } catch (error) {
+          console.error("Error syncing to GitHub:", error);
         }
-      } catch (error) {
-        console.error("Error syncing to GitHub:", error);
       }
 
       return c.json({ data: issue });
