@@ -55,11 +55,17 @@ const app = new Hono()
     const user = c.get("user");
     const { issueId } = c.req.param();
 
-    const issuesFromDb = await databases.getDocument<Issue>(
-      DATABASE_ID,
-      ISSUES_ID,
-      issueId,
-    );
+    // Check if issue exists first
+    let issuesFromDb: Issue;
+    try {
+      issuesFromDb = await databases.getDocument<Issue>(
+        DATABASE_ID,
+        ISSUES_ID,
+        issueId,
+      );
+    } catch (error) {
+      return c.json({ error: "Issue not found" }, 404);
+    }
 
     const projectId = issuesFromDb.projectId;
     const existingProject = await databases.getDocument<Project>(
@@ -109,22 +115,18 @@ const app = new Hono()
       return c.json({ error: "Issue number not found in database" }, 400);
     }
 
-    const owner = await getAuthenticatedUser(githubToken);
-    if (!owner) {
-      return c.json({ error: "Failed to authenticate with GitHub" }, 500);
-    }
-
     // Close the GitHub issue and delete from database in parallel
     await Promise.all([
       updateIssue(
         githubToken,
-        owner.login,
+        existingProject.owner,
         existingProject.name,
         issuesFromDb.number,
         { state: "closed" },
       ),
       databases.deleteDocument(DATABASE_ID, ISSUES_ID, issueId)
     ]);
+
     return c.json({
       success: true,
       data: {

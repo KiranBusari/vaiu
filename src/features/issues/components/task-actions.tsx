@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useConfirm } from "@/hooks/use-confirm";
+import { Button } from "@/components/ui/button";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 
 import { useDeleteTask } from "../api/use-delete-task";
@@ -25,6 +25,7 @@ interface TaskActionsProps {
 
 export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
   const [showAISummary, setShowAISummary] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { data: taskData, isLoading: isLoadingTask } = useGetTask({ issueId: id, enabled: showAISummary });
   const { isPending: isSummaryPending } = useGenerateAISummary();
 
@@ -35,16 +36,15 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
   const router = useRouter();
   const workspaceId = useWorkspaceId();
   const { open } = useEditTaskModal();
-  const [ConfirmDialog, confirm] = useConfirm(
-    "Delete Task",
-    "Are you sure you want to delete this task?",
-    "destructive",
-  );
   const { mutate, isPending } = useDeleteTask();
-  const onDelete = async () => {
-    const ok = await confirm();
-    if (!ok) return;
+
+  const onDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
     mutate({ param: { issueId: id } });
+    setShowDeleteConfirm(false);
   };
 
   const onOpenTask = () => {
@@ -55,7 +55,36 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
   };
   return (
     <div className="flex justify-end">
-      <ConfirmDialog />
+      <Dialog 
+        open={showDeleteConfirm} 
+        onOpenChange={(open) => {
+          if (!isPending) {
+            setShowDeleteConfirm(open);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete Task</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            This action cannot be undone.
+          </p>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={isPending}>
+              {isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 text-sm">
@@ -81,10 +110,7 @@ export const TaskActions = ({ children, id, projectId }: TaskActionsProps) => {
             Edit Task
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={(e) => {
-              e.preventDefault();
-              onDelete();
-            }}
+            onClick={onDelete}
             disabled={isPending}
             className="p-[10px] font-medium text-amber-700 focus:text-amber-700"
           >
