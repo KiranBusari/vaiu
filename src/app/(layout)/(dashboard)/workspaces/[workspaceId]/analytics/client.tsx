@@ -20,9 +20,7 @@ import {
   Activity,
   CheckSquare,
   FolderKanban,
-  Users,
-  PieChart as PieChartIcon,
-  BarChart3
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -39,9 +37,8 @@ import {
   Cell,
 } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { IssueStatus, Issue } from "@/features/issues/types";
-import { Project } from "@/features/projects/types";
-import { Member, MemberRole } from "@/features/members/types";
+import { IssueStatus } from "@/features/issues/types";
+import { Member } from "@/features/members/types";
 
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
