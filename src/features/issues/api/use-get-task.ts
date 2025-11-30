@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 
 interface useGetIssueProps {
   issueId: string;
+  enabled?: boolean;
 }
-export const useGetTask = ({ issueId }: useGetIssueProps) => {
+export const useGetTask = ({ issueId, enabled = true }: useGetIssueProps) => {
   const query = useQuery({
     queryKey: ["issue", issueId],
     queryFn: async () => {
@@ -21,6 +22,10 @@ export const useGetTask = ({ issueId }: useGetIssueProps) => {
 
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes - issues don't change that often
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on window focus/page reload
+    enabled, // Only fetch when enabled
   });
 
   return query;

@@ -30,8 +30,14 @@ export const TaskOverview = ({ issue }: TaskOverviewProps) => {
         <Separator className="my-4" />
         <div className="flex flex-col gap-y-4">
           <OverviewProperty label="Assignee">
-            <MemberAvatar name={issue.assignee.name} className="size-6" />
-            <p className="text-sm font-medium">{issue.assignee.name}</p>
+            {issue.assignee ? (
+              <>
+                <MemberAvatar name={issue.assignee.name} className="size-6" />
+                <p className="text-sm font-medium">{issue.assignee.name}</p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Unassigned</p>
+            )}
           </OverviewProperty>
           <OverviewProperty label="Due Date">
             <TaskDate value={issue.dueDate} className="text-sm font-medium" />

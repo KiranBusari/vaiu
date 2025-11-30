@@ -195,7 +195,6 @@ const app = new Hono()
         repoName
       );
 
-
       const status = IssueStatus.TODO;
 
       const highestPositionTask = await databases.listDocuments(
@@ -214,19 +213,22 @@ const app = new Hono()
           ? highestPositionTask.documents[0].position + 1000
           : 1000;
 
-      data.map(async (issue) => {
-        await databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
-          name: issue.title,
-          description: issue.body,
-          status,
-          dueDate: new Date().toISOString(),
-          workspaceId,
-          projectId: project.$id,
-          assigneeId: issue?.assignee?.login,
-          position: newPosition,
-          number: issue.number,
-        });
-      });
+      // Create all issues in parallel instead of sequentially
+      await Promise.all(
+        data.map((issue) =>
+          databases.createDocument(DATABASE_ID, ISSUES_ID, ID.unique(), {
+            name: issue.title,
+            description: issue.body,
+            status,
+            dueDate: new Date().toISOString(),
+            workspaceId,
+            projectId: project.$id,
+            assigneeId: issue?.assignee?.login,
+            position: newPosition,
+            number: issue.number,
+          })
+        )
+      );
 
       // Update member's projectId array (keep existing workspace role)
       const currentProjectIds = member.projectId || [];
@@ -242,101 +244,20 @@ const app = new Hono()
     sessionMiddleware,
     zValidator("query", z.object({ workspaceId: z.string() })),
     async (c) => {
-      const user = c.get("user");
-      const databases = c.get("databases");
+      try {
+        const user = c.get("user");
+        const databases = c.get("databases");
 
-      const { workspaceId } = c.req.valid("query");
-      if (!workspaceId) {
-        return c.json({ error: "Missing workspaceId" }, 400);
-      }
+        const { workspaceId } = c.req.valid("query");
+        if (!workspaceId) {
+          return c.json({ error: "Missing workspaceId" }, 400);
+        }
 
-      // Check if user is a super admin
-      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
+        // Check if user is a super admin
+        const isSuper = await isSuperAdmin({ databases, userId: user.$id });
 
-      if (isSuper) {
-        // Super admins can see all projects
-        const projects = await databases.listDocuments<Project>(
-          DATABASE_ID,
-          PROJECTS_ID,
-          [
-            Query.equal("workspaceId", workspaceId),
-            Query.orderDesc("$createdAt"),
-          ],
-        );
-        return c.json({ data: projects });
-      }
-
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
-
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
-
-      // Workspace admins can see all projects in the workspace
-      if (member.role === MemberRole.ADMIN) {
-        const projects = await databases.listDocuments<Project>(
-          DATABASE_ID,
-          PROJECTS_ID,
-          [
-            Query.equal("workspaceId", workspaceId),
-            Query.orderDesc("$createdAt"),
-          ],
-        );
-        return c.json({ data: projects });
-      }
-
-      // Regular members can only see projects they're assigned to
-      const projectIds = member.projectId || [];
-
-      if (projectIds.length === 0) {
-        return c.json({ data: { documents: [], total: 0 } });
-      }
-
-      // Fetch all projects in workspace and filter by member's projectIds
-      const allProjects = await databases.listDocuments<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        [
-          Query.equal("workspaceId", workspaceId),
-          Query.orderDesc("$createdAt"),
-        ],
-      );
-
-      const filteredProjects = allProjects.documents.filter((project) =>
-        projectIds.includes(project.$id),
-      );
-
-      return c.json({
-        data: {
-          documents: filteredProjects,
-          total: filteredProjects.length,
-        },
-      });
-    },
-  )
-  .get(
-    "/get-projects",
-    sessionMiddleware,
-    zValidator("query", z.object({ workspaceId: z.string() })),
-    async (c) => {
-      const user = c.get("user");
-      const databases = c.get("databases");
-
-      const { workspaceId } = c.req.valid("query");
-      if (!workspaceId) {
-        return c.json({ error: "Missing workspaceId" }, 400);
-      }
-
-      // Check if user is a super admin
-      const isSuper = await isSuperAdmin({ databases, userId: user.$id });
-
-      if (isSuper) {
-        // Super admins can see all projects in the workspace
-        try {
+        if (isSuper) {
+          // Super admins can see all projects
           const projects = await databases.listDocuments<Project>(
             DATABASE_ID,
             PROJECTS_ID,
@@ -345,33 +266,21 @@ const app = new Hono()
               Query.orderDesc("$createdAt"),
             ],
           );
-
-          return c.json({
-            data: {
-              documents: projects.documents,
-              total: projects.total,
-            },
-          });
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-          return c.json({ error: "Failed to fetch projects" }, 500);
+          return c.json({ data: projects });
         }
-      }
 
-      // Check workspace membership and role
-      const member = await getMember({
-        databases,
-        workspaceId,
-        userId: user.$id,
-      });
+        const member = await getMember({
+          databases,
+          workspaceId,
+          userId: user.$id,
+        });
 
-      if (!member) {
-        return c.json({ error: "Unauthorized" }, 401);
-      }
+        if (!member) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
 
-      // Workspace admins can see all projects in the workspace
-      if (member.role === MemberRole.ADMIN) {
-        try {
+        // Workspace admins can see all projects in the workspace
+        if (member.role === MemberRole.ADMIN) {
           const projects = await databases.listDocuments<Project>(
             DATABASE_ID,
             PROJECTS_ID,
@@ -380,46 +289,40 @@ const app = new Hono()
               Query.orderDesc("$createdAt"),
             ],
           );
-
-          return c.json({
-            data: {
-              documents: projects.documents,
-              total: projects.total,
-            },
-          });
-        } catch (error) {
-          console.error("Error fetching projects:", error);
-          return c.json({ error: "Failed to fetch projects" }, 500);
+          return c.json({ data: projects });
         }
+
+        // Regular members can only see projects they're assigned to
+        const projectIds = member.projectId || [];
+
+        if (projectIds.length === 0) {
+          return c.json({ data: { documents: [], total: 0 } });
+        }
+
+        // Fetch all projects in workspace and filter by member's projectIds
+        const allProjects = await databases.listDocuments<Project>(
+          DATABASE_ID,
+          PROJECTS_ID,
+          [
+            Query.equal("workspaceId", workspaceId),
+            Query.orderDesc("$createdAt"),
+          ],
+        );
+
+        const filteredProjects = allProjects.documents.filter((project) =>
+          projectIds.includes(project.$id),
+        );
+
+        return c.json({
+          data: {
+            documents: filteredProjects,
+            total: filteredProjects.length,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        return c.json({ error: "Failed to fetch projects" }, 500);
       }
-
-      // Regular members can only see projects they're assigned to
-      const projectIds = member.projectId || [];
-
-      if (projectIds.length === 0) {
-        return c.json({ data: { documents: [], total: 0 } });
-      }
-
-      // Fetch all projects in workspace and filter by member's projectIds
-      const allProjects = await databases.listDocuments<Project>(
-        DATABASE_ID,
-        PROJECTS_ID,
-        [
-          Query.equal("workspaceId", workspaceId),
-          Query.orderDesc("$createdAt"),
-        ],
-      );
-
-      const filteredProjects = allProjects.documents.filter((project) =>
-        projectIds.includes(project.$id),
-      );
-
-      return c.json({
-        data: {
-          documents: filteredProjects,
-          total: filteredProjects.length,
-        },
-      });
     },
   )
   .get("/:projectId", sessionMiddleware, async (c) => {

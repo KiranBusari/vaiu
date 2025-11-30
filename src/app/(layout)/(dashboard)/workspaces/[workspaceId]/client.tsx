@@ -40,6 +40,14 @@ export const WorkspaceIdClient = () => {
     return <PageError message="Failed to load workspace data" />;
   return (
     <div className="flex h-full flex-col space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+        <Button variant="outline" asChild>
+          <Link href={`/workspaces/${workspaceId}/analytics`}>
+            View Analytics
+          </Link>
+        </Button>
+      </div>
       <Analytics data={analytics} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <TaskList data={tasks.documents} total={tasks.total} />

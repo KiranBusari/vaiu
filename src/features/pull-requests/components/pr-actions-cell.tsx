@@ -36,6 +36,13 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const [showTestManagement, setShowTestManagement] = useState(false);
   const projectId = useProjectId();
   const workspaceId = useWorkspaceId();
+  
+  const closeAllDialogs = () => {
+    setShowAIReview(false);
+    setShowAISummary(false);
+    setShowTestGeneration(false);
+    setShowTestManagement(false);
+  };
 
   const {
     generateReview,
@@ -47,7 +54,8 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const handleAIReview = async () => {
     try {
       reset(); // Clear any previous data/errors
-      setShowAIReview(true);
+      closeAllDialogs();
+      setTimeout(() => setShowAIReview(true), 50);
       await generateReview({
         projectId,
         prNumber: pr.number,
@@ -59,13 +67,14 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
 
   const handleCloseReview = () => {
     setShowAIReview(false);
-    reset(); // Clear the review data when closing
+    setTimeout(() => reset(), 100); // Delay cleanup to allow dialog to fully close
   };
 
   const { isPending: isSummaryPending } = useGenerateAISummary();
 
   const handleAISummary = () => {
-    setShowAISummary(true);
+    closeAllDialogs();
+    setTimeout(() => setShowAISummary(true), 50);
   };
 
   const {
@@ -78,7 +87,8 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
   const handleGenerateTests = async () => {
     try {
       resetTests();
-      setShowTestGeneration(true);
+      closeAllDialogs();
+      setTimeout(() => setShowTestGeneration(true), 50);
       await generateTests({
         projectId,
         prNumber: pr.number,
@@ -90,7 +100,7 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
 
   const handleCloseTests = () => {
     setShowTestGeneration(false);
-    resetTests();
+    setTimeout(() => resetTests(), 100);
   };
 
   return (
@@ -157,7 +167,10 @@ export function PRActionsCell({ pr }: PRActionsCellProps) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => setShowTestManagement(true)}
+            onClick={() => {
+              closeAllDialogs();
+              setTimeout(() => setShowTestManagement(true), 50);
+            }}
             className="flex items-center"
           >
             <FileText className="mr-2 h-4 w-4" />

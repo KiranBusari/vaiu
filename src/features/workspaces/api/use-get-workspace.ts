@@ -17,6 +17,9 @@ export const useGetWorkspace = ({ workspaceId }: useGetWorkspaceProps) => {
       const { data } = await response.json();
       return data;
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes cache
+    refetchOnWindowFocus: false,
   });
 
   return query;

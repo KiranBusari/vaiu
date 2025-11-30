@@ -20,6 +20,9 @@ export const useGetProjects = ({ workspaceId }: useGetProjectsProps) => {
       const { data } = await response.json();
       return data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes - projects change more often
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchOnWindowFocus: false,
   });
 
   return query;
