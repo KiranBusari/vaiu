@@ -27,13 +27,13 @@ export const CardBackground = ({
   className?: string;
 }) => (
   <div
-    className={`relative flex h-full w-full flex-col overflow-hidden bg-neutral-950 ${className}`}
+    className={`relative flex h-full w-full flex-col overflow-hidden bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 ${className}`}
   >
     {/* Subtle Grid Pattern */}
     <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
 
     {/* Radial Gradient for depth */}
-    <div className="absolute inset-0 bg-[radial-gradient(circle_400px_at_50%_50%,#3b82f605,transparent)]" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_400px_at_50%_50%,#3b82f605,transparent)] dark:bg-[radial-gradient(circle_400px_at_50%_50%,#3b82f605,transparent)]" />
 
     {children}
   </div>
@@ -43,7 +43,7 @@ export const CardBackground = ({
 export const CodeReviewVisual = () => {
   return (
     <CardBackground className="items-center justify-center p-6">
-      <div className="relative w-full max-w-[280px] overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/90 shadow-2xl">
+      <div className="relative w-full max-w-[280px] overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100/60 shadow-2xl dark:border-neutral-800 dark:bg-neutral-900/90">
         {/* Header */}
         <div className="flex items-center gap-2 border-b border-neutral-800 bg-neutral-900 px-3 py-2">
           <div className="flex gap-1.5">
@@ -51,7 +51,7 @@ export const CodeReviewVisual = () => {
             <div className="h-2.5 w-2.5 rounded-full bg-yellow-500/20" />
             <div className="h-2.5 w-2.5 rounded-full bg-green-500/20" />
           </div>
-          <div className="ml-2 h-2 w-20 rounded-full bg-neutral-800" />
+          <div className="ml-2 h-2 w-20 rounded-full bg-neutral-200 dark:bg-neutral-800" />
         </div>
 
         {/* Code Content */}
@@ -60,7 +60,7 @@ export const CodeReviewVisual = () => {
             <div key={i} className="flex items-center gap-2">
               <div className="w-4 text-[10px] text-neutral-600">{i}</div>
               <div
-                className={`h-2 rounded-full bg-neutral-800 ${i === 3 ? "w-1/2" : "w-full"}`}
+                className={`h-2 rounded-full bg-neutral-200 dark:bg-neutral-800 ${i === 3 ? "w-1/2" : "w-full"}`}
                 style={{ width: `${Math.random() * 30 + 50}%` }}
               />
             </div>
@@ -128,7 +128,7 @@ export const CodeReviewVisual = () => {
 export const TestGenVisual = () => {
   return (
     <CardBackground className="p-5">
-      <div className="flex h-full flex-col gap-4 rounded-xl border border-neutral-800 bg-neutral-900/50 p-4">
+      <div className="flex h-full flex-col gap-4 rounded-xl border border-neutral-200 bg-neutral-100/60 p-4 dark:border-neutral-800 dark:bg-neutral-900/50">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
           <div className="flex items-center gap-2">
@@ -183,7 +183,7 @@ export const TestGenVisual = () => {
           ))}
 
           {/* Simulated running test */}
-          <div className="flex items-center justify-between rounded-md bg-neutral-800/30 px-3 py-2">
+          <div className="flex items-center justify-between rounded-md bg-neutral-100/70 px-3 py-2 dark:bg-neutral-800/30">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={{ rotate: 360 }}
@@ -199,7 +199,7 @@ export const TestGenVisual = () => {
         </div>
 
         {/* Summary Stats */}
-        <div className="mt-auto grid grid-cols-3 gap-2 border-t border-neutral-800 pt-3">
+        <div className="mt-auto grid grid-cols-3 gap-2 border-t border-neutral-200 pt-3 dark:border-neutral-800">
           <div className="text-center">
             <div className="text-[10px] text-neutral-500">Total</div>
             <div className="font-mono text-xs text-neutral-300">42</div>
@@ -257,7 +257,7 @@ export const SummaryVisual = () => {
             repeatDelay: 3,
             ease: "easeInOut",
           }}
-          className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 overflow-hidden rounded-lg border border-purple-500/30 bg-neutral-900/95 shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] backdrop-blur-md"
+          className="absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 overflow-hidden rounded-lg border border-purple-500/30 bg-neutral-100/70 shadow-[0_0_30px_-5px_rgba(168,85,247,0.3)] backdrop-blur-md dark:bg-neutral-900/95"
         >
           <div className="flex items-center gap-2 border-b border-purple-500/10 bg-purple-500/5 px-3 py-2">
             <SparklesIcon className="h-3 w-3 text-purple-400" />

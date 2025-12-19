@@ -61,8 +61,8 @@ type FeatureItem = {
 
 // --- Helper Components ---
 const VisualSkeleton = () => (
-  <div className="flex h-full w-full animate-pulse items-center justify-center border-b border-neutral-800 bg-neutral-900">
-    <div className="h-8 w-8 rounded-full bg-neutral-800" />
+  <div className="flex h-full w-full animate-pulse items-center justify-center border-b border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="h-8 w-8 rounded-full bg-neutral-300 dark:bg-neutral-800" />
   </div>
 );
 
@@ -127,16 +127,16 @@ const BentoGridItem: React.FC<BentoGridItemProps> = ({
       whileHover={
         isExpandable ? { y: -5, transition: { duration: 0.2 } } : { y: -2 }
       }
-      className={`group/bento relative flex flex-col justify-between overflow-hidden rounded-3xl border border-neutral-800 bg-black shadow-lg transition-all duration-300 hover:border-neutral-700 hover:shadow-2xl hover:shadow-neutral-900/50 ${className} ${isExpandable ? "cursor-pointer" : ""}`}
+      className={`group/bento relative flex flex-col justify-between overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg transition-all duration-300 hover:border-neutral-300 dark:border-neutral-800 dark:bg-black dark:shadow-2xl dark:hover:border-neutral-700 ${className} ${isExpandable ? "cursor-pointer" : ""}`}
     >
       {/* Visual Header - Taking up more space for impact */}
-      <div className="relative h-[60%] w-full overflow-hidden bg-neutral-950">
+      <div className="relative h-[60%] w-full overflow-hidden bg-neutral-50 dark:bg-neutral-950">
         <Suspense fallback={<VisualSkeleton />}>{header}</Suspense>
 
         {/* Overlay for Expandable Items */}
         {isExpandable && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/bento:opacity-100">
-            <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/20 backdrop-blur-md">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/bento:opacity-100 dark:bg-black/50">
+            <div className="flex items-center gap-2 rounded-full bg-black/10 px-4 py-2 text-sm font-medium text-neutral-900 ring-1 ring-neutral-900/10 backdrop-blur-md dark:bg-white/10 dark:text-white dark:ring-white/20">
               <Search className="h-4 w-4" />
               <span>Explore</span>
             </div>
@@ -145,22 +145,23 @@ const BentoGridItem: React.FC<BentoGridItemProps> = ({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex h-[40%] flex-col justify-between bg-neutral-900/50 p-6 backdrop-blur-sm transition-colors group-hover/bento:bg-neutral-900/80">
+      <div className="relative z-10 flex h-[40%] flex-col justify-between bg-white/60 p-6 backdrop-blur-sm transition-colors group-hover/bento:bg-white/80 dark:bg-neutral-900/50 dark:group-hover/bento:bg-neutral-900/80">
         <div className="flex items-start justify-between">
           <div>
             {category && (
-              <span className="mb-2 inline-block rounded-full border border-neutral-800 bg-neutral-800/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              <span className="mb-2 inline-block rounded-full border border-neutral-200 bg-neutral-100/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-neutral-700 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-neutral-400">
                 {category}
               </span>
             )}
-            <h3 className="text-xl font-bold text-neutral-100">{title}</h3>
+            <h3 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+              {title}
+            </h3>
           </div>
-          <div className="rounded-lg border border-neutral-700/50 bg-neutral-800/50 p-2 text-neutral-300">
+          <div className="rounded-lg border border-neutral-200/50 bg-neutral-100/50 p-2 text-neutral-700 dark:border-neutral-700/50 dark:bg-neutral-800/50 dark:text-neutral-300">
             {icon}
           </div>
         </div>
-
-        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-400">
+        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
           {description}
         </p>
       </div>
@@ -297,7 +298,7 @@ export default function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
+          className="text-4xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-5xl md:text-6xl"
         >
           Engineered for <span className="text-blue-500">Velocity</span>
         </motion.h2>
@@ -306,10 +307,11 @@ export default function BentoFeatures() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mx-auto max-w-2xl text-sm text-neutral-400 md:text-lg"
+          className="mx-auto max-w-2xl text-sm text-neutral-700 dark:text-neutral-400 md:text-lg"
         >
           A complete toolkit designed to accelerate your development workflow,
-          from intelligent code reviews to seamless deployment synchronization.
+          from intelligent code reviews to project management and issue
+          tracking.
         </motion.p>
       </div>
 
@@ -326,7 +328,7 @@ export default function BentoFeatures() {
 
       <AnimatePresence>
         {selectedId && selectedFeature && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm sm:p-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 p-4 backdrop-blur-sm dark:bg-black/80 sm:p-8">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -337,20 +339,20 @@ export default function BentoFeatures() {
             <motion.div
               layoutId={`card-${selectedFeature.id}`}
               ref={ref}
-              className="relative flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-neutral-800 bg-neutral-900 shadow-2xl md:h-[600px] md:flex-row"
+              className="relative flex h-[80vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-900 md:h-[600px] md:flex-row"
             >
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedId(null);
                 }}
-                className="absolute right-6 top-6 z-50 rounded-full bg-black/50 p-2 text-neutral-400 backdrop-blur-md transition-colors hover:bg-neutral-800 hover:text-white"
+                className="absolute right-6 top-6 z-50 rounded-full bg-white/50 p-2 text-neutral-700 backdrop-blur-md transition-colors hover:bg-neutral-100 dark:bg-black/50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"
               >
                 <X className="h-5 w-5" />
               </button>
 
               {/* Left: Visual (Expanded) */}
-              <div className="relative h-64 w-full overflow-hidden border-b border-neutral-800 bg-black md:h-full md:w-1/2 md:border-b-0 md:border-r">
+              <div className="relative h-64 w-full overflow-hidden border-b border-neutral-200 bg-neutral-50 dark:border-neutral-800 dark:bg-black md:h-full md:w-1/2 md:border-b-0 md:border-r">
                 <div className="flex h-full w-full items-center justify-center p-8">
                   <div className="h-full w-full">
                     <Suspense fallback={<VisualSkeleton />}>
@@ -359,51 +361,51 @@ export default function BentoFeatures() {
                   </div>
                 </div>
                 {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-transparent to-transparent opacity-80" />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-50/80 via-transparent to-transparent opacity-80 dark:from-neutral-900/80" />
               </div>
 
               {/* Right: Content */}
-              <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto bg-neutral-900 p-8 md:p-12">
+              <div className="custom-scrollbar flex flex-1 flex-col overflow-y-auto bg-white p-8 dark:bg-neutral-900 md:p-12">
                 <div className="mb-6 flex items-center gap-4">
-                  <div className="rounded-xl border border-neutral-800 bg-neutral-800/50 p-3 text-blue-400 shadow-inner">
+                  <div className="rounded-xl border border-neutral-200 bg-neutral-100/50 p-3 text-blue-600 shadow-inner dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-blue-400">
                     {selectedFeature.icon}
                   </div>
                   <div>
-                    <h3 className="text-3xl font-bold text-white">
+                    <h3 className="text-3xl font-bold text-neutral-900 dark:text-white">
                       {selectedFeature.title}
                     </h3>
                     {selectedFeature.category && (
-                      <p className="mt-1 text-sm font-medium uppercase tracking-widest text-neutral-500">
+                      <p className="mt-1 text-sm font-medium uppercase tracking-widest text-neutral-600 dark:text-neutral-500">
                         {selectedFeature.category}
                       </p>
                     )}
                   </div>
                 </div>
 
-                <div className="prose prose-invert prose-lg max-w-none">
-                  <p className="text-xl leading-relaxed text-neutral-300">
+                <div className="prose prose-lg dark:prose-invert max-w-none text-neutral-700">
+                  <p className="text-xl leading-relaxed text-neutral-700 dark:text-neutral-300">
                     {selectedFeature.description}
                   </p>
-                  <div className="my-8 h-px w-full bg-neutral-800" />
-                  <p className="text-base leading-relaxed text-neutral-400">
+                  <div className="my-8 h-px w-full bg-neutral-200 dark:bg-neutral-800" />
+                  <p className="text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
                     {selectedFeature.longDescription}
                   </p>
                 </div>
 
                 <div className="mt-auto grid grid-cols-2 gap-4 pt-8">
-                  <div className="rounded-xl border border-neutral-800 bg-neutral-800/20 p-4">
-                    <div className="mb-1 text-xs font-medium uppercase text-neutral-500">
+                  <div className="rounded-xl border border-neutral-200 bg-neutral-100/20 p-4 dark:border-neutral-800 dark:bg-neutral-800/20">
+                    <div className="mb-1 text-xs font-medium uppercase text-neutral-600 dark:text-neutral-500">
                       Impact
                     </div>
-                    <div className="text-lg font-semibold text-white">
+                    <div className="text-lg font-semibold text-neutral-900 dark:text-white">
                       +40% Velocity
                     </div>
                   </div>
-                  <div className="rounded-xl border border-neutral-800 bg-neutral-800/20 p-4">
-                    <div className="mb-1 text-xs font-medium uppercase text-neutral-500">
+                  <div className="rounded-xl border border-neutral-200 bg-neutral-100/20 p-4 dark:border-neutral-800 dark:bg-neutral-800/20">
+                    <div className="mb-1 text-xs font-medium uppercase text-neutral-600 dark:text-neutral-500">
                       Setup
                     </div>
-                    <div className="text-lg font-semibold text-white">
+                    <div className="text-lg font-semibold text-neutral-900 dark:text-white">
                       Instant
                     </div>
                   </div>
