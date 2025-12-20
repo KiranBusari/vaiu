@@ -9,7 +9,6 @@ import {
   Kanban,
   FileSearch,
   BarChart3,
-  Search,
   X,
   ArrowRight,
   Terminal,
@@ -110,38 +109,20 @@ interface BentoGridItemProps {
   isExpandable?: boolean;
 }
 
-const BentoGridItem: React.FC<BentoGridItemProps> = ({
-  item,
-  onClick,
-  isExpandable,
-}) => {
+const BentoGridItem: React.FC<BentoGridItemProps> = ({ item }) => {
   const { title, description, header, icon, className, category } = item;
 
   return (
     <motion.div
       layoutId={`card-${item.id}`}
-      onClick={isExpandable ? onClick : undefined}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      whileHover={
-        isExpandable ? { y: -5, transition: { duration: 0.2 } } : { y: -2 }
-      }
-      className={`group/bento relative flex flex-col justify-between overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg transition-all duration-300 hover:border-neutral-300 dark:border-neutral-800 dark:bg-black dark:shadow-2xl dark:hover:border-neutral-700 ${className} ${isExpandable ? "cursor-pointer" : ""}`}
+      className={`group/bento relative flex flex-col justify-between overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-lg transition-all duration-300 hover:border-neutral-300 dark:border-neutral-800 dark:bg-black dark:shadow-2xl dark:hover:border-neutral-700 ${className}`}
     >
       {/* Visual Header - Taking up more space for impact */}
       <div className="relative h-[60%] w-full overflow-hidden bg-neutral-50 dark:bg-neutral-950">
         <Suspense fallback={<VisualSkeleton />}>{header}</Suspense>
-
-        {/* Overlay for Expandable Items */}
-        {isExpandable && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/bento:opacity-100 dark:bg-black/50">
-            <div className="flex items-center gap-2 rounded-full bg-black/10 px-4 py-2 text-sm font-medium text-neutral-900 ring-1 ring-neutral-900/10 backdrop-blur-md dark:bg-white/10 dark:text-white dark:ring-white/20">
-              <Search className="h-4 w-4" />
-              <span>Explore</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Content */}
