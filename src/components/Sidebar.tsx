@@ -189,19 +189,21 @@ export const SidebarComponent = () => {
                 </div>
               </div>
             ) : (
-              <Link
-                href={homeLink}
-                className="flex items-center justify-between transition-opacity hover:opacity-80"
-                aria-label="Home"
-              >
-                <div className="">
-                  <Logo className="dark:hidden" />
-                  <Logo2 className="hidden dark:block" />
-                </div>
+              <div className="flex items-center justify-between px-1">
+                <Link
+                  href={homeLink}
+                  className="flex items-center justify-between transition-opacity hover:opacity-80"
+                  aria-label="Home"
+                >
+                  <div className="">
+                    <Logo className="dark:hidden" />
+                    <Logo2 className="hidden dark:block" />
+                  </div>
+                </Link>
                 <div className="">
                   <SidebarTrigger aria-label="Toggle sidebar" />
                 </div>
-              </Link>
+              </div>
             )}
           </SidebarHeader>
         </SidebarGroup>
