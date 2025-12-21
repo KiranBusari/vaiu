@@ -21,7 +21,7 @@ export const useRegister = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
+          "error" in errorData ? errorData.error : "Failed to register",
         );
       }
       return await response.json();

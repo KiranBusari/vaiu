@@ -5,11 +5,11 @@ import { client } from "@/lib/rpc";
 import { toast } from "sonner";
 
 type ResponseType = InferResponseType<
-  (typeof client.api.v1["pull-requests"])[":projectId"]["submit-pull-request"]["$post"],
+  (typeof client.api.v1)["pull-requests"][":projectId"]["submit-pull-request"]["$post"],
   200
 >;
 type RequestType = InferRequestType<
-  (typeof client.api.v1["pull-requests"])[":projectId"]["submit-pull-request"]["$post"]
+  (typeof client.api.v1)["pull-requests"][":projectId"]["submit-pull-request"]["$post"]
 >;
 
 export const useCreatePr = () => {
@@ -25,7 +25,7 @@ export const useCreatePr = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
+          "error" in errorData ? errorData.error : "Failed to create PR",
         );
       }
       return await response.json();

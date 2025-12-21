@@ -18,7 +18,7 @@ export const useGetProjectInfo = ({ projectId }: useGetProjectInfo) => {
         throw new Error(
           "error" in errorData && typeof errorData.error === "string"
             ? errorData.error
-            : "Failed to login",
+            : "Failed to fetch project info",
         );
       }
 

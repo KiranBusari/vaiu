@@ -13,7 +13,7 @@ export const useGetMembers = ({ workspaceId }: UseGetMembersProps) => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          "error" in errorData ? errorData.error : "Failed to login",
+          "error" in errorData ? errorData.error : "Failed to fetch members",
         );
       }
       const { data } = await response.json();

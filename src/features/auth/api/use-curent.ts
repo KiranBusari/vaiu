@@ -11,7 +11,7 @@ export const useCurrent = () => {
         throw new Error(
           "error" in errorData && typeof errorData.error === "string"
             ? errorData.error
-            : "Failed to login",
+            : "Failed to fetch current user",
         );
       }
       const { data } = await response.json();
