@@ -37,9 +37,9 @@ export const ProjectSwitcher = () => {
 
   const currentProject =
     projects &&
-      typeof projects === "object" &&
-      "documents" in projects &&
-      Array.isArray(projects.documents)
+    typeof projects === "object" &&
+    "documents" in projects &&
+    Array.isArray(projects.documents)
       ? projects.documents.find((p: Project) => p.$id === projectId)
       : null;
 
@@ -77,11 +77,11 @@ export const ProjectSwitcher = () => {
   return (
     <div className="flex flex-col gap-y-2">
       <Select onValueChange={onSelect} value={projectId}>
-        <SelectTrigger className="w-full bg-slate-100 p-1 font-medium dark:bg-slate-800">
+        <SelectTrigger className="w-full bg-slate-100 p-1 pl-3 font-medium dark:bg-slate-800">
           <SelectValue placeholder="Select a project" className="font-bold" />
         </SelectTrigger>
         <SelectContent position="popper" className="">
-          {projects &&
+          {projects && projects?.total > 0 ? (
             typeof projects === "object" &&
             "documents" in projects &&
             Array.isArray(projects.documents) &&
@@ -99,7 +99,12 @@ export const ProjectSwitcher = () => {
                   <span className="truncate capitalize">{project.name}</span>
                 </div>
               </SelectItem>
-            ))}
+            ))
+          ) : (
+              <div className="flex pl-3 pb-2 font-sm">
+                No projects
+              </div>
+          )}
         </SelectContent>
       </Select>
     </div>
