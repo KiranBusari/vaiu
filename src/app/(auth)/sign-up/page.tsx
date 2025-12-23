@@ -6,7 +6,8 @@ import { getWorkspaces } from "@/features/workspaces/queries";
 
 const SignUp = async () => {
   const user = await getCurrent();
-  if (!user) return <SignUpCard />;
+  if (!user || !user.emailVerification || !user.phoneVerification)
+    return <SignUpCard />;
   else {
     const workspaces = await getWorkspaces();
     if (workspaces.total === 0 && user) {
