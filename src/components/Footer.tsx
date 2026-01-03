@@ -23,7 +23,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="w-full border-t dark:border-slate-800 border-slate-200 bg-slate-50 dark:bg-slate-950">
+    <footer className="w-full border-t dark:border-slate-800 border-slate-200">
       <div className="container mx-auto px-4 py-12 md:px-6 md:py-16">
         {/* Main Footer Content */}
         <div className="flex justify-between items-start mb-12">

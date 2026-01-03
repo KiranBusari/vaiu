@@ -113,7 +113,7 @@ export const EditTaskForm = ({
       <CardContent className="p-7">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-4 mb-8">
               <FormField
                 control={form.control}
                 name="name"
@@ -149,6 +149,7 @@ export const EditTaskForm = ({
                     <FormLabel>Due Date</FormLabel>
                     <FormControl>
                       <input
+                        placeholder="Select due date"
                         type="date"
                         value={
                           field.value
@@ -270,7 +271,6 @@ export const EditTaskForm = ({
                 )}
               />
             </div>
-            <Separator className="py-7" />
             <div className="flex items-center justify-between">
               <Button
                 type="button"
