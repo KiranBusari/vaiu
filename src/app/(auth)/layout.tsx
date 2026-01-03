@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from "react";
 import { Navbar } from "@/components/mainNavbar";
+import Footer from "@/components/Footer";
 
 const AuthLayout = ({ children }: PropsWithChildren) => {
   return (
@@ -13,6 +14,9 @@ const AuthLayout = ({ children }: PropsWithChildren) => {
         <div className="flex flex-col items-center justify-center pt-4 md:py-14">
           {children}
         </div>
+        <footer>
+          <Footer />
+        </footer>
       </div>
     </main>
   );

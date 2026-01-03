@@ -37,4 +37,6 @@ next-env.d.ts
 .env
 *.lockb
 
+package-lock.json
+
 .idea
