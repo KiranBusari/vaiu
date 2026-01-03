@@ -21,7 +21,7 @@ export default function PrivacyPage() {
                             1. Introduction
                         </h2>
                         <p>
-                            Vaiu ("we" or "us" or "our") operates the website. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our website and the choices you have associated with that data.
+                            Vaiu (&quot;we&quot; or &quot;us&quot; or &quot;our&quot;) operates the website. This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our website and the choices you have associated with that data.
                         </p>
                     </section>
 
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mt-8 mb-4">
-                            8. Children's Privacy
+                            8. Children&apos;s Privacy
                         </h2>
                         <p>
                             Our website is not directed to anyone under the age of 13. We do not knowingly collect personally identifiable information from children under 13. If we become aware that a child under 13 has provided us with personal information, we immediately delete such information from our systems.
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
                             9. Changes to This Privacy Policy
                         </h2>
                         <p>
-                            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date at the top of this page.
+                            We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date at the top of this page.
                         </p>
                     </section>
 

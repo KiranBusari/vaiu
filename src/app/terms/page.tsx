@@ -37,7 +37,7 @@ export default function TermsPage() {
                             <li>Using the materials for any commercial purpose or for any public display</li>
                             <li>Attempting to decompile or reverse engineer any software contained on Vaiu</li>
                             <li>Removing any copyright or other proprietary notations from the materials</li>
-                            <li>Transferring the materials to another person or "mirroring" the materials on any other server</li>
+                            <li>Transferring the materials to another person or &quot;mirroring&quot; the materials on any other server</li>
                             <li>Violating any applicable laws or regulations</li>
                             <li>Disrupting the normal flow of dialogue within our website</li>
                             <li>Harassing or causing distress or inconvenience to any person</li>
@@ -49,7 +49,7 @@ export default function TermsPage() {
                             3. Disclaimer
                         </h2>
                         <p>
-                            The materials on Vaiu are provided on an 'as is' basis. Vaiu makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                            The materials on Vaiu are provided on an &apos;as is&apos; basis. Vaiu makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
                         </p>
                     </section>
 
@@ -76,7 +76,7 @@ export default function TermsPage() {
                             6. Links
                         </h2>
                         <p>
-                            Vaiu has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by Vaiu of the site. Use of any such linked website is at the user's own risk.
+                            Vaiu has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by Vaiu of the site. Use of any such linked website is at the user&apos;s own risk.
                         </p>
                     </section>
 
