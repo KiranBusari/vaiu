@@ -4,6 +4,7 @@ import { FaGithub } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { motion } from "motion/react";
 
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -140,10 +141,7 @@ export const SignUpCard = () => {
           </form>
         </Form>
       </CardContent>
-      <div className="hidden px-7">
-        <Separator />
-      </div>
-      <CardContent className="flex-col gap-y-2 p-7">
+      <CardContent className="flex-col">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
@@ -154,19 +152,14 @@ export const SignUpCard = () => {
           <FaGithub className="mr-2 size-5" />
           Continue with Github
         </Button>
-      </CardContent>
-      <div className="px-7">
-        <Separator />
-      </div>
-      <CardContent className="flex items-center justify-center p-7">
-        <p>
+        <motion.p className="text-center text-sm mt-4">
           already have an account?
           <Link href="/sign-in">
             <span className="text-gray-700 underline-offset-2 hover:underline dark:text-gray-400">
               &nbsp;Sign In
             </span>
           </Link>
-        </p>
+        </motion.p>
       </CardContent>
     </Card>
   );

@@ -21,6 +21,7 @@ import {
 
 import { type LoginSchema, loginSchema } from "../schemas";
 import { useLogin } from "../api/use-login";
+import { motion } from "motion/react";
 
 export const SignInCard = () => {
   const { mutate, isPending } = useLogin();
@@ -122,7 +123,7 @@ export const SignInCard = () => {
       <div className="px-7">
         <Separator />
       </div>
-      <CardContent className="flex-col gap-y-4 p-7">
+      <CardContent className="">
         <Button
           onClick={() => signUpWithGithub()}
           disabled={isPending}
@@ -133,20 +134,15 @@ export const SignInCard = () => {
           <FaGithub className="mr-2 size-5" />
           Continue with Github
         </Button>
-      </CardContent>
-      <div className="hidden px-7">
-        <Separator />
-      </div>
-      <CardContent className="flex items-center justify-center p-7">
-        <p>
+        <motion.p className='text-center mt-4 text-sm text-gray-600 dark:text-gray-400'>
           Don&apos;t have an account?
-          <Link href="/sign-up">
+          <Link href="/sign-up ">
             <span className="cursor-pointer text-neutral-950 underline-offset-4 hover:underline dark:text-gray-400">
               &nbsp;Signup
             </span>
           </Link>
-        </p>
+        </motion.p>
       </CardContent>
     </Card>
   );
-};
+}

@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { type ForgotPasswordSchema, forgotPasswordSchema } from "../schemas";
 import { useForgotPassword } from "../api/use-forgot-password";
+import { motion } from "motion/react";
 
 export const ForgotPasswordCard = () => {
   const { mutate, isPending } = useForgotPassword();
@@ -41,6 +42,14 @@ export const ForgotPasswordCard = () => {
   return (
     <Card className="size-full border-none bg-slate-200 shadow-none dark:bg-zinc-800 md:w-[487px]">
       <CardHeader className="flex flex-col items-center p-7 text-center">
+        <Link href="/sign-in" className="items-start self-start">
+          <Button variant='link' size="sm">
+            <motion.div whileHover={{ x: -2 }} whileTap={{ scale: 0.9 }}>
+              <ArrowLeft className="h-4 w-4" />
+            </motion.div>
+            Back to Sign In
+          </Button>
+        </Link>
         <CardTitle className="text-2xl">Forgot Password</CardTitle>
         <CardDescription>
           Enter your email address and we&apos;ll send you a recovery link
@@ -84,13 +93,7 @@ export const ForgotPasswordCard = () => {
         <Separator />
       </div>
       <CardContent className="flex items-center justify-center p-7">
-        <Link href="/sign-in">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 size-4" />
-            Back to Sign In
-          </Button>
-        </Link>
       </CardContent>
-    </Card>
+    </Card >
   );
 };
