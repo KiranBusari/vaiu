@@ -1,6 +1,6 @@
-# RepoX
+# Vaiu
 
-RepoX is a collaborative platform for managing GitHub repositories, tracking issues, and facilitating team collaboration. It allows users to create workspaces, add existing GitHub projects or create new ones, manage pull requests, and track issues in a user-friendly interface.
+Vaiu is a collaborative platform for managing GitHub repositories, tracking issues, and facilitating team collaboration. It allows users to create workspaces, add existing GitHub projects or create new ones, manage pull requests, and track issues in a user-friendly interface.
 
 ## Features
 
@@ -92,8 +92,8 @@ Replace the placeholder values with your actual credentials:
 Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/repoX.git
-cd repoX
+git clone https://github.com/yourusername/Vaiu.git
+cd Vaiu
 npm install
 ```
 
@@ -105,12 +105,12 @@ Start the development server with the following command:
 npm run dev
 ```
 
-Open your browser and navigate to `http://localhost:3000` to see RepoX in action.
+Open your browser and navigate to `http://localhost:3000` to see Vaiu in action.
 
 ## Contributing
 
-We welcome contributions to RepoX! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for more information on how to get involved.
+We welcome contributions to Vaiu! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for more information on how to get involved.
 
 ## License
 
-RepoX is [MIT licensed](LICENSE).
+Vaiu is [MIT licensed](LICENSE).
