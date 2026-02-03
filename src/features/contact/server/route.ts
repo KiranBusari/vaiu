@@ -67,7 +67,7 @@ app.post("/", zValidator("json", contactSchema), async (c) => {
       html: userEmailContent,
     });
 
-    console.log("Contact form submission sent successfully:", data);
+    // console.log("Contact form submission sent successfully:", data);
 
     return c.json(
       {

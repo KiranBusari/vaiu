@@ -3,7 +3,7 @@ import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { AnalyticsCard } from "./analytics-card";
 
 export const Analytics = ({ data }: ProjectAnalyticsResponseType) => {
-  console.log(data);
+  // console.log(data);
   if (!data) {
     return (
       <div className="flex h-full w-full items-center justify-center">
