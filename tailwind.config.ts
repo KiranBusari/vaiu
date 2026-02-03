@@ -69,7 +69,9 @@ const config: Config = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		animation: {
-  			spotlight: 'spotlight 2s ease .75s 1 forwards'
+  			spotlight: 'spotlight 2s ease .75s 1 forwards',
+  			'accordion-down': 'accordion-down 0.2s ease-out',
+  			'accordion-up': 'accordion-up 0.2s ease-out'
   		},
   		keyframes: {
   			spotlight: {
@@ -80,6 +82,22 @@ const config: Config = {
   				'100%': {
   					opacity: '1',
   					transform: 'translate(-50%,-40%) scale(1)'
+  				}
+  			},
+  			'accordion-down': {
+  				from: {
+  					height: '0'
+  				},
+  				to: {
+  					height: 'var(--radix-accordion-content-height)'
+  				}
+  			},
+  			'accordion-up': {
+  				from: {
+  					height: 'var(--radix-accordion-content-height)'
+  				},
+  				to: {
+  					height: '0'
   				}
   			}
   		}

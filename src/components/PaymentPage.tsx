@@ -134,6 +134,7 @@ export default function PaymentPage() {
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center">
                       <select
+                        title="Amount"
                         id="currency"
                         name="currency"
                         className="h-full border-none bg-transparent py-0 pl-2 pr-4 text-gray-500 focus:outline-none focus:ring-0"

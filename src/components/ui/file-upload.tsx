@@ -62,6 +62,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onChange, accept }) => {
         className="group/file relative block w-full cursor-pointer overflow-hidden rounded-lg p-10"
       >
         <input
+          placeholder="Upload file"
           ref={fileInputRef}
           id="file-upload-handle"
           type="file"
@@ -183,11 +184,10 @@ export function GridPattern() {
           return (
             <div
               key={`${col}-${row}`}
-              className={`flex h-10 w-10 shrink-0 rounded-[2px] ${
-                index % 2 === 0
-                  ? "bg-gray-50 dark:bg-neutral-950"
-                  : "bg-gray-50 shadow-[0px_0px_1px_3px_rgba(255,255,255,1)_inset] dark:bg-neutral-950 dark:shadow-[0px_0px_1px_3px_rgba(0,0,0,1)_inset]"
-              }`}
+              className={`flex h-10 w-10 shrink-0 rounded-[2px] ${index % 2 === 0
+                ? "bg-gray-50 dark:bg-neutral-950"
+                : "bg-gray-50 shadow-[0px_0px_1px_3px_rgba(255,255,255,1)_inset] dark:bg-neutral-950 dark:shadow-[0px_0px_1px_3px_rgba(0,0,0,1)_inset]"
+                }`}
             />
           );
         }),

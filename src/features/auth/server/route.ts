@@ -20,6 +20,10 @@ const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
 
+    if (!user) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
     return c.json({ data: user });
   })
   .post("/login", zValidator("json", loginSchema), async (c) => {
@@ -97,7 +101,6 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { name, email, password } = c.req.valid("json");
-      console.log(name, email, password);
       if (!name || !email || !password) {
         return c.json({ error: "Name, email and password are required" }, 400);
       }
@@ -111,7 +114,6 @@ const app = new Hono()
         return c.json({ error: "Invalid email address" }, 400);
       }
       const { users } = await createAdminClient();
-      console.log("Admin account", users);
 
       try {
         // Check if user with this email already exists
@@ -126,12 +128,7 @@ const app = new Hono()
         console.log("Error checking users:", error);
       }
       const { account, databases } = await createAdminClient();
-      const user = await account.create(
-        ID.unique(),
-        email,
-        password,
-        name
-      );
+      const user = await account.create(ID.unique(), email, password, name);
 
       // Create user profile in database
       try {
@@ -144,7 +141,7 @@ const app = new Hono()
             email: user.email,
             name: user.name,
             githubAccessToken: "",
-          }
+          },
         );
       } catch (profileError) {
         console.error("Failed to create user profile:", profileError);

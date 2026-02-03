@@ -102,7 +102,6 @@ export const columns: ColumnDef<Issue>[] = [
     },
     cell: ({ row }) => {
       const assignee = row.original.assignee || row.original.assigneeId;
-      // console.log("assignee", assignee);
 
       return (
         <div className="flex items-center gap-x-2 font-medium">
