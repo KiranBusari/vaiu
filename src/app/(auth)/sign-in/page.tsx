@@ -5,12 +5,10 @@ import { redirect } from "next/navigation";
 
 const SignIn = async () => {
   const user = await getCurrent();
-  // console.log("User", user);
   if (!user || !user.emailVerification || !user.phoneVerification)
     return <SignInCard />;
   else {
     const workspaces = await getWorkspaces();
-    // console.log(workspaces);
 
     if (workspaces.total === 0 && user) {
       redirect("/workspaces/create");

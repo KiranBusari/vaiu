@@ -212,19 +212,15 @@ const app = new Hono()
       }
 
       if (status) {
-        // console.log("status:", status);
         query.push(Query.equal("status", status));
       }
       if (assigneeId) {
-        // console.log("assigneeId:", assigneeId);
         query.push(Query.equal("assigneeId", assigneeId));
       }
       if (dueDate) {
-        // console.log("dueDate:", dueDate);
         query.push(Query.equal("dueDate", dueDate));
       }
       if (search) {
-        // console.log("search:", search);
         query.push(Query.search("name", search));
       }
 
@@ -914,8 +910,6 @@ const app = new Hono()
         const { projectId } = c.req.valid("json");
         const databases = c.get("databases");
         const user = c.get("user");
-        // console.log("ProjectId:", projectId);
-
         if (!projectId) {
           return c.json({ error: "Project ID is required" }, 400);
         }

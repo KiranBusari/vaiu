@@ -40,8 +40,8 @@ app.post("/", zValidator("json", contactSchema), async (c) => {
 
     // Send email to team
     await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: "vaiu.in.team@gmail.com",
+      from: data.email,
+      to: process.env.GMAIL_USER,
       subject: `New Contact Form: ${data.subject}`,
       html: teamEmailContent,
       replyTo: data.email,
@@ -67,7 +67,6 @@ app.post("/", zValidator("json", contactSchema), async (c) => {
       html: userEmailContent,
     });
 
-    // console.log("Contact form submission sent successfully:", data);
 
     return c.json(
       {

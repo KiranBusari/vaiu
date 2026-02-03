@@ -4,6 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "next/link";
 
 const FAQPage = () => {
   const faqItems = [
@@ -79,9 +80,9 @@ const FAQPage = () => {
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             Find answers to common questions about Vaiu. Can&apos;t find what you&apos;re looking for?{" "}
-            <a href="/contact" className="text-primary hover:underline font-semibold">
+            <Link href="/contact" className="text-primary hover:underline font-semibold">
               Contact us
-            </a>
+            </Link>
           </p>
         </div>
 
@@ -112,12 +113,12 @@ const FAQPage = () => {
             Reach out to our team and we&apos;ll be happy to help you get the most out of Vaiu.
           </p>
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
-            <a
+            <Link
               href="/contact"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Contact Support
-            </a>
+            </Link>
             <a
               href="https://medium.com/@prathyarti/vaiu-d9e33ef48464"
               target="_blank"

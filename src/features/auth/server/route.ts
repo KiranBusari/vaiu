@@ -19,7 +19,6 @@ import { headers } from "next/headers";
 const app = new Hono()
   .get("/current", sessionMiddleware, async (c) => {
     const user = c.get("user");
-    // console.log(user);
 
     if (!user) {
       return c.json({ error: "Unauthorized" }, 401);
@@ -115,7 +114,6 @@ const app = new Hono()
         return c.json({ error: "Invalid email address" }, 400);
       }
       const { users } = await createAdminClient();
-      // console.log("Admin account", users);
 
       try {
         // Check if user with this email already exists
