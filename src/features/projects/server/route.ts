@@ -51,7 +51,7 @@ const app = new Hono()
       const databases = c.get("databases");
       const storage = c.get("storage");
       const user = c.get("user");
-      console.log("User", user);
+      // console.log("User", user);
 
       const { name, image, workspaceId } = c.req.valid("form");
 

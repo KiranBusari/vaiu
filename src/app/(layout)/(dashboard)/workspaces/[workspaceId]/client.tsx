@@ -34,7 +34,7 @@ export const WorkspaceIdClient = () => {
   const isLoading = analyticsLoading || tasksLoading || projectsLoading;
 
   if (isLoading) return <Loader />;
-  console.log("projects", projects);
+  // console.log("projects", projects);
 
   if (!analytics || !tasks || !projects)
     return <PageError message="Failed to load workspace data" />;
@@ -122,8 +122,8 @@ interface ProjectListProps {
 export const ProjectList = ({ data, total }: ProjectListProps) => {
   const { open: createProject } = useCreateProjectModal();
   const workspaceId = useWorkspaceId();
-  console.log("ProjectList data", data);
-  console.log("ProjectList total", total);
+  // console.log("ProjectList data", data);
+  // console.log("ProjectList total", total);
 
   return (
     <div className="col-span-1 flex flex-col gap-y-4">

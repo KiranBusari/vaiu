@@ -10,6 +10,8 @@ const SignIn = async () => {
     return <SignInCard />;
   else {
     const workspaces = await getWorkspaces();
+    console.log(workspaces);
+
     if (workspaces.total === 0 && user) {
       redirect("/workspaces/create");
     } else {

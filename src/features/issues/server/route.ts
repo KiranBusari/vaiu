@@ -914,7 +914,7 @@ const app = new Hono()
         const { projectId } = c.req.valid("json");
         const databases = c.get("databases");
         const user = c.get("user");
-        console.log("ProjectId:", projectId);
+        // console.log("ProjectId:", projectId);
 
         if (!projectId) {
           return c.json({ error: "Project ID is required" }, 400);

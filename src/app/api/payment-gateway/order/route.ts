@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     };
 
     const response = await axios(options);
-    console.log(response.data);
+    // console.log(response.data);
 
     return NextResponse.json(response.data);
   } catch (error) {
