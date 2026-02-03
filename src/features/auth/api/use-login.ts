@@ -32,9 +32,7 @@ export const useLogin = () => {
 
       router.refresh();
 
-      setTimeout(() => {
-        router.push("/");
-      }, 100);
+      router.push("/");
     },
     onError: (e) => {
       toast.error(e.message);

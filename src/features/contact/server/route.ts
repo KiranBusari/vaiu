@@ -14,7 +14,6 @@ const contactSchema = z.object({
 
 type ContactData = z.infer<typeof contactSchema>;
 
-// Configure email transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -23,7 +22,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// POST: Submit contact form
 app.post("/", zValidator("json", contactSchema), async (c) => {
   try {
     const data: ContactData = c.req.valid("json");
@@ -66,7 +64,6 @@ app.post("/", zValidator("json", contactSchema), async (c) => {
       subject: "We received your message - VAIU",
       html: userEmailContent,
     });
-
 
     return c.json(
       {
